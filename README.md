@@ -1,32 +1,89 @@
-# React + TypeScript + Vite
+# TactiVision IA
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+TactiVision IA is a web platform for intelligent soccer tactical analysis.
 
-Currently, two official plugins are available:
+## Current Prototype
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The current prototype verifies the connection between:
 
-## React Compiler
+- React + TypeScript frontend
+- FastAPI backend
+- PostgreSQL database on Neon
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The frontend provides a system verification button that checks the backend and database connection.
 
-## Expanding the Oxlint configuration
+## Technologies
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### Frontend
+- React
+- TypeScript
+- Vite
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+### Backend
+- Python
+- FastAPI
+- Uvicorn
+
+### Database
+- PostgreSQL
+- Neon
+
+## Run the frontend
+
+Install dependencies:
+
+```cmd
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Start the development server:
+
+```cmd
+npm run dev
+```
+
+The frontend uses:
+
+```text
+http://localhost:5173
+```
+
+The local backend uses:
+
+```text
+http://localhost:8000
+```
+
+The backend URL is configured through:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+## Available scripts
+
+```cmd
+npm run dev
+npm run build
+npm run lint
+npm run preview
+```
+
+## Project structure
+
+```text
+src/
+├── App.tsx
+├── App.css
+├── index.css
+└── main.tsx
+
+public/
+└── favicon.svg
+```
+
+## Scope
+
+This repository currently contains the initial system connectivity prototype.
+
+Future tactical analysis features will be incorporated in later development stages.
