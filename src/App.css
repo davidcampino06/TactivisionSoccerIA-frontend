@@ -105,3 +105,32 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Phase 7 (initial): auth + dashboard ---- */
+.status-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.label { text-transform: uppercase; }
+.card { background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 18px; padding: 20px; margin-top: 20px; color: #e2e8f0; text-align: left; }
+.form { display: grid; gap: 10px; }
+.form input, .form select, .inline-form input, .inline-form select { padding: 10px 12px; border-radius: 10px; border: 1px solid #334155; background: #0b1220; color: #e2e8f0; }
+.inline-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.link-button { background: none; border: none; color: #7dd3fc; cursor: pointer; padding: 4px 0; text-align: left; }
+.primary-button.small { margin-top: 0; padding: 0.5rem 1rem; font-size: 0.9rem; }
+.error { color: #fca5a5; }
+.warning { color: #fde68a; font-size: 0.9rem; }
+.dashboard { max-width: 1100px; margin: 0 auto; padding: 24px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; color: #e2e8f0; }
+.section-nav { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: 0.85rem; }
+.section-nav .active { color: #5eead4; }
+.section-nav .upcoming { color: #64748b; }
+.list { list-style: none; padding: 0; display: grid; gap: 8px; }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 0.8rem; }
+.badge.real { background: #14532d; color: #bbf7d0; }
+.badge.simulation { background: #78350f; color: #fde68a; }
+.recommendation { border-left: 4px solid #38bdf8; padding: 8px 12px; margin: 10px 0; background: rgba(2, 6, 23, 0.6); }
+.recommendation.high { border-color: #f87171; }
+.recommendation.medium { border-color: #fbbf24; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th, td { border-bottom: 1px solid #1e293b; padding: 6px; text-align: left; }
+code { background: #0b1220; padding: 2px 6px; border-radius: 6px; }
+@media (max-width: 640px) { .status-grid { grid-template-columns: 1fr 1fr; } }
