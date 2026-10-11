@@ -1,6 +1,7 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import Logo from "../components/Logo";
+import ThemeToggle from "../components/ThemeToggle";
 import { es } from "../i18n/es";
 import { label } from "../i18n/labels";
 import { useTeam } from "./teamState";
@@ -25,10 +26,44 @@ const ICONS = {
   profile: icon("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"),
 };
 
-/** App shell: side navigation (collapses to a top bar on phones) and the page area. */
+const COLLAPSE_KEY = "tactivision-sidebar";
+
+function savedCollapsed(): boolean {
+  try {
+    return localStorage.getItem(COLLAPSE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * App shell: side navigation and the page area. On desktop the sidebar collapses to an icon rail
+ * (button or Ctrl+B, remembered in this browser); on phones it becomes a top bar with a menu.
+ */
 export default function AppLayout({ onLogout }: { onLogout: () => void }) {
   const { user, team } = useTeam();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(savedCollapsed);
+  const toggleCollapsed = () => setCollapsed((value) => {
+    try {
+      localStorage.setItem(COLLAPSE_KEY, value ? "0" : "1");
+    } catch {
+      /* still toggles for this visit */
+    }
+    return !value;
+  });
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "b"
+        && !(event.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) {
+        event.preventDefault();
+        toggleCollapsed();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const location = useLocation();
   const [lastPath, setLastPath] = useState(location.pathname);
   if (lastPath !== location.pathname) {
@@ -56,13 +91,19 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
     ];
 
   return (
-    <div className={`app-shell${menuOpen ? " menu-open" : ""}`}>
+    <div className={`app-shell${menuOpen ? " menu-open" : ""}${collapsed ? " is-collapsed" : ""}`}>
       <aside className="sidebar">
         <div className="sidebar-top">
           <NavLink to="/" className="sidebar-brand">
             <Logo size={30} />
             <span>{es.brand.name}</span>
           </NavLink>
+          <button type="button" className="collapse-toggle" onClick={toggleCollapsed} aria-expanded={!collapsed}
+            aria-label={collapsed ? es.app.sidebar.expand : es.app.sidebar.collapse}
+            title={`${collapsed ? es.app.sidebar.expand : es.app.sidebar.collapse} (${es.app.sidebar.shortcut})`}>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8"
+              strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3" /><path d="M9.5 4.5v15M15.5 10l-2 2 2 2" /></svg>
+          </button>
           <button type="button" className="menu-toggle" aria-expanded={menuOpen}
             aria-label={menuOpen ? es.landing.close : "Menú"} onClick={() => setMenuOpen((open) => !open)}>
             <span /><span /><span />
@@ -71,9 +112,12 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
 
         <div className="sidebar-body">
           {team && (
-            <div className="sidebar-team">
-              <span className="sidebar-team-label">{es.app.nav.team}</span>
-              <strong>{team.name}</strong>
+            <div className="sidebar-team" title={team.name}>
+              <span className="team-badge" aria-hidden="true">{team.name.split(/\s+/).map((word) => word[0]).slice(0, 2).join("")}</span>
+              <span className="sidebar-team-text">
+                <span className="sidebar-team-label">{es.app.nav.team}</span>
+                <strong>{team.name}</strong>
+              </span>
             </div>
           )}
           <nav aria-label={es.brand.name}>
@@ -83,12 +127,12 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
                 {group.items.map((item) => {
                   const disabled = item.needsTeam && !team && user.role !== "ADMINISTRATOR";
                   return disabled ? (
-                    <span key={item.to} className="nav-link disabled" title={es.app.nav.team}>
-                      {item.icon}{item.text}
+                    <span key={item.to} className="nav-link disabled" title={es.app.nav.team} data-label={item.text}>
+                      {item.icon}<span className="nav-text">{item.text}</span>
                     </span>
                   ) : (
-                    <NavLink key={item.to} to={item.to} className="nav-link">
-                      {item.icon}{item.text}
+                    <NavLink key={item.to} to={item.to} className="nav-link" data-label={item.text} aria-label={collapsed ? item.text : undefined}>
+                      {item.icon}<span className="nav-text">{item.text}</span>
                     </NavLink>
                   );
                 })}
@@ -97,14 +141,20 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
           </nav>
 
           <div className="sidebar-user">
-            <NavLink to="/perfil" className="user-card">
+            <ThemeToggle compact={collapsed} />
+            <NavLink to="/perfil" className="user-card" data-label={`${user.first_name} ${user.last_name}`}>
               <span className="avatar" aria-hidden="true">{user.first_name[0]}{user.last_name[0]}</span>
               <span className="user-text">
                 <strong>{user.first_name} {user.last_name}</strong>
                 <small>{label("role", user.role)}</small>
               </span>
             </NavLink>
-            <button type="button" className="btn btn-ghost btn-sm btn-block" onClick={onLogout}>{es.app.logout}</button>
+            <button type="button" className="btn btn-ghost btn-sm btn-block logout-button" onClick={onLogout} aria-label={es.app.logout}
+              data-label={es.app.logout}>
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9"
+                strokeLinecap="round" strokeLinejoin="round"><path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10" /></svg>
+              <span className="nav-text">{es.app.logout}</span>
+            </button>
           </div>
         </div>
       </aside>
