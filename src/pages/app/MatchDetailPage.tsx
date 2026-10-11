@@ -7,7 +7,7 @@ import { ConfirmButton, EmptyState, ErrorBanner, Loading, PageHeader, Pill, Sect
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { formatDateTime, formatFileSize, formatTimestamp, label } from "../../i18n/labels";
-import type { Match, Video, VideoAnalysis } from "../../types";
+import type { Match, MatchNeighbors, Video, VideoAnalysis } from "../../types";
 
 const t = es.pages.match;
 const MAX_VIDEO_MB = 200;
@@ -28,7 +28,10 @@ export default function MatchDetailPage() {
 
   return (
     <div className="page">
-      <Link to="/partidos" className="back-link">← {t.back}</Link>
+      <div className="match-nav-row">
+        <Link to="/partidos" className="back-link">← {t.back}</Link>
+        <MatchNavigation matchId={data.id} />
+      </div>
       <PageHeader
         eyebrow={`${formatDateTime(data.match_date)} · ${data.is_home ? es.pages.matches.home : es.pages.matches.away}`}
         title={`${es.pages.matches.vs} ${data.opponent}`}
@@ -38,6 +41,7 @@ export default function MatchDetailPage() {
             {data.result
               ? <Pill tone={RESULT_TONE[data.result]}>{label("matchResult", data.result)} {data.home_score}-{data.away_score}</Pill>
               : <Pill>{label("matchStatus", data.status)}</Pill>}
+            <Link to={`/reportes?nuevo=1&tipo=MATCH&partido=${data.id}`} className="btn btn-ghost btn-sm">{es.pages.reports.create}</Link>
             {isCoach && (
               <ConfirmButton label={t.deleteMatch} confirmLabel={t.deleteMatchConfirm} onConfirm={() => {
                 api(`/api/matches/${data.id}`, { method: "DELETE" }).then(() => navigate("/partidos")).catch(setError);
@@ -105,6 +109,29 @@ function ScoreForm({ match, onSaved }: { match: Match; onSaved: (match: Match) =
       {notice && <p className="notice" role="status">{notice}</p>}
       <ErrorBanner error={error} />
     </form>
+  );
+}
+
+/** Previous / next match of the team, from the doubly linked match timeline in the backend. */
+function MatchNavigation({ matchId }: { matchId: string }) {
+  const neighbors = useLoad(() => api<MatchNeighbors>(`/api/matches/${matchId}/neighbors`), matchId);
+  const { previous, next } = neighbors.data ?? { previous: null, next: null };
+  if (!previous && !next) return null;
+  return (
+    <nav className="match-nav" aria-label={t.timelineHint} title={t.timelineHint}>
+      {previous ? (
+        <Link to={`/partidos/${previous.id}`} className="match-nav-link">
+          <small>← {t.previous}</small>
+          <span>vs {previous.opponent}</span>
+        </Link>
+      ) : <span />}
+      {next && (
+        <Link to={`/partidos/${next.id}`} className="match-nav-link is-next">
+          <small>{t.next} →</small>
+          <span>vs {next.opponent}</span>
+        </Link>
+      )}
+    </nav>
   );
 }
 
