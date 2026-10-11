@@ -6,7 +6,7 @@ import { useTeam } from "../../app/teamState";
 import { useLoad } from "../../hooks/useLoad";
 import { ConfirmButton, EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
 import { es } from "../../i18n/es";
-import { formatTimestamp, formatNumber, formatPercent, indicatorLabel, label, unitLabel } from "../../i18n/labels";
+import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, label } from "../../i18n/labels";
 import type { AnalysisResult, Indicator, Player, Recommendation, Track, VideoAnalysis } from "../../types";
 
 const t = es.pages.analysis;
@@ -76,6 +76,11 @@ export default function AnalysisPage() {
           <>
             <Pill tone={simulated ? "warning" : "success"}>{label("analysisMode", analysis.analysis_mode)}</Pill>
             <Pill tone={ANALYSIS_TONE[analysis.status]}>{label("analysisStatus", analysis.status)}</Pill>
+            {analysis.status === "COMPLETED" && (
+              <Link to={`/reportes?nuevo=1&tipo=VIDEO_ANALYSIS&analisis=${analysis.id}`} className="btn btn-ghost btn-sm">
+                {es.pages.reports.create}
+              </Link>
+            )}
           </>
         }
         description={simulated ? t.simulatedModel : analysis.model_name ? `${t.model}: ${analysis.model_name}${analysis.model_version ? ` (${analysis.model_version})` : ""}` : undefined}
@@ -267,13 +272,11 @@ function TrackSection({ analysisId }: { analysisId: string }) {
 }
 
 function formatIndicator(indicator: Indicator): string {
-  if (indicator.unit.endsWith("_ratio")) return `${formatPercent(indicator.value)} ${unitLabel(indicator.unit)}`;
-  return `${formatNumber(indicator.value)} ${unitLabel(indicator.unit)}`;
+  return formatIndicatorValue(indicator.value, indicator.unit);
 }
 
 function formatThreshold(indicator: Indicator): string {
-  if (indicator.threshold === null) return "—";
-  return indicator.unit.endsWith("_ratio") ? formatPercent(indicator.threshold) : formatNumber(indicator.threshold);
+  return indicator.threshold === null ? "—" : formatIndicatorValue(indicator.threshold, indicator.unit, false);
 }
 
 function IndicatorTable({ indicators, flagged }: { indicators: Indicator[]; flagged: Set<string> }) {
