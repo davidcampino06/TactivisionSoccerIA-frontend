@@ -3,11 +3,15 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { Loading } from "../components/ui";
 import { es } from "../i18n/es";
 import AnalysisPage from "../pages/app/AnalysisPage";
+import ComparisonPage from "../pages/app/ComparisonPage";
+import EvolutionPage from "../pages/app/EvolutionPage";
 import HomePage from "../pages/app/HomePage";
 import MatchDetailPage from "../pages/app/MatchDetailPage";
 import MatchesPage from "../pages/app/MatchesPage";
 import PlayerDetailPage from "../pages/app/PlayerDetailPage";
 import PlayersPage from "../pages/app/PlayersPage";
+import ReportDetailPage from "../pages/app/ReportDetailPage";
+import ReportsPage from "../pages/app/ReportsPage";
 import { ComingSoonPage, NotFoundPage } from "../pages/app/PlaceholderPages";
 import TacticalEditorPage from "../pages/app/TacticalEditorPage";
 import TacticsPage from "../pages/app/TacticsPage";
@@ -53,9 +57,10 @@ export default function AppRoutes({ user, onLogout }: { user: User; onLogout: ()
             <Route path="jugadores/:playerId" element={<TeamOnly><PlayerDetailPage /></TeamOnly>} />
             <Route path="diseno-tactico" element={<TeamOnly><TacticsPage /></TeamOnly>} />
             <Route path="diseno-tactico/:playId" element={<TeamOnly><TacticalEditorPage /></TeamOnly>} />
-            <Route path="comparacion" element={<TeamOnly><ComingSoonPage title={nav.comparison} /></TeamOnly>} />
-            <Route path="evolucion" element={<TeamOnly><ComingSoonPage title={nav.evolution} /></TeamOnly>} />
-            <Route path="reportes" element={<TeamOnly><ComingSoonPage title={nav.reports} /></TeamOnly>} />
+            <Route path="comparacion" element={<TeamOnly><ComparisonPage /></TeamOnly>} />
+            <Route path="evolucion" element={<TeamOnly><EvolutionPage /></TeamOnly>} />
+            <Route path="reportes" element={<TeamOnly><ReportsPage /></TeamOnly>} />
+            <Route path="reportes/:reportId" element={<TeamOnly><ReportDetailPage /></TeamOnly>} />
             <Route path="perfil" element={<ComingSoonPage title={nav.profile} />} />
             <Route path="admin" element={<AdminOnly><ComingSoonPage title={nav.admin} /></AdminOnly>} />
             <Route path="*" element={<NotFoundPage />} />
