@@ -168,3 +168,106 @@ export interface TacticalVersion {
   created_at: string;
   is_current: boolean;
 }
+
+export type ThresholdStatus = "OK" | "EXCEEDS" | null;
+
+export interface MatchSnapshot {
+  match_id: string;
+  opponent: string;
+  match_date: string;
+  result: string | null;
+  is_home: boolean;
+  home_score: number | null;
+  away_score: number | null;
+  analysis_id: string | null;
+  analysis_mode: string | null;
+  indicators: Record<string, { value: number; unit: string; threshold: number | null; status: ThresholdStatus }>;
+  possible_issues: number;
+  mean_issue_confidence: number | null;
+}
+
+export interface ComparisonRow {
+  indicator: string;
+  unit: string | null;
+  threshold: number | null;
+  risk_direction: "above" | "below";
+  statuses: ThresholdStatus[];
+  values: (number | null)[];
+  difference_last_vs_first: number | null;
+  range: number | null;
+}
+
+export interface Comparison {
+  matches: MatchSnapshot[];
+  indicators: ComparisonRow[];
+  warnings: string[];
+}
+
+export type Trend = "INCREASING" | "DECREASING" | "STABLE" | "INSUFFICIENT_DATA";
+export type Assessment = "IMPROVING" | "WORSENING" | "STABLE" | "INSUFFICIENT_DATA" | null;
+
+export interface EvolutionTrend {
+  indicator: string;
+  unit: string | null;
+  threshold: number | null;
+  risk_direction: "above" | "below";
+  values: (number | null)[];
+  deltas_vs_previous: (number | null)[];
+  slope: number | null;
+  trend: Trend;
+  assessment: Assessment;
+}
+
+export interface Evolution {
+  matches: MatchSnapshot[];
+  trends: EvolutionTrend[];
+  warnings: string[];
+}
+
+export interface MatchNeighbors {
+  previous: Match | null;
+  current: Match;
+  next: Match | null;
+}
+
+export interface AnalysedMatch {
+  match_id: string;
+  opponent: string;
+  match_date: string;
+  result: string | null;
+  analysis_id: string;
+  analysis_mode: string;
+}
+
+export type ReportType = "MATCH" | "VIDEO_ANALYSIS" | "TEAM_EVOLUTION";
+
+export interface Report {
+  id: string;
+  team_id: string;
+  generated_by: string | null;
+  generated_by_name: string | null;
+  title: string;
+  report_type: ReportType;
+  generated_at: string;
+  version: number;
+}
+
+export interface ReportSnapshot {
+  report_type: ReportType;
+  title: string;
+  team: { id: string; name: string; category: string | null };
+  generated_by: string;
+  generated_at: string;
+  warnings?: string[];
+  match?: { id: string; opponent: string; date: string; is_home: boolean; score: string | null; result: string | null; status: string };
+  events?: { minute: number; second: number; type: string; zone: string | null; result: string | null }[];
+  analysis?: { id: string; label: string; model: string | null; model_version: string | null; completed_at: string | null; warnings: string | null } | null;
+  tactical_indicators?: { name: string; value: number; unit: string; threshold: number | null }[];
+  possible_issues?: { issue: string; evidence: string; confidence: number; severity: string; status: string; related_indicators: string[] }[];
+  ai_recommendations?: { recommendation: string; issue: string; confidence: number; status: string }[];
+  team_evolution?: Evolution;
+}
+
+export interface ReportDetail extends Report {
+  snapshot: ReportSnapshot;
+}
