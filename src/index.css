@@ -1,7 +1,26 @@
+/* Design tokens. Cinematic broadcast: near-black ink, chalk white, per-slide team tints, gold mark. */
 :root {
-  font-family: Arial, sans-serif;
-  color: #f8fafc;
+  --ink: #070909;
+  --pitch-deep: #06140d;
+  --chalk: #f3f4f0;
+  --chalk-muted: rgba(243, 244, 240, 0.68);
+  --line: rgba(226, 236, 228, 0.13);
+  --accent: #f2b544;
+  --team-a: #bfe3ff;
+  --team-b: #ff6b57;
+  --success: #7ee2a8;
+  --danger: #ff6b57;
+  --warn: #f2b544;
+  --live: #ff4d4d;
+
+  --font-display: "Archivo Variable", "Arial Narrow", sans-serif;
+  --font-body: "Archivo Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  font-family: var(--font-body);
+  color: var(--chalk);
   background: #020617;
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
