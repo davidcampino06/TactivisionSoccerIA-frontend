@@ -38,3 +38,9 @@ export const formatNumber = (value: number, digits = 2) =>
   value.toLocaleString("es-CO", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 export const formatPercent = (value: number) => `${Math.round(value * 100)} %`;
 export const formatFileSize = (bytes: number) => `${formatNumber(bytes / 1_048_576, 1)} MB`;
+
+/** Indicator value with its unit: ratios as percentages ("42 % del ancho de imagen"), counts as numbers. */
+export function formatIndicatorValue(value: number, unit: string, withUnit = true): string {
+  const number = unit.endsWith("_ratio") ? formatPercent(value) : formatNumber(value);
+  return withUnit ? `${number} ${unitLabel(unit)}` : number;
+}
