@@ -46,4 +46,30 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   return body as T;
 }
 
+/**
+ * Downloads a file from the API (exports need the Authorization header, so a plain link would fail)
+ * and saves it with `fileName`.
+ */
+export async function download(path: string, fileName: string): Promise<void> {
+  const token = tokenStore.get();
+  const response = await fetch(`${API_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    if (response.status === 401 && token) {
+      tokenStore.clear();
+      notifySessionExpired();
+    }
+    throw new ApiError(response.status, typeof body.detail === "string" ? body.detail : "Download failed",
+      typeof body.code === "string" ? body.code : null, body);
+  }
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 export const json = (data: unknown) => JSON.stringify(data);
