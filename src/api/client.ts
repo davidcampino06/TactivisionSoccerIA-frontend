@@ -1,13 +1,21 @@
 // Single HTTP client. The frontend talks ONLY to the Backend (never to the AI Service).
+import { notifySessionExpired } from "../security/session";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 const TOKEN_KEY = "tactivision_token";
 
 export class ApiError extends Error {
   readonly status: number;
+  /** Stable error code from the backend (e.g. INVALID_CREDENTIALS); translated in i18n/errors.ts. */
+  readonly code: string | null;
+  /** Extra fields sent with the error (e.g. failed_rules, retry_after_seconds). */
+  readonly data: Record<string, unknown>;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, code: string | null = null, data: Record<string, unknown> = {}) {
     super(message);
     this.status = status;
+    this.code = code;
+    this.data = data;
   }
 }
 
@@ -28,8 +36,12 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     const detail = typeof body.detail === "string" ? body.detail : "Request failed";
-    if (response.status === 401) tokenStore.clear();
-    throw new ApiError(response.status, detail);
+    const code = typeof body.code === "string" ? body.code : null;
+    if (response.status === 401 && token) {
+      tokenStore.clear();
+      notifySessionExpired();
+    }
+    throw new ApiError(response.status, detail, code, body);
   }
   return body as T;
 }
