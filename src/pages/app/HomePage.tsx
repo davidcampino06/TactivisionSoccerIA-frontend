@@ -18,7 +18,7 @@ import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { formatDateTime, formatTimestamp, label } from "../../i18n/labels";
 import type {
-  AnalysedMatch, AnalysisResult, Evolution, EvolutionTrend, Match, Notification, Player, TacticalPlaySummary,
+  AnalysedMatch, AnalysisResult, Evolution, EvolutionTrend, Match, Notification, Player, ReviewQueue, TacticalPlaySummary,
 } from "../../types";
 
 const t = es.pages.home;
@@ -51,6 +51,7 @@ export default function HomePage() {
   const matches = useLoad(() => api<Match[]>(`/api/teams/${id}/matches`), id);
   const analysed = useLoad(() => api<AnalysedMatch[]>(`/api/teams/${id}/analysed-matches`), id);
   const pending = useLoad(() => api<PendingReviews>(`/api/teams/${id}/pending-reviews`), id);
+  const queue = useLoad(() => api<ReviewQueue>(`/api/teams/${id}/review-queue?limit=3`), id);
   const evolution = useLoad(() => api<Evolution>(`/api/teams/${id}/evolution?last=5`), id);
   const players = useLoad(() => api<Player[]>(`/api/teams/${id}/players`), id);
   const plays = useLoad(() => api<TacticalPlaySummary[]>(`/api/teams/${id}/tactical-plays`), id);
@@ -128,7 +129,7 @@ export default function HomePage() {
 
           <PulseCard evolution={evolution.data ?? null} />
           <ProfileCard result={latest.data ?? null} />
-          <PendingCard data={pending.data ?? null} analysisOf={analysisOf} />
+          <PendingCard data={pending.data ?? null} queue={queue.data ?? null} analysisOf={analysisOf} />
 
           <AnalysesCard analysed={analysed.data ?? []} pending={pending.data ?? null} />
           <PlayCard play={plays.data?.[0] ?? null} />
@@ -294,7 +295,8 @@ function ProfileCard({ result }: { result: AnalysisResult | null }) {
   );
 }
 
-function PendingCard({ data, analysisOf }: { data: PendingReviews | null; analysisOf: Map<string, string> }) {
+function PendingCard({ data, queue, analysisOf }:
+  { data: PendingReviews | null; queue: ReviewQueue | null; analysisOf: Map<string, string> }) {
   return (
     <Card className="dash-pending" title={t.pending}>
       {!data || data.total === 0 ? (
@@ -307,17 +309,28 @@ function PendingCard({ data, analysisOf }: { data: PendingReviews | null; analys
         <>
           <p className="pending-total"><strong>{data.total}</strong> {t.pendingBody(data.total)}</p>
           {data.high > 0 && <p><Pill tone="danger">{t.pendingHigh(data.high)}</Pill></p>}
-          <ul className="pending-list">
-            {data.matches.slice(0, 3).map((match) => {
-              const analysisId = analysisOf.get(match.match_id);
-              return (
-                <li key={match.match_id}>
-                  <span><strong>vs {match.opponent}</strong><small>{formatShortDate(match.match_date)} · {match.open}</small></span>
-                  <Link to={analysisId ? `/analisis/${analysisId}` : `/partidos/${match.match_id}`} className="btn btn-glass btn-sm">{t.review}</Link>
-                </li>
-              );
-            })}
-          </ul>
+          {(queue?.items ?? []).length > 0 && (
+            <>
+              <p className="urgent-title" title={t.urgentHint}>{t.urgentFirst}</p>
+              <ol className="urgent-list">
+                {queue!.items.map((item) => {
+                  const analysisId = item.analysis_id ?? analysisOf.get(item.match_id);
+                  return (
+                    <li key={item.id}>
+                      <Link to={analysisId ? `/analisis/${analysisId}` : `/partidos/${item.match_id}`}
+                        className={`urgent-item severity-${item.severity.toLowerCase()}`} aria-label={t.openReview(item.title)}>
+                        <span className="urgent-rank" aria-hidden="true">{item.rank}</span>
+                        <span className="urgent-text">
+                          <strong>{item.title}</strong>
+                          <small>vs {item.opponent} · {formatShortDate(item.match_date)} · {Math.round(item.confidence * 100)} %</small>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ol>
+            </>
+          )}
         </>
       )}
     </Card>
