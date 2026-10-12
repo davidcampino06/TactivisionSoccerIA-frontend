@@ -327,3 +327,16 @@ export interface ReviewQueue {
   /** The heap array as stored (level order), to draw the tree. */
   heap: ReviewQueueItem[];
 }
+
+/** Participation of a player in the analysed videos (data of the BST ranking). */
+export interface PlayerStats {
+  player_id: string;
+  first_name: string;
+  last_name: string;
+  shirt_number: number | null;
+  position: string | null;
+  status: PlayerStatus;
+  matches: number;
+  detections: number;
+  seconds: number;
+}

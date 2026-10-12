@@ -62,8 +62,11 @@ export default function PlayersPage() {
   return (
     <div className="page">
       <PageHeader eyebrow={t.eyebrow} title={t.title} description={players.data ? t.description(squadSize) : undefined}
-        actions={isCoach && !showForm && (
-          <button type="button" className="btn btn-primary" onClick={() => setParams({ nuevo: "1" })}>{t.create}</button>
+        actions={!showForm && (
+          <div className="header-actions">
+            <Link to="/jugadores/ranking" className="btn btn-ghost">{t.ranking}</Link>
+            {isCoach && <button type="button" className="btn btn-primary" onClick={() => setParams({ nuevo: "1" })}>{t.create}</button>}
+          </div>
         )} />
 
       {showForm && (
