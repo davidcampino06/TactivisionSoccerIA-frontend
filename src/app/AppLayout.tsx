@@ -6,7 +6,7 @@ import { es } from "../i18n/es";
 import { label } from "../i18n/labels";
 import { useTeam } from "./teamState";
 
-type NavItem = { to: string; text: string; icon: ReactNode; needsTeam?: boolean };
+type NavItem = { to: string; text: string; icon: ReactNode; needsTeam?: boolean; end?: boolean };
 
 const icon = (path: string) => (
   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor"
@@ -23,6 +23,10 @@ const ICONS = {
   evolution: icon("M3 17l6-6 4 4 8-8M15 7h6v6"),
   reports: icon("M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6"),
   admin: icon("M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6zM9 12l2 2 4-4"),
+  overview: icon("M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"),
+  users: icon("M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M3 20c.8-3.4 3.2-5 6-5s5.2 1.6 6 5M16 4.4a3.5 3.5 0 0 1 0 6.2M18 15c1.6.6 2.6 2.2 3 5"),
+  teams: icon("M12 3 5 6v5c0 4.4 3 7.8 7 9 4-1.2 7-4.6 7-9V6zM12 8v8M8.5 11.5h7"),
+  system: icon("M4 5h16v6H4zM4 13h16v6H4zM7.5 8h.01M7.5 16h.01M11 8h5M11 16h5"),
   profile: icon("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"),
 };
 
@@ -72,7 +76,12 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
   }
 
   const groups: { title: string; items: NavItem[] }[] = user.role === "ADMINISTRATOR"
-    ? [{ title: es.app.nav.admin, items: [{ to: "/admin", text: es.app.nav.admin, icon: ICONS.admin }] }]
+    ? [{ title: es.app.nav.admin, items: [
+        { to: "/admin", text: es.app.nav.adminOverview, icon: ICONS.overview, end: true },
+        { to: "/admin/usuarios", text: es.app.nav.adminUsers, icon: ICONS.users },
+        { to: "/admin/equipos", text: es.app.nav.adminTeams, icon: ICONS.teams },
+        { to: "/admin/sistema", text: es.app.nav.adminSystem, icon: ICONS.system },
+      ] }]
     : [
       { title: es.app.nav.sectionWork, items: [
         { to: "/panel", text: es.app.nav.home, icon: ICONS.home, needsTeam: true },
@@ -131,7 +140,7 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
                       {item.icon}<span className="nav-text">{item.text}</span>
                     </span>
                   ) : (
-                    <NavLink key={item.to} to={item.to} className="nav-link" data-label={item.text} aria-label={collapsed ? item.text : undefined}>
+                    <NavLink key={item.to} to={item.to} end={item.end} className="nav-link" data-label={item.text} aria-label={collapsed ? item.text : undefined}>
                       {item.icon}<span className="nav-text">{item.text}</span>
                     </NavLink>
                   );
