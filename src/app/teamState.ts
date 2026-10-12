@@ -7,6 +7,8 @@ export interface TeamState {
   loading: boolean;
   refresh: () => Promise<void>;
   isCoach: boolean;
+  /** Replaces the signed-in user (after editing the profile or changing the password). */
+  updateUser: (user: User) => void;
 }
 
 export const TeamContext = createContext<TeamState | null>(null);
