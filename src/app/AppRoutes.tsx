@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { Loading } from "../components/ui";
-import { es } from "../i18n/es";
 import AdminPage from "../pages/app/AdminPage";
 import AnalysisPage from "../pages/app/AnalysisPage";
 import ComparisonPage from "../pages/app/ComparisonPage";
@@ -11,9 +10,10 @@ import MatchDetailPage from "../pages/app/MatchDetailPage";
 import MatchesPage from "../pages/app/MatchesPage";
 import PlayerDetailPage from "../pages/app/PlayerDetailPage";
 import PlayersPage from "../pages/app/PlayersPage";
+import ProfilePage from "../pages/app/ProfilePage";
 import ReportDetailPage from "../pages/app/ReportDetailPage";
 import ReportsPage from "../pages/app/ReportsPage";
-import { ComingSoonPage, NotFoundPage } from "../pages/app/PlaceholderPages";
+import { NotFoundPage } from "../pages/app/PlaceholderPages";
 import TacticalEditorPage from "../pages/app/TacticalEditorPage";
 import TacticsPage from "../pages/app/TacticsPage";
 import TeamPage from "../pages/app/TeamPage";
@@ -41,11 +41,17 @@ function Start() {
   return <Navigate to={user.role === "ADMINISTRATOR" ? "/admin" : "/panel"} replace />;
 }
 
-export default function AppRoutes({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const nav = es.app.nav;
+type Props = {
+  user: User;
+  /** The profile page edits the user (name, phone) and renews the session after a password change. */
+  onUserChange: (user: User) => void;
+  onLogout: () => void;
+};
+
+export default function AppRoutes({ user, onUserChange, onLogout }: Props) {
   return (
     <BrowserRouter>
-      <TeamProvider user={user}>
+      <TeamProvider user={user} onUserChange={onUserChange}>
         <Routes>
           <Route element={<AppLayout onLogout={onLogout} />}>
             <Route index element={<Start />} />
@@ -62,7 +68,8 @@ export default function AppRoutes({ user, onLogout }: { user: User; onLogout: ()
             <Route path="evolucion" element={<TeamOnly><EvolutionPage /></TeamOnly>} />
             <Route path="reportes" element={<TeamOnly><ReportsPage /></TeamOnly>} />
             <Route path="reportes/:reportId" element={<TeamOnly><ReportDetailPage /></TeamOnly>} />
-            <Route path="perfil" element={<ComingSoonPage title={nav.profile} />} />
+            <Route path="perfil" element={<ProfilePage onLogout={onLogout} />} />
+            <Route path="restablecer" element={<Navigate to="/perfil" replace />} />
             <Route path="admin" element={<AdminOnly><AdminPage section="overview" /></AdminOnly>} />
             <Route path="admin/usuarios" element={<AdminOnly><AdminPage section="users" /></AdminOnly>} />
             <Route path="admin/equipos" element={<AdminOnly><AdminPage section="teams" /></AdminOnly>} />
