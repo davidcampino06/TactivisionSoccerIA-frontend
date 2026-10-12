@@ -1,6 +1,6 @@
 import "./App.css";
 import { useCallback, useEffect, useState } from "react";
-import { api, tokenStore } from "./api/client";
+import { ApiError, api, tokenStore } from "./api/client";
 import Logo from "./components/Logo";
 import { es } from "./i18n/es";
 import AuthPage from "./pages/AuthPage";
@@ -36,7 +36,11 @@ function App() {
     if (!initial.hasToken) return;
     api<User>("/api/auth/me")
       .then(setUser)
-      .catch(() => tokenStore.clear())
+      .catch((error: unknown) => {
+        tokenStore.clear();
+        // Rejected token (expired, password changed on another device, account disabled): say why.
+        if (error instanceof ApiError && error.status === 401) setSessionNotice(es.errors.sessionExpired);
+      })
       .finally(() => setCheckingSession(false));
   }, [initial.hasToken]);
 
@@ -64,7 +68,7 @@ function App() {
     setUser(null);
   };
 
-  if (user) return <AppRoutes user={user} onLogout={() => void logout()} />;
+  if (user) return <AppRoutes user={user} onUserChange={setUser} onLogout={() => void logout()} />;
 
   if (checkingSession) {
     return (
