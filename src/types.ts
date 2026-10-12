@@ -88,6 +88,34 @@ export interface AnalysisResult {
   summary: Record<string, number | boolean>;
   indicators: Indicator[];
   recommendations: Recommendation[];
+  /** Graph of supports between team-mates (AI: graph + BFS). Null for older analyses. */
+  proximity_network?: ProximityNetwork | null;
+}
+
+export interface NetworkNode {
+  track_id: number;
+  /** Image ratios (0..1). */
+  x: number;
+  y: number;
+  degree: number;
+  group: number;
+}
+
+export interface TeamNetwork {
+  nodes: NetworkNode[];
+  links: [number, number][];
+  groups: number;
+  isolated: number[];
+  diameter: number;
+  /** BFS hops: hops[source][target] for every pair in the same group. */
+  hops: Record<string, Record<string, number>>;
+}
+
+export interface ProximityNetwork {
+  frame_number: number;
+  timestamp_seconds: number;
+  link_distance: number;
+  teams: Partial<Record<"TEAM_A" | "TEAM_B", TeamNetwork>>;
 }
 
 export interface Notification {
