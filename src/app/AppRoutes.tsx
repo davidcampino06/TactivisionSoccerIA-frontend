@@ -9,6 +9,7 @@ import HomePage from "../pages/app/HomePage";
 import MatchDetailPage from "../pages/app/MatchDetailPage";
 import MatchesPage from "../pages/app/MatchesPage";
 import PlayerDetailPage from "../pages/app/PlayerDetailPage";
+import PlayerRankingPage from "../pages/app/PlayerRankingPage";
 import PlayersPage from "../pages/app/PlayersPage";
 import ProfilePage from "../pages/app/ProfilePage";
 import ReportDetailPage from "../pages/app/ReportDetailPage";
@@ -61,6 +62,7 @@ export default function AppRoutes({ user, onUserChange, onLogout }: Props) {
             <Route path="partidos/:matchId" element={<TeamOnly><MatchDetailPage /></TeamOnly>} />
             <Route path="analisis/:analysisId" element={<TeamOnly><AnalysisPage /></TeamOnly>} />
             <Route path="jugadores" element={<TeamOnly><PlayersPage /></TeamOnly>} />
+            <Route path="jugadores/ranking" element={<TeamOnly><PlayerRankingPage /></TeamOnly>} />
             <Route path="jugadores/:playerId" element={<TeamOnly><PlayerDetailPage /></TeamOnly>} />
             <Route path="diseno-tactico" element={<TeamOnly><TacticsPage /></TeamOnly>} />
             <Route path="diseno-tactico/:playId" element={<TeamOnly><TacticalEditorPage /></TeamOnly>} />
