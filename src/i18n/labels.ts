@@ -34,6 +34,21 @@ export function parseServerTime(value: string): Date {
 }
 export const formatTimestamp = (value: string) => dateTimeFormat.format(parseServerTime(value));
 export const formatServerDate = (value: string) => dateFormat.format(parseServerTime(value));
+
+const relativeFormat = new Intl.RelativeTimeFormat("es", { numeric: "auto" });
+const RELATIVE_STEPS: [Intl.RelativeTimeFormatUnit, number][] = [["minute", 60], ["hour", 24], ["day", 7]];
+
+/** "ahora", "hace 5 minutos", "hace 3 horas", "ayer"; after a week, the date. */
+export function formatRelative(value: string, now: number, justNow: string): string {
+  const seconds = Math.round((now - parseServerTime(value).getTime()) / 1000);
+  if (seconds < 45) return justNow;
+  let amount = seconds / 60;
+  for (const [unit, size] of RELATIVE_STEPS) {
+    if (amount < size) return relativeFormat.format(-Math.round(amount), unit);
+    amount /= size;
+  }
+  return formatServerDate(value);
+}
 export const formatNumber = (value: number, digits = 2) =>
   value.toLocaleString("es-CO", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 export const formatPercent = (value: number) => `${Math.round(value * 100)} %`;
