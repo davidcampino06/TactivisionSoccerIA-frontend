@@ -13,7 +13,7 @@ async function fetchTeam(): Promise<Team | null> {
 }
 
 /** Loads the user's team once and shares it with every page (see useTeam in teamState.ts). */
-export function TeamProvider({ user, children }: { user: User; children: ReactNode }) {
+export function TeamProvider({ user, onUserChange, children }: { user: User; onUserChange: (user: User) => void; children: ReactNode }) {
   const isAdmin = user.role === "ADMINISTRATOR";
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(!isAdmin);
@@ -28,7 +28,7 @@ export function TeamProvider({ user, children }: { user: User; children: ReactNo
   }, [isAdmin]);
 
   return (
-    <TeamContext.Provider value={{ user, team, loading, refresh, isCoach: user.role === "COACH" }}>
+    <TeamContext.Provider value={{ user, team, loading, refresh, isCoach: user.role === "COACH", updateUser: onUserChange }}>
       {children}
     </TeamContext.Provider>
   );
