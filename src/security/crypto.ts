@@ -1,4 +1,4 @@
-import { api } from "../api/client";
+import { ApiError, api } from "../api/client";
 
 // Passwords are encrypted in the browser with the backend's RSA public key (RSA-OAEP, SHA-256)
 // before being sent, so DevTools -> Network never shows them in plain text.
@@ -43,4 +43,21 @@ export async function encryptPassword(password: string): Promise<string> {
 /** The backend may restart with a new key; call this and retry once if decryption fails. */
 export function forgetPublicKey(): void {
   keyPromise = null;
+}
+
+/**
+ * Sends a request with one or more passwords encrypted. If the backend restarted with a new key
+ * (PASSWORD_DECRYPTION_FAILED), the key is fetched again and the request is retried once.
+ */
+export async function withEncryptedPasswords<T>(passwords: string[], request: (encrypted: string[]) => Promise<T>): Promise<T> {
+  const encryptAll = () => Promise.all(passwords.map(encryptPassword));
+  try {
+    return await request(await encryptAll());
+  } catch (error) {
+    if (error instanceof ApiError && error.code === "PASSWORD_DECRYPTION_FAILED") {
+      forgetPublicKey();
+      return request(await encryptAll());
+    }
+    throw error;
+  }
 }
