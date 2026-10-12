@@ -3549,6 +3549,312 @@
   .collapse-toggle { display: none; }
 }
 
+/* ---------------- admin panel ---------------- */
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-grid > .panel {
+  margin: 0;
+}
+
+.admin-wide {
+  grid-column: 1 / -1;
+}
+
+.role-bar {
+  display: flex;
+  gap: 3px;
+  height: 14px;
+  margin: 4px 0 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(var(--fg), 0.06);
+}
+
+.role-bar > span {
+  min-width: 6px;
+  transition: flex 0.5s ease;
+}
+
+.series-bg-1 { background: var(--series-1); }
+.series-bg-2 { background: var(--series-2); }
+.series-bg-3 { background: var(--series-3); }
+
+.legend-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+}
+
+.legend-list strong {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.swatch.swatch-muted {
+  background: rgba(var(--fg), 0.22);
+}
+
+.status-bars {
+  display: grid;
+  gap: 11px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.status-bars li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+}
+
+.status-bars strong {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.status-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(var(--fg), 0.07);
+}
+
+.status-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--series-1);
+  transition: width 0.5s ease;
+}
+
+.mode-split {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+}
+
+.queue-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 4px 2px 10px;
+  overflow-x: auto;
+}
+
+.queue-end {
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 0 6px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: var(--chalk-muted);
+  font: 700 0.7rem var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.queue-item {
+  position: relative;
+  display: grid;
+  flex: none;
+  gap: 4px;
+  min-width: 170px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+  animation: queue-in 0.35s ease both;
+}
+
+.queue-item + .queue-item::before {
+  content: "←";
+  position: absolute;
+  top: 50%;
+  left: -10px;
+  transform: translate(-50%, -50%);
+  color: var(--chalk-muted);
+  font-size: 0.8rem;
+}
+
+.queue-item small {
+  color: var(--chalk-muted);
+  font: 600 0.72rem var(--font-mono);
+  text-transform: uppercase;
+}
+
+.queue-item span {
+  color: var(--chalk-muted);
+  font-size: 0.82rem;
+}
+
+.queue-item.is-processing {
+  border-color: var(--series-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--series-1) 18%, transparent);
+}
+
+.queue-item.is-processing small {
+  color: var(--series-1);
+}
+
+@keyframes queue-in {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.row-muted td {
+  opacity: 0.55;
+}
+
+.row-muted td.cell-actions {
+  opacity: 1;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.user-cell > span:last-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-cell small {
+  overflow: hidden;
+  color: var(--chalk-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar.avatar-sm {
+  width: 32px;
+  height: 32px;
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+.app-shell .table select.select-sm {
+  width: auto;
+  min-width: 132px;
+  padding: 7px 10px;
+  border: 1px solid rgba(var(--fg), 0.14);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--chalk);
+  font: 600 0.85rem var(--font-body);
+}
+
+.app-shell .table select.select-sm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cell-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.service-card {
+  --tone: var(--chalk-muted);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--tone);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.service-card.tone-success { --tone: var(--success); }
+.service-card.tone-danger { --tone: var(--danger); }
+.service-card.tone-warning { --tone: var(--warn); }
+
+.service-dot {
+  grid-row: span 2;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tone) 22%, transparent);
+  animation: service-pulse 2.4s ease-in-out infinite;
+}
+
+.service-name {
+  color: var(--chalk-muted);
+  font-size: 0.82rem;
+}
+
+.service-card strong {
+  color: var(--tone);
+}
+
+@keyframes service-pulse {
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--tone) 6%, transparent); }
+}
+
+.config-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.config-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.config-list li:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 1100px) {
+  .admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .admin-grid { grid-template-columns: minmax(0, 1fr); }
+  .mode-split { grid-template-columns: 100px minmax(0, 1fr); }
+}
+
 /* ---------------- responsive ---------------- */
 
 @media (max-width: 1100px) {
@@ -3635,6 +3941,8 @@
   }
 
   .spinner,
+  .service-dot,
+  .queue-item,
   .scan-bar span,
   .pill-live::before {
     animation: none;
