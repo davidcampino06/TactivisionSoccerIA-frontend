@@ -91,11 +91,14 @@ export interface AnalysisResult {
 }
 
 export interface Notification {
+  id: string;
   event: string;
   team_id: string;
-  analysis_id: string;
+  analysis_id: string | null;
+  match_id: string | null;
   message: string;
   created_at: string;
+  read: boolean;
 }
 
 export type PlayerStatus = "ACTIVE" | "INJURED" | "SUSPENDED" | "INACTIVE";
