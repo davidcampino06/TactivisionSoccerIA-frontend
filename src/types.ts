@@ -305,3 +305,25 @@ export interface AdminOverview {
     encrypted_passwords: boolean; api_docs: boolean; simulation_mode: boolean;
   };
 }
+
+/** One open issue in the team's review queue (binary heap in the backend). */
+export interface ReviewQueueItem {
+  id: string;
+  rank: number | null;
+  title: string;
+  severity: string;
+  confidence: number;
+  status: string;
+  match_id: string;
+  opponent: string;
+  match_date: string;
+  analysis_id: string | null;
+}
+
+export interface ReviewQueue {
+  total: number;
+  /** Popped from the heap: rank 1 = review first. */
+  items: ReviewQueueItem[];
+  /** The heap array as stored (level order), to draw the tree. */
+  heap: ReviewQueueItem[];
+}
