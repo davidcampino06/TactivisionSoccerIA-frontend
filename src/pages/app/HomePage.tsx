@@ -137,8 +137,8 @@ export default function HomePage() {
           <Card className="dash-activity" title={t.activity}>
             {(activity.data ?? []).length === 0 ? <p className="muted">{t.noActivity}</p> : (
               <ul className="activity dash-activity-list">
-                {(activity.data ?? []).slice(0, 6).map((item, index) => (
-                  <li key={index}>
+                {(activity.data ?? []).slice(0, 6).map((item) => (
+                  <li key={item.id}>
                     <Pill tone={EVENT_TONE[item.event]}>{label("notification", item.event)}</Pill>
                     <span className="activity-text">
                       {item.message}
