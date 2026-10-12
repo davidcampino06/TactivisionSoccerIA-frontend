@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import Logo from "../components/Logo";
+import NotificationBell from "../components/notifications/NotificationBell";
 import ThemeToggle from "../components/ThemeToggle";
 import { es } from "../i18n/es";
 import { label } from "../i18n/labels";
@@ -107,6 +108,7 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
             <Logo size={30} />
             <span>{es.brand.name}</span>
           </NavLink>
+          {user.role !== "ADMINISTRATOR" && <NotificationBell />}
           <button type="button" className="collapse-toggle" onClick={toggleCollapsed} aria-expanded={!collapsed}
             aria-label={collapsed ? es.app.sidebar.expand : es.app.sidebar.collapse}
             title={`${collapsed ? es.app.sidebar.expand : es.app.sidebar.collapse} (${es.app.sidebar.shortcut})`}>
