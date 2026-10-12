@@ -17,6 +17,7 @@ export const RECOMMENDATION_TONE: Record<string, Tone> = {
 
 export const EVENT_TONE: Record<string, Tone> = {
   ANALYSIS_COMPLETED: "success", ANALYSIS_FAILED: "danger", TACTICAL_ALERT: "warning", ANALYSIS_STARTED: "live",
+  ANALYSIS_CANCELLED: "neutral", ANALYST_JOINED: "info",
 };
 
 export const PLAYER_STATUS_TONE: Record<string, Tone> = {
