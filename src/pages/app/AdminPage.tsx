@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { api, json } from "../../api/client";
 import Donut from "../../components/dashboard/Donut";
 import { ConfirmButton, EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section, type Tone } from "../../components/ui";
+import { useElementWidth } from "../../hooks/useElementWidth";
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { formatServerDate, formatTimestamp, label } from "../../i18n/labels";
@@ -119,24 +120,10 @@ function Stat({ value, label: text, foot }: { value: number; label: string; foot
   );
 }
 
-/** Width of an element, so an SVG can be drawn at its real size (text keeps its size on any screen). */
-function useWidth<T extends HTMLElement>(initial: number) {
-  const ref = useRef<T>(null);
-  const [width, setWidth] = useState(initial);
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(Math.max(240, Math.round(entry.contentRect.width))));
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-  return [ref, width] as const;
-}
-
 /** One column per day (single series, one axis from 0, direct label on the busiest day). */
 function SignupsChart({ days }: { days: AdminOverview["users"]["signups"] }) {
   const [hover, setHover] = useState<number | null>(null);
-  const [ref, W] = useWidth<HTMLDivElement>(560);
+  const [ref, W] = useElementWidth<HTMLDivElement>(560);
   const narrow = W < 480;
   const max = Math.max(1, ...days.map((day) => day.count));
   const total = days.reduce((sum, day) => sum + day.count, 0);
