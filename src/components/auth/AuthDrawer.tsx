@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { es } from "../../i18n/es";
 import type { User } from "../../types";
-import { LoginForm, RegisterForm } from "./AuthForms";
+import { ForgotPasswordForm, LoginForm, RegisterForm, ResetPasswordForm } from "./AuthForms";
 
-export type AuthMode = "login" | "register";
+export type AuthMode = "login" | "register" | "forgot" | "reset";
 
 type Props = {
   open: boolean;
@@ -13,10 +13,17 @@ type Props = {
   onAuthenticated: (user: User) => void;
   /** Message shown in the login form when the panel opens (e.g. the session expired). */
   initialNotice?: string;
+  /** One-time token from the recovery link (mode "reset"). */
+  resetToken?: string;
+  onResetToken: (token: string) => void;
 };
 
 /** Side panel with the login / register forms. Closes with Escape or by clicking outside. */
-export default function AuthDrawer({ open, mode, onModeChange, onClose, onAuthenticated, initialNotice = "" }: Props) {
+const TITLES: Record<AuthMode, string> = {
+  login: es.auth.loginTab, register: es.auth.registerTab, forgot: es.auth.forgotTitle, reset: es.auth.resetTitle,
+};
+
+export default function AuthDrawer({ open, mode, onModeChange, onClose, onAuthenticated, initialNotice = "", resetToken = "", onResetToken }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [notice, setNotice] = useState<{ text: string; tone: "success" | "warning" }>(
     { text: initialNotice, tone: "warning" },
@@ -44,7 +51,7 @@ export default function AuthDrawer({ open, mode, onModeChange, onClose, onAuthen
   return (
     <div className={`drawer${open ? " open" : ""}`} aria-hidden={!open} inert={!open}>
       <div className="drawer-backdrop" onClick={onClose} />
-      <div ref={panelRef} className="drawer-panel" role="dialog" aria-modal="true" aria-label={mode === "login" ? es.auth.loginTab : es.auth.registerTab}>
+      <div ref={panelRef} className="drawer-panel" role="dialog" aria-modal="true" aria-label={TITLES[mode]}>
         <div className="drawer-head">
           <div className="auth-tabs" role="tablist">
             {(["login", "register"] as const).map((tab) => (
@@ -58,9 +65,11 @@ export default function AuthDrawer({ open, mode, onModeChange, onClose, onAuthen
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
           </button>
         </div>
-        {open && (mode === "login" ? (
-          <LoginForm key="login" notice={notice.text} noticeTone={notice.tone} onAuthenticated={onAuthenticated} />
-        ) : (
+        {open && mode === "login" && (
+          <LoginForm key="login" notice={notice.text} noticeTone={notice.tone} onAuthenticated={onAuthenticated}
+            onForgotPassword={() => switchMode("forgot")} />
+        )}
+        {open && mode === "register" && (
           <RegisterForm
             key="register"
             onRegistered={() => {
@@ -68,7 +77,21 @@ export default function AuthDrawer({ open, mode, onModeChange, onClose, onAuthen
               onModeChange("login");
             }}
           />
-        ))}
+        )}
+        {open && mode === "forgot" && (
+          <ForgotPasswordForm key="forgot" onBack={() => switchMode("login")} onDevelopmentToken={onResetToken} />
+        )}
+        {open && mode === "reset" && (
+          <ResetPasswordForm
+            key={resetToken}
+            token={resetToken}
+            onRequestNewLink={() => switchMode("forgot")}
+            onDone={() => {
+              setNotice({ text: es.auth.passwordUpdated, tone: "success" });
+              onModeChange("login");
+            }}
+          />
+        )}
       </div>
     </div>
   );
