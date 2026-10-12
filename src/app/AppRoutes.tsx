@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { Loading } from "../components/ui";
 import { es } from "../i18n/es";
+import AdminPage from "../pages/app/AdminPage";
 import AnalysisPage from "../pages/app/AnalysisPage";
 import ComparisonPage from "../pages/app/ComparisonPage";
 import EvolutionPage from "../pages/app/EvolutionPage";
@@ -62,7 +63,10 @@ export default function AppRoutes({ user, onLogout }: { user: User; onLogout: ()
             <Route path="reportes" element={<TeamOnly><ReportsPage /></TeamOnly>} />
             <Route path="reportes/:reportId" element={<TeamOnly><ReportDetailPage /></TeamOnly>} />
             <Route path="perfil" element={<ComingSoonPage title={nav.profile} />} />
-            <Route path="admin" element={<AdminOnly><ComingSoonPage title={nav.admin} /></AdminOnly>} />
+            <Route path="admin" element={<AdminOnly><AdminPage section="overview" /></AdminOnly>} />
+            <Route path="admin/usuarios" element={<AdminOnly><AdminPage section="users" /></AdminOnly>} />
+            <Route path="admin/equipos" element={<AdminOnly><AdminPage section="teams" /></AdminOnly>} />
+            <Route path="admin/sistema" element={<AdminOnly><AdminPage section="system" /></AdminOnly>} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>
