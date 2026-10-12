@@ -271,3 +271,34 @@ export interface ReportSnapshot {
 export interface ReportDetail extends Report {
   snapshot: ReportSnapshot;
 }
+
+export interface AdminUser extends User {
+  team_name: string | null;
+}
+
+export interface AdminTeam {
+  id: string;
+  name: string;
+  category: string | null;
+  city: string | null;
+  is_active: boolean;
+  created_at: string;
+  coach_name: string | null;
+  analysts: number;
+  players: number;
+  matches: number;
+  analyses: number;
+}
+
+export interface AdminOverview {
+  users: { total: number; by_role: Record<string, number>; inactive: number; signups: { date: string; count: number }[] };
+  teams: number;
+  matches: number;
+  videos: number;
+  analyses: { total: number; by_status: Record<string, number>; by_mode: Record<string, number> };
+  queue: { waiting: number; mode: string; jobs: { team: string; status: string; mode: string; started_at: string | null; position: number | null }[] };
+  system: {
+    backend: string; database: string; ai_service: string; environment: string; row_level_security: boolean;
+    encrypted_passwords: boolean; api_docs: boolean; simulation_mode: boolean;
+  };
+}
