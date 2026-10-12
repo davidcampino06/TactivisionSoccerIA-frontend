@@ -7,7 +7,8 @@ import { useLoad } from "../../hooks/useLoad";
 import { ConfirmButton, EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
 import { es } from "../../i18n/es";
 import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, label } from "../../i18n/labels";
-import type { AnalysisResult, Indicator, Player, Recommendation, Track, VideoAnalysis } from "../../types";
+import ProximityNetwork from "../../components/analysis/ProximityNetwork";
+import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Track, VideoAnalysis } from "../../types";
 
 const t = es.pages.analysis;
 const POLL_MS = 2000;
@@ -130,6 +131,8 @@ export default function AnalysisPage() {
             )}
           </Section>
 
+          {result.proximity_network && <NetworkSection analysisId={analysis.id} network={result.proximity_network} />}
+
           {!simulated && <TrackSection analysisId={analysis.id} />}
 
           <Section title={t.indicators}>
@@ -186,6 +189,19 @@ function IssueCard({ item, rank, onUpdated, onError }:
         </div>
       )}
     </article>
+  );
+}
+
+/** Graph + BFS of the AI. Track numbers become shirt numbers when a person linked them to a player. */
+function NetworkSection({ analysisId, network }: { analysisId: string; network: Network }) {
+  const { team } = useTeam();
+  const tracks = useLoad(() => api<Track[]>(`/api/analyses/${analysisId}/tracks`), analysisId);
+  const squad = useLoad(() => api<Player[]>(`/api/teams/${team!.id}/players`), team!.id);
+  return (
+    <Section title={t.network.title} className="network-section">
+      <p className="network-subtitle">{t.network.subtitle}</p>
+      <ProximityNetwork network={network} tracks={tracks.data ?? []} players={squad.data ?? []} />
+    </Section>
   );
 }
 
