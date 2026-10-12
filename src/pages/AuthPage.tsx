@@ -9,10 +9,34 @@ import type { User } from "../types";
 
 type Props = { onAuthenticated: (user: User) => void; sessionNotice?: string };
 
+const RESET_PATH = "/restablecer";
+
+/**
+ * Token of a recovery link (/restablecer#token=...). It travels in the URL fragment, which the
+ * browser never sends to a server. It is read once when the app loads and removed from the
+ * address bar, so it does not stay in the history or get copied by accident.
+ */
+let pendingResetToken = (() => {
+  if (window.location.pathname !== RESET_PATH) return "";
+  const token = new URLSearchParams(window.location.hash.slice(1)).get("token") ?? "";
+  window.history.replaceState(null, "", "/");
+  return token;
+})();
+
+/** Hands the token over once (a later visit to the landing, e.g. after logout, does not reuse it). */
+function takeResetToken(): string {
+  const token = pendingResetToken;
+  pendingResetToken = "";
+  return token;
+}
+
 /** Public landing: hero slideshow, philosophy footer and the login / register drawer. */
 export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props) {
-  // When the session just expired, the login panel opens right away with the explanation.
-  const [drawer, setDrawer] = useState<{ open: boolean; mode: AuthMode }>({ open: Boolean(sessionNotice), mode: "login" });
+  const [resetToken, setResetToken] = useState(takeResetToken);
+  // A recovery link opens the "new password" form; an expired session opens the login with the explanation.
+  const [drawer, setDrawer] = useState<{ open: boolean; mode: AuthMode }>(() => (
+    resetToken ? { open: true, mode: "reset" } : { open: Boolean(sessionNotice), mode: "login" }
+  ));
   const openDrawer = (mode: AuthMode) => setDrawer({ open: true, mode });
   const closeDrawer = useCallback(() => setDrawer((current) => ({ ...current, open: false })), []);
 
@@ -43,6 +67,11 @@ export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props)
         onClose={closeDrawer}
         onAuthenticated={onAuthenticated}
         initialNotice={sessionNotice}
+        resetToken={resetToken}
+        onResetToken={(token) => {
+          setResetToken(token);
+          openDrawer("reset");
+        }}
       />
     </div>
   );
