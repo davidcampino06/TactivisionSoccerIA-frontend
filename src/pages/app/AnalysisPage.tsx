@@ -12,7 +12,6 @@ import type { AnalysisResult, Indicator, Player, Recommendation, Track, VideoAna
 const t = es.pages.analysis;
 const POLL_MS = 2000;
 const RUNNING = new Set(["PENDING", "PROCESSING"]);
-const SEVERITY_ORDER: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 
 export default function AnalysisPage() {
   const { analysisId = "" } = useParams();
@@ -120,12 +119,13 @@ export default function AnalysisPage() {
           </div>}
 
           <Section title={t.issues}>
-            <p className="muted">{t.issuesHint}</p>
+            <p className="muted">{t.issuesHint} {t.issuesOrder}</p>
             {result.recommendations.length === 0 ? <EmptyState title={t.noIssues} /> : (
               <div className="issue-list">
-                {[...result.recommendations]
-                  .sort((a, b) => (SEVERITY_ORDER[a.severity] ?? 3) - (SEVERITY_ORDER[b.severity] ?? 3) || b.confidence - a.confidence)
-                  .map((item) => <IssueCard key={item.id} item={item} onUpdated={updateRecommendation} onError={setError} />)}
+                {/* Already in priority order: the backend pops them from a heap (most urgent first). */}
+                {result.recommendations.map((item, index) => (
+                  <IssueCard key={item.id} item={item} rank={index + 1} onUpdated={updateRecommendation} onError={setError} />
+                ))}
               </div>
             )}
           </Section>
@@ -145,8 +145,8 @@ export default function AnalysisPage() {
   );
 }
 
-function IssueCard({ item, onUpdated, onError }:
-  { item: Recommendation; onUpdated: (item: Recommendation) => void; onError: (error: unknown) => void }) {
+function IssueCard({ item, rank, onUpdated, onError }:
+  { item: Recommendation; rank: number; onUpdated: (item: Recommendation) => void; onError: (error: unknown) => void }) {
   const [busy, setBusy] = useState(false);
   const act = async (action: "review" | "confirm" | "dismiss") => {
     setBusy(true);
@@ -163,7 +163,7 @@ function IssueCard({ item, onUpdated, onError }:
   return (
     <article className={`issue issue-${item.severity.toLowerCase()}${item.status === "DISMISSED" ? " issue-dismissed" : ""}`}>
       <div className="issue-head">
-        <h3>{item.title}</h3>
+        <h3><span className="issue-rank" title={t.priority(rank)} aria-label={t.priority(rank)}>{rank}</span>{item.title}</h3>
         <div className="issue-pills">
           <Pill tone={SEVERITY_TONE[item.severity]}>{t.severity} {label("severity", item.severity).toLowerCase()}</Pill>
           <Pill tone={RECOMMENDATION_TONE[item.status]}>{label("recommendationStatus", item.status)}</Pill>
