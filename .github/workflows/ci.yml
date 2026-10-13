@@ -1,0 +1,41 @@
+# Runs on every push to main and on every pull request: lint, unit tests (Vitest) and the build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Lint, tests y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint (oxlint)
+        run: npm run lint
+
+      - name: Pruebas de las estructuras de datos (Vitest)
+        run: npm test
+
+      - name: Build (TypeScript + Vite)
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:8000

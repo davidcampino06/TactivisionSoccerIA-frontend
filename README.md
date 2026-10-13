@@ -1,5 +1,10 @@
 # TactivisionSoccerIA-frontend
 
+[![CI](https://github.com/davidcampino06/TactivisionSoccerIA-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/davidcampino06/TactivisionSoccerIA-frontend/actions/workflows/ci.yml)
+
+Integración continua (GitHub Actions, `.github/workflows/ci.yml`): en cada push a `main` y en cada
+pull request se ejecutan lint, pruebas de las estructuras (Vitest) y build.
+
 React + TypeScript + Vite. Se comunica **solo con el Backend** (`VITE_API_URL`).
 
 Estado actual (Fase 7 inicial):
