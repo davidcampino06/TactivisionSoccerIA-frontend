@@ -18,3 +18,17 @@ npm install
 copy .env.example .env      # VITE_API_URL=http://localhost:8000
 npm run dev
 ```
+## Pruebas de las estructuras de datos
+
+Las estructuras propias del frontend (`src/structures/`) tienen pruebas unitarias con Vitest:
+
+```bash
+npm test
+```
+
+| Estructura | Dónde se usa | Qué comprueban las pruebas |
+|---|---|---|
+| `Stack` (pila inmutable) | Deshacer/rehacer del editor táctico | Orden LIFO, versiones antiguas intactas, pila vacía, límite de tamaño |
+| `UndoHistory` (dos pilas) | Editor táctico | Deshacer y rehacer en orden, un cambio nuevo vacía "rehacer", capacidad máxima |
+| `Trie` (árbol de prefijos) | Búsqueda instantánea de jugadores | Tildes y mayúsculas, búsqueda por prefijo, camino roto, varias palabras a la vez |
+| `BinarySearchTree` (ABB / AVL) | Ranking de jugadores | Orden descendente, propiedad de búsqueda, altura del AVL frente al ABB simple, rangos que saltan subárboles |
