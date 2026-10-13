@@ -29,6 +29,7 @@ const ICONS = {
   teams: icon("M12 3 5 6v5c0 4.4 3 7.8 7 9 4-1.2 7-4.6 7-9V6zM12 8v8M8.5 11.5h7"),
   system: icon("M4 5h16v6H4zM4 13h16v6H4zM7.5 8h.01M7.5 16h.01M11 8h5M11 16h5"),
   profile: icon("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"),
+  structures: icon("M10 3.5h4v4h-4zM3.5 16.5h4v4h-4zM10 16.5h4v4h-4zM16.5 16.5h4v4h-4zM12 7.5v9M5.5 16.5V12h13v4.5"),
 };
 
 const COLLAPSE_KEY = "tactivision-sidebar";
@@ -97,6 +98,9 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
         { to: "/comparacion", text: es.app.nav.comparison, icon: ICONS.comparison, needsTeam: true },
         { to: "/evolucion", text: es.app.nav.evolution, icon: ICONS.evolution, needsTeam: true },
         { to: "/reportes", text: es.app.nav.reports, icon: ICONS.reports, needsTeam: true },
+      ] },
+      { title: es.app.nav.sectionProject, items: [
+        { to: "/estructuras", text: es.app.nav.structures, icon: ICONS.structures, needsTeam: true },
       ] },
     ];
 
