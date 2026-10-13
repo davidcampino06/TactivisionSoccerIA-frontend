@@ -14,6 +14,7 @@ import PlayersPage from "../pages/app/PlayersPage";
 import ProfilePage from "../pages/app/ProfilePage";
 import ReportDetailPage from "../pages/app/ReportDetailPage";
 import ReportsPage from "../pages/app/ReportsPage";
+import StructuresPage from "../pages/app/StructuresPage";
 import { NotFoundPage } from "../pages/app/PlaceholderPages";
 import TacticalEditorPage from "../pages/app/TacticalEditorPage";
 import TacticsPage from "../pages/app/TacticsPage";
@@ -70,6 +71,7 @@ export default function AppRoutes({ user, onUserChange, onLogout }: Props) {
             <Route path="evolucion" element={<TeamOnly><EvolutionPage /></TeamOnly>} />
             <Route path="reportes" element={<TeamOnly><ReportsPage /></TeamOnly>} />
             <Route path="reportes/:reportId" element={<TeamOnly><ReportDetailPage /></TeamOnly>} />
+            <Route path="estructuras" element={<TeamOnly><StructuresPage /></TeamOnly>} />
             <Route path="perfil" element={<ProfilePage onLogout={onLogout} />} />
             <Route path="restablecer" element={<Navigate to="/perfil" replace />} />
             <Route path="admin" element={<AdminOnly><AdminPage section="overview" /></AdminOnly>} />
