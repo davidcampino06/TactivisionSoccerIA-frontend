@@ -195,12 +195,19 @@ function VideoFilePicker({ url, method, action, onDone }:
   );
 }
 
+/** Frames sent to the AI: on Render Free each frame costs close to a second, so "fast" is the default. */
+const DETAIL = {
+  fast: { frame_stride: 5, max_frames: 120 },
+  full: { frame_stride: 3, max_frames: 300 },
+} as const;
+
 function VideoItem({ video, canDelete, canUpload, onChange }:
   { video: Video; canDelete: boolean; canUpload: boolean; onChange: () => void }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("REAL_VIDEO_ANALYSIS");
   const [direction, setDirection] = useState("unknown");
+  const [detail, setDetail] = useState<keyof typeof DETAIL>("fast");
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const analyses = useLoad(() => api<VideoAnalysis[]>(`/api/videos/${video.id}/analyses`), video.id + video.status);
@@ -214,7 +221,7 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
     setError(null);
     try {
       const analysis = await api<VideoAnalysis>(`/api/videos/${video.id}/analysis`, {
-        method: "POST", body: json({ mode: effectiveMode, team_a_attack_direction: direction, frame_stride: 3, max_frames: 300 }),
+        method: "POST", body: json({ mode: effectiveMode, team_a_attack_direction: direction, ...DETAIL[detail] }),
       });
       navigate(`/analisis/${analysis.id}`);
     } catch (caught) {
@@ -271,6 +278,17 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
             </select>
             <small className="muted">{t.directionHint}</small>
           </label>
+          {effectiveMode === "REAL_VIDEO_ANALYSIS" && (
+            <label className="field">
+              <span>{t.detail}</span>
+              <select value={detail} onChange={(e) => setDetail(e.target.value as keyof typeof DETAIL)}>
+                {(Object.keys(DETAIL) as (keyof typeof DETAIL)[]).map((value) => (
+                  <option key={value} value={value}>{t.detailOptions[value]}</option>
+                ))}
+              </select>
+              <small className="muted">{t.detailHint}</small>
+            </label>
+          )}
           <button className="btn btn-primary" disabled={busy}>{busy ? es.auth.working : t.start}</button>
         </form>
       )}

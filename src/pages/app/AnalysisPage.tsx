@@ -6,7 +6,7 @@ import { useTeam } from "../../app/teamState";
 import { useLoad } from "../../hooks/useLoad";
 import { ConfirmButton, EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
 import { es } from "../../i18n/es";
-import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, label } from "../../i18n/labels";
+import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, label, parseServerTime } from "../../i18n/labels";
 import ProximityNetwork from "../../components/analysis/ProximityNetwork";
 import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Track, VideoAnalysis } from "../../types";
 
@@ -92,6 +92,8 @@ export default function AnalysisPage() {
           <div className="scan-bar" aria-hidden="true"><span /></div>
           <p>{t.waiting}</p>
           {analysis.queue_position ? <p className="muted">{t.queued(analysis.queue_position)}</p> : null}
+          <ElapsedTime since={analysis.started_at ?? null} />
+          <p className="muted small">{t.waitingHint}</p>
           <ConfirmButton label={t.cancel} confirmLabel={t.cancelConfirm} className="btn btn-ghost btn-sm" onConfirm={cancel} />
         </Section>
       )}
@@ -146,6 +148,20 @@ export default function AnalysisPage() {
       {matchId && <Link to={`/partidos/${matchId}`} className="btn btn-ghost">{t.back}</Link>}
     </div>
   );
+}
+
+/** Minutes and seconds since the analysis started (or since this page opened, while it is queued). */
+function ElapsedTime({ since }: { since: string | null }) {
+  const [opened] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const start = since ? parseServerTime(since).getTime() : opened;
+  const seconds = Math.max(0, Math.round((now - start) / 1000));
+  const time = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+  return <p className="analysis-elapsed" aria-live="off">{t.elapsed(time)}</p>;
 }
 
 function IssueCard({ item, rank, onUpdated, onError }:
