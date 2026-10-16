@@ -44,6 +44,8 @@ export interface Video {
   file_size: number;
   duration_seconds?: number | null;
   uploaded_at?: string;
+  /** False when the server lost the file (ephemeral disk): a new real analysis needs it again. */
+  file_available?: boolean;
 }
 
 export type AnalysisStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED";
