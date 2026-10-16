@@ -50,7 +50,7 @@ export default function ProximityNetwork({ network, tracks, players }: Props) {
     return (trackId: number): Who => {
       const playerId = byTrack.get(trackId);
       const player = playerId ? byId.get(playerId) : undefined;
-      if (!player) return { shirt: String(trackId), name: t.track(trackId), position: null };
+      if (!player) return { shirt: trackId < 0 ? "?" : String(trackId), name: t.track(trackId), position: null };
       return {
         shirt: player.shirt_number !== null ? String(player.shirt_number) : String(trackId),
         name: player.last_name,
