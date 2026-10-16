@@ -59,7 +59,7 @@ export default function MatchDetailPage() {
           {videos.loading ? <Loading /> : (videos.data ?? []).length === 0 ? <EmptyState title={t.noVideos} /> : (
             <ul className="video-list">
               {(videos.data ?? []).map((video) => (
-                <VideoItem key={video.id} video={video} canDelete={isCoach} onChange={videos.reload} />
+                <VideoItem key={video.id} video={video} canDelete={isCoach} canUpload={isCoach} onChange={videos.reload} />
               ))}
             </ul>
           )}
@@ -136,6 +136,12 @@ function MatchNavigation({ matchId }: { matchId: string }) {
 }
 
 function UploadVideo({ matchId, onUploaded }: { matchId: string; onUploaded: () => void }) {
+  return <VideoFilePicker url={`/api/matches/${matchId}/videos`} method="POST" action={t.upload} onDone={onUploaded} />;
+}
+
+/** Chooses a video file, checks its size and sends it (new video, or the file of an existing one). */
+function VideoFilePicker({ url, method, action, onDone }:
+  { url: string; method: "POST" | "PUT"; action: string; onDone: () => void }) {
   const input = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -159,10 +165,10 @@ function UploadVideo({ matchId, onUploaded }: { matchId: string; onUploaded: () 
     try {
       const data = new FormData();
       data.append("video", file);
-      await api(`/api/matches/${matchId}/videos`, { method: "POST", body: data });
+      await api(url, { method, body: data });
       setFile(null);
       if (input.current) input.current.value = "";
-      onUploaded();
+      onDone();
     } catch (caught) {
       setError(caught);
     } finally {
@@ -180,7 +186,7 @@ function UploadVideo({ matchId, onUploaded }: { matchId: string; onUploaded: () 
         </label>
         <span className="upload-file">{file ? `${file.name} · ${formatFileSize(file.size)}` : t.fileHint(MAX_VIDEO_MB)}</span>
         <button type="button" className="btn btn-primary" disabled={!file || busy} onClick={() => void upload()}>
-          {busy ? t.uploading : t.upload}
+          {busy ? t.uploading : action}
         </button>
       </div>
       {localError && <p className="field-error">{localError}</p>}
@@ -189,7 +195,8 @@ function UploadVideo({ matchId, onUploaded }: { matchId: string; onUploaded: () 
   );
 }
 
-function VideoItem({ video, canDelete, onChange }: { video: Video; canDelete: boolean; onChange: () => void }) {
+function VideoItem({ video, canDelete, canUpload, onChange }:
+  { video: Video; canDelete: boolean; canUpload: boolean; onChange: () => void }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("REAL_VIDEO_ANALYSIS");
@@ -197,6 +204,9 @@ function VideoItem({ video, canDelete, onChange }: { video: Video; canDelete: bo
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const analyses = useLoad(() => api<VideoAnalysis[]>(`/api/videos/${video.id}/analyses`), video.id + video.status);
+  // Without the file only a simulated analysis is possible (it does not read the video).
+  const fileMissing = video.file_available === false;
+  const effectiveMode = fileMissing ? "SIMULATION_MODE" : mode;
 
   const start = async (event: FormEvent) => {
     event.preventDefault();
@@ -204,7 +214,7 @@ function VideoItem({ video, canDelete, onChange }: { video: Video; canDelete: bo
     setError(null);
     try {
       const analysis = await api<VideoAnalysis>(`/api/videos/${video.id}/analysis`, {
-        method: "POST", body: json({ mode, team_a_attack_direction: direction, frame_stride: 3, max_frames: 300 }),
+        method: "POST", body: json({ mode: effectiveMode, team_a_attack_direction: direction, frame_stride: 3, max_frames: 300 }),
       });
       navigate(`/analisis/${analysis.id}`);
     } catch (caught) {
@@ -221,6 +231,7 @@ function VideoItem({ video, canDelete, onChange }: { video: Video; canDelete: bo
           <small>{formatFileSize(video.file_size)}{video.uploaded_at ? ` · ${formatTimestamp(video.uploaded_at)}` : ""}</small>
         </span>
         <Pill tone={VIDEO_TONE[video.status]}>{label("videoStatus", video.status)}</Pill>
+        {fileMissing && <Pill tone="warning">{t.fileMissing}</Pill>}
         <button type="button" className="btn btn-primary btn-sm" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
           {t.analyze}
         </button>
@@ -231,12 +242,23 @@ function VideoItem({ video, canDelete, onChange }: { video: Video; canDelete: bo
         )}
       </div>
 
+      {fileMissing && (
+        <div className="video-missing" role="status">
+          <strong>{t.fileMissingTitle}</strong>
+          <p>{t.fileMissingBody}</p>
+          {canUpload ? <VideoFilePicker url={`/api/videos/${video.id}/file`} method="PUT" action={t.reupload} onDone={onChange} />
+            : <p className="muted small">{t.fileMissingAsk}</p>}
+        </div>
+      )}
+
       {open && (
         <form className="analysis-form" onSubmit={start}>
           <label className="field">
             <span>{t.mode}</span>
-            <select value={mode} onChange={(e) => setMode(e.target.value)}>
-              <option value="REAL_VIDEO_ANALYSIS">{label("analysisMode", "REAL_VIDEO_ANALYSIS")}</option>
+            <select value={effectiveMode} onChange={(e) => setMode(e.target.value)}>
+              <option value="REAL_VIDEO_ANALYSIS" disabled={fileMissing}>
+                {label("analysisMode", "REAL_VIDEO_ANALYSIS")}{fileMissing ? ` ${t.realNeedsFile}` : ""}
+              </option>
               <option value="SIMULATION_MODE">{label("analysisMode", "SIMULATION_MODE")}</option>
             </select>
           </label>
