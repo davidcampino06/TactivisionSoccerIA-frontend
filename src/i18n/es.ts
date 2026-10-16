@@ -306,7 +306,7 @@ export const es = {
       analyze: "Analizar",
       mode: "Tipo de análisis",
       direction: "Dirección de ataque",
-      directionHint: "Indicarla activa los indicadores de línea defensiva.",
+      directionHint: "Si no la indicas, la IA intenta detectarla y te avisa en el resultado. Indicarla asegura los indicadores de línea defensiva y de profundidad.",
       start: "Iniciar análisis",
       history: "Análisis de este video",
       viewResult: "Ver resultado",
@@ -920,7 +920,7 @@ export const es = {
     severity: { HIGH: "Alta", MEDIUM: "Media", LOW: "Baja" },
     recommendationStatus: { GENERATED: "Sin revisar", REVIEWED: "Revisada", CONFIRMED: "Confirmada", DISMISSED: "Descartada" },
     attackDirection: {
-      unknown: "No indicar",
+      unknown: "Detectar automáticamente",
       left_to_right: "Mi equipo ataca de izquierda a derecha",
       right_to_left: "Mi equipo ataca de derecha a izquierda",
     },
@@ -948,6 +948,9 @@ export const es = {
       isolated_players: "Jugadores aislados",
       network_average_links: "Apoyos cercanos por jugador",
       network_diameter: "Pases cortos para cruzar el grupo",
+      pressure_on_ball: "Presión sobre el balón",
+      attacking_width: "Amplitud en ataque",
+      players_ahead_of_ball: "Jugadores por delante del balón",
     } as Record<string, string>,
     unit: {
       frame_width_ratio: "del ancho de imagen",
