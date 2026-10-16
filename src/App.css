@@ -90,6 +90,16 @@
   font-family: var(--font-body);
 }
 
+/* What shows behind the app if anything ever overflows it: the same tone as the page,
+   never a dark band under a light theme. */
+html {
+  background: #070909;
+}
+
+:root[data-theme="light"] {
+  background: rgb(243, 244, 239);
+}
+
 /* ---------------- sidebar ---------------- */
 
 .sidebar {
@@ -991,16 +1001,25 @@
 
 .analysis-form {
   display: grid;
-  grid-template-columns: 1fr 1.4fr auto;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   align-items: start;
-  gap: 12px;
+  gap: 12px 16px;
   padding: 14px;
   border-radius: 10px;
   background: rgba(var(--sink), 0.25);
 }
 
+.analysis-form .field {
+  min-width: 0;
+}
+
+.analysis-form select {
+  width: 100%;
+}
+
 .analysis-form .btn {
-  margin-top: 23px;
+  grid-column: 1 / -1;
+  justify-self: start;
 }
 
 .analysis-history ul {
@@ -1039,6 +1058,11 @@
 
 .analysis-waiting p {
   margin: 0;
+}
+
+.analysis-elapsed {
+  font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums;
 }
 
 .scan-bar {
@@ -3504,7 +3528,8 @@
 
   .is-collapsed .sidebar-body {
     overflow: visible;
-    padding: 0 14px 16px;
+    gap: 12px;
+    padding: 0 14px 12px;
   }
 
   .is-collapsed .sidebar-team {
@@ -3517,7 +3542,7 @@
 
   .is-collapsed .nav-link {
     justify-content: center;
-    padding: 12px;
+    padding: 10px;
   }
 
   .is-collapsed .nav-link.active::before {
@@ -3525,8 +3550,8 @@
   }
 
   .is-collapsed .nav-group + .nav-group {
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: 6px;
+    padding-top: 6px;
     border-top: 1px solid var(--border);
   }
 
@@ -5665,9 +5690,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .analysis-form .btn {
-    margin-top: 0;
-  }
 
   .player-grid,
   .type-picker {
@@ -5704,5 +5726,32 @@
   .scan-bar span,
   .pill-live::before {
     animation: none;
+  }
+}
+
+/* Collapsed rail on short screens (a laptop at 125 % scaling is about 730 px tall): tighter
+   icons so the whole rail fits; below 720 px it scrolls inside instead of stretching the page. */
+@media (min-width: 861px) and (max-height: 820px) {
+  .is-collapsed .sidebar-top {
+    gap: 8px;
+    padding: 12px 0 8px;
+  }
+
+  .is-collapsed .sidebar-body {
+    gap: 8px;
+  }
+
+  .is-collapsed .nav-link {
+    padding: 8px;
+  }
+
+  .is-collapsed .sidebar-team {
+    padding: 4px;
+  }
+}
+
+@media (min-width: 861px) and (max-height: 720px) {
+  .is-collapsed .sidebar-body {
+    overflow-y: auto;
   }
 }
