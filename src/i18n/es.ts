@@ -352,7 +352,8 @@ export const es = {
         unreachable: "Sin conexión",
         reach: (reached: number, total: number) => `Llega a ${reached - 1} de ${total - 1} compañeros.`,
         node: (label: string, hops: number | null) => (hops === null ? `${label}: sin conexión con el origen` : `${label}: ${hops === 0 ? "origen" : hops === 1 ? "a 1 pase" : `a ${hops} pases`}`),
-        track: (id: number) => `T${id}`,
+        // Negative ids are players the AI saw in that frame without following them over time.
+        track: (id: number) => (id < 0 ? "Sin seguimiento" : `T${id}`),
         none: "Este análisis no tiene red de cercanía (se hizo antes de esta función o no hubo suficientes jugadores visibles).",
         how: "¿Cómo se calcula?",
         explanation: "La IA toma el cuadro con más jugadores visibles. Cada jugador es un nodo y dos compañeros cercanos se unen con una arista. La búsqueda en anchura (BFS) parte de un jugador, visita primero a sus vecinos (a 1 pase), luego a los vecinos de ellos (a 2 pases) y así sucesivamente, usando una cola. Con BFS se cuentan los grupos sin conexión, los jugadores aislados y el diámetro: la ruta más larga en pases cortos dentro de un grupo.",
