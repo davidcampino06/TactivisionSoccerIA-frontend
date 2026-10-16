@@ -968,6 +968,27 @@
   min-width: 160px;
 }
 
+/* The server lost the file (ephemeral disk): explain it and offer to upload it again. */
+.video-missing {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(242, 181, 68, 0.45);
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: rgba(242, 181, 68, 0.08);
+}
+
+.video-missing p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.video-missing .upload-row {
+  background: var(--surface);
+}
+
 .analysis-form {
   display: grid;
   grid-template-columns: 1fr 1.4fr auto;
