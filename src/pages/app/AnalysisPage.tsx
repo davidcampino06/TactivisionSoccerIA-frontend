@@ -168,6 +168,7 @@ function IssueCard({ item, rank, onUpdated, onError }:
       <div className="issue-head">
         <h3><span className="issue-rank" title={t.priority(rank)} aria-label={t.priority(rank)}>{rank}</span>{item.title}</h3>
         <div className="issue-pills">
+          {item.team && <Pill>{label("team", item.team)}</Pill>}
           <Pill tone={SEVERITY_TONE[item.severity]}>{t.severity} {label("severity", item.severity).toLowerCase()}</Pill>
           <Pill tone={RECOMMENDATION_TONE[item.status]}>{label("recommendationStatus", item.status)}</Pill>
         </div>

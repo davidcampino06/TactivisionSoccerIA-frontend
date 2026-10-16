@@ -16,8 +16,11 @@ export function countByGroup(indicators: string[]): Record<TeamGroup, number> {
   return counts;
 }
 
-// Same rule as the AI service: these two are a risk when LOW, the rest when HIGH.
-const RISK_WHEN_LOW = new Set(["team_width", "defensive_line_position", "network_average_links"]);
+// Same rule as the AI service: these are a risk when LOW, the rest when HIGH.
+const RISK_WHEN_LOW = new Set([
+  "team_width", "defensive_line_position", "network_average_links",
+  "pressure_on_ball", "attacking_width", "players_ahead_of_ball",
+]);
 
 /** True when the value is on the risky side of its threshold. */
 export function isRisky(indicator: string, value: number, threshold: number | null): boolean {

@@ -81,6 +81,8 @@ export interface Recommendation {
   severity: string;
   status: string;
   created_at?: string;
+  /** TEAM_A, TEAM_B or MATCH; null for analyses stored before the team was saved. */
+  team?: string | null;
   indicator_names?: string[];
 }
 
