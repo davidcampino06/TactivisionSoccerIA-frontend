@@ -33,5 +33,8 @@ describe("ProximityNetwork", () => {
     expect(screen.getAllByText("T3").length).toBeGreaterThan(0);
     expect(screen.queryByText("-5")).toBeNull();
     expect(screen.queryByText("T-5")).toBeNull();
+    // On the pitch only tracked players carry a name tag, so identical "Sin seguimiento" tags never overlap.
+    const tags = [...document.querySelectorAll(".network-name")].map((tag) => tag.textContent);
+    expect(tags).toEqual(["T3"]);
   });
 });
