@@ -60,6 +60,9 @@ export interface VideoAnalysis {
   started_at?: string | null;
   completed_at?: string | null;
   warning_message: string | null;
+  /** Shirt colour of each team as the AI saw it (#rrggbb); null in old or simulated analyses. */
+  team_a_color?: string | null;
+  team_b_color?: string | null;
   queue_position: number | null;
 }
 
