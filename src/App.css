@@ -841,6 +841,50 @@ html {
   letter-spacing: 0.1em;
 }
 
+/* Shirt colour of a team (AnalysisPage, network chips) */
+.team-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.team-swatch {
+  display: inline-block;
+  flex: none;
+  width: 0.85em;
+  height: 0.85em;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(var(--fg), 0.35);
+}
+
+.team-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.team-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-legend-item .team-swatch {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.team-legend p {
+  flex-basis: 100%;
+  margin: 0;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
