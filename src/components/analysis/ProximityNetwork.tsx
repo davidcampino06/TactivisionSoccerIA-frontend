@@ -2,6 +2,8 @@ import { useMemo, useState, type CSSProperties } from "react";
 import { es } from "../../i18n/es";
 import { formatNumber, formatPercent, label } from "../../i18n/labels";
 import type { NetworkNode, Player, ProximityNetwork as Network, Track } from "../../types";
+import { TeamTag } from "./TeamColors";
+import type { TeamColors } from "./shirtColor";
 
 const t = es.pages.analysis.network;
 const TEAMS = ["TEAM_A", "TEAM_B"] as const;
@@ -19,6 +21,7 @@ interface Props {
   network: Network;
   tracks: Track[];
   players: Player[];
+  teamColors?: TeamColors;
 }
 
 interface Who {
@@ -32,7 +35,7 @@ interface Who {
  * The AI's proximity network on a 3D pitch: links between close team-mates drawn on the grass and,
  * from the chosen player, the BFS levels (how many short passes away every other player is).
  */
-export default function ProximityNetwork({ network, tracks, players }: Props) {
+export default function ProximityNetwork({ network, tracks, players, teamColors }: Props) {
   const available = TEAMS.filter((team) => network.teams[team]?.nodes.length);
   const [team, setTeam] = useState<TeamKey>(available[0] ?? "TEAM_A");
   const [flat, setFlat] = useState(false);
@@ -80,7 +83,7 @@ export default function ProximityNetwork({ network, tracks, players }: Props) {
             <div className="filter-chips" role="group" aria-label={t.title}>
               {available.map((option) => (
                 <button key={option} type="button" className={`chip${team === option ? " selected" : ""}`} aria-pressed={team === option}
-                  onClick={() => { setTeam(option); setChosen(null); }}>{t.teams[option]}</button>
+                  onClick={() => { setTeam(option); setChosen(null); }}><TeamTag team={option} colors={teamColors} /></button>
               ))}
             </div>
           )}
@@ -127,7 +130,8 @@ export default function ProximityNetwork({ network, tracks, players }: Props) {
                   {level !== undefined && level > 0 && <span className="network-badge" aria-hidden="true">{level}</span>}
                   <Jersey number={who.shirt} />
                   <span className="network-bar" aria-hidden="true" />
-                  <span className="network-name">{who.name}</span>
+                  {/* Untracked players (negative ids) only show the "?" shirt: many identical labels overlap. */}
+                  {node.track_id >= 0 && <span className="network-name">{who.name}</span>}
                 </button>
               </div>
             );
