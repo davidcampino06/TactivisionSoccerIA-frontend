@@ -332,6 +332,12 @@ export const es = {
       timelineHint: "Navegación por la línea de tiempo del equipo (lista doblemente enlazada).",
     },
     analysis: {
+      teamColors: {
+        title: "Quién es quién",
+        teams: { TEAM_A: "Equipo A", TEAM_B: "Equipo B" } as Record<string, string>,
+        shirt: (name: string) => `camiseta ${name}`,
+        hint: "La IA llama Equipo A al que, en promedio, aparece más a la izquierda de la imagen. El color es el promedio de las camisetas que vio, por eso puede verse más apagado que en el video.",
+      },
       network: {
         title: "Red de cercanía",
         subtitle: "Grafo de apoyos entre compañeros, recorrido con búsqueda en anchura (BFS)",
