@@ -9,6 +9,7 @@ import { es } from "../../i18n/es";
 import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, label, parseServerTime } from "../../i18n/labels";
 import ProximityNetwork from "../../components/analysis/ProximityNetwork";
 import { TeamLegend, TeamTag } from "../../components/analysis/TeamColors";
+import IssueExplanation from "../../components/analysis/IssueExplanation";
 import type { TeamColors, TeamKey } from "../../components/analysis/shirtColor";
 import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Track, VideoAnalysis } from "../../types";
 
@@ -202,6 +203,7 @@ function IssueCard({ item, rank, colors, onUpdated, onError }:
       </div>
       <p><span className="issue-label">{t.evidence}:</span> {item.evidence}</p>
       <p><span className="issue-label">{t.recommendation}:</span> {item.description}</p>
+      {item.explanation && <IssueExplanation explanation={item.explanation} colors={colors} />}
       {open && (
         <div className="issue-actions">
           {item.status === "GENERATED" && <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => void act("review")}>{t.review}</button>}

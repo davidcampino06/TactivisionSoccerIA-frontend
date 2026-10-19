@@ -841,6 +841,94 @@ html {
   letter-spacing: 0.1em;
 }
 
+/* Issue explained in football words, with the frame that shows it (IssueExplanation, PitchExample) */
+.issue-explain {
+  margin-top: 4px;
+}
+
+.issue-explain-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 20px;
+  margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.issue-explain-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.issue-explain h4 {
+  margin: 0 0 4px;
+  font: 600 0.74rem var(--font-mono, var(--font-body));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--chalk-muted);
+}
+
+.issue-explain-figure {
+  margin: 0;
+}
+
+.issue-explain-figure figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.issue-explain-legend {
+  color: rgba(var(--fg), 0.85);
+}
+
+.pitch-example {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(var(--fg), 0.12);
+}
+
+/* The grass is green in both themes, like the proximity network pitch. */
+.pitch-example-grass { fill: #3d9e46; }
+.pitch-example-stripe { fill: #358f3e; }
+.pitch-example-frame { fill: none; stroke: rgba(255, 255, 255, 0.55); stroke-width: 0.5; }
+.pitch-example-grid { stroke: rgba(255, 255, 255, 0.4); stroke-width: 0.35; stroke-dasharray: 1.4 1.2; }
+.pitch-example-line { stroke: #ffffff; stroke-width: 0.6; stroke-dasharray: 2 1.4; }
+.pitch-example-gap { fill: rgba(255, 60, 50, 0.42); stroke: #ff5c48; stroke-width: 0.4; }
+.pitch-example-cell { fill: rgba(255, 214, 102, 0.32); stroke: #ffd666; stroke-width: 0.5; }
+.pitch-example-band { fill: rgba(255, 214, 102, 0.3); stroke: #ffd666; stroke-width: 0.4; }
+.pitch-example-area { fill: rgba(255, 214, 102, 0.28); stroke: #ffd666; stroke-width: 0.6; }
+.pitch-example-link { stroke-width: 0.8; stroke-linecap: round; }
+.pitch-example-link.is-good { stroke: #d9ffe3; }
+.pitch-example-link.is-bad { stroke: #ff5c48; stroke-dasharray: 1.6 1; stroke-width: 1; }
+.pitch-example-ring { fill: none; stroke-width: 0.8; }
+.pitch-example-ring.is-bad { stroke: #ff5c48; }
+.pitch-example-ring.is-good { stroke: #d9ffe3; }
+.pitch-example-pressure { fill: rgba(255, 92, 72, 0.16); stroke: #ff5c48; stroke-width: 0.7; stroke-dasharray: 1.8 1.2; }
+
+.pitch-example-player {
+  fill: var(--player);
+  stroke: #ffffff;
+  stroke-width: 0.5;
+  opacity: 0.45;
+}
+
+.pitch-example-player.is-focus { opacity: 1; stroke-width: 0.7; }
+.pitch-example-player.is-unassigned { fill: #c9cdd3; opacity: 0.45; }
+.pitch-example-ball { fill: #ffffff; stroke: #13161b; stroke-width: 0.5; }
+
+@media (max-width: 860px) {
+  .issue-explain-body {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Shirt colour of a team (AnalysisPage, network chips) */
 .team-tag {
   display: inline-flex;
