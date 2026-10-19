@@ -87,6 +87,46 @@ export interface Recommendation {
   /** TEAM_A, TEAM_B or MATCH; null for analyses stored before the team was saved. */
   team?: string | null;
   indicator_names?: string[];
+  /** The issue in football words and a real frame that shows it; null in older analyses. */
+  explanation?: IssueExplanation | null;
+}
+
+export interface ExamplePlayer {
+  id: number;
+  team: string;
+  /** Image ratios (0..1), as the camera saw them. */
+  x: number;
+  y: number;
+}
+
+export type ExampleOverlay =
+  | { kind: "nearest"; pairs: { from: number; to: number; distance: number; too_far: boolean }[] }
+  | { kind: "hull"; polygon: [number, number][] }
+  | { kind: "network"; links: [number, number][]; groups: number[][]; isolated: number[] }
+  | { kind: "lines"; lines: number[]; gap: [number, number]; own_goal: "left" | "right" | null }
+  | { kind: "zone"; column: number; row: number; players: number; of: number }
+  | { kind: "third"; third: number; team_a: number; team_b: number }
+  | { kind: "width"; from: number; to: number }
+  | { kind: "pressure"; radius: number; pressing: number[] }
+  | { kind: "ahead"; ball_x: number; towards: "left" | "right"; ahead: number[] };
+
+export interface IssueExample {
+  frame_number: number;
+  timestamp_seconds: number;
+  aspect_ratio?: number;
+  team: string;
+  value: number;
+  players: ExamplePlayer[];
+  ball: [number, number] | null;
+  owner: string | null;
+  overlay: ExampleOverlay | null;
+}
+
+export interface IssueExplanation {
+  seen: string;
+  meaning?: string;
+  coach?: string;
+  example?: IssueExample | null;
 }
 
 export interface AnalysisResult {
