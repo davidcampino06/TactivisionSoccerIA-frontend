@@ -3,7 +3,8 @@ import { es } from "../../i18n/es";
 import { formatNumber, formatPercent, label } from "../../i18n/labels";
 import type { NetworkNode, Player, ProximityNetwork as Network, Track } from "../../types";
 import { TeamTag } from "./TeamColors";
-import type { TeamColors } from "./shirtColor";
+import { shirtColorName, type TeamColors } from "./shirtColor";
+import { networkStory } from "./networkStory";
 
 const t = es.pages.analysis.network;
 const TEAMS = ["TEAM_A", "TEAM_B"] as const;
@@ -71,6 +72,8 @@ export default function ProximityNetwork({ network, tracks, players, teamColors 
   const isolated = new Set(data.isolated);
   const levelOf = (trackId: number) => hops[String(trackId)];
   const origin = whoIs(source);
+  const shirt = teamColors?.[team] ? shirtColorName(teamColors[team]!) : "";
+  const story = networkStory(data, `${t.ofTeam[team]}${shirt ? ` (camiseta ${shirt})` : ""}`, reached);
   // Far side first, so in the flat view the players nearer the camera are drawn on top.
   const ordered = [...data.nodes].sort((a, b) => a.y - b.y || Number(a.track_id === source) - Number(b.track_id === source));
 
@@ -94,6 +97,12 @@ export default function ProximityNetwork({ network, tracks, players, teamColors 
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="network-story">
+        <p><span className="network-story-label">{t.storySeen}:</span> {story.seen}</p>
+        <p><span className="network-story-label">{t.storyMeaning}:</span> {story.meaning}</p>
+        <p className="muted small">{t.colorsNote}</p>
       </div>
 
       <div className={`network-stage${flat ? " is-flat" : ""}`}
@@ -169,6 +178,8 @@ export default function ProximityNetwork({ network, tracks, players, teamColors 
           <div><dt>{t.links}</dt><dd>{data.links.length}</dd></div>
         </dl>
       </div>
+
+      <p className="muted small network-camera">{t.cameraNote}</p>
 
       <details className="tree-how">
         <summary>{t.how}</summary>
