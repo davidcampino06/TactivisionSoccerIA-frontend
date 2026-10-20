@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { api } from "../../api/client";
+import { ConfirmButton } from "../ui";
 import { es } from "../../i18n/es";
 import { formatRelative, label } from "../../i18n/labels";
 import type { Notification } from "../../types";
@@ -109,6 +110,22 @@ export default function NotificationBell() {
     void refreshCount();
   };
 
+  const deleteItem = (item: Notification) => {
+    setItems((list) => list?.filter((entry) => entry.id !== item.id) ?? list);
+    if (!item.read) showCount(Math.max(0, lastCount.current - 1));
+    void api(`/api/notifications/${item.id}`, { method: "DELETE" }).catch(() => {
+      void loadList(); // it failed: show the real list again
+      void refreshCount();
+    });
+  };
+
+  const deleteAll = async () => {
+    setItems([]);
+    showCount(0);
+    await api("/api/notifications", { method: "DELETE" }).catch(() => void loadList());
+    void refreshCount();
+  };
+
   const visible = (items ?? []).filter((item) => filter === "all" || !item.read);
 
   return (
@@ -156,9 +173,21 @@ export default function NotificationBell() {
                     </span>
                     {!item.read && <span className="notif-dot"><span className="visually-hidden">{t.newBadge}</span></span>}
                   </button>
+                  <button type="button" className="notif-delete" aria-label={t.delete(label("notification", item.event))}
+                    title={t.delete(label("notification", item.event))} onClick={() => deleteItem(item)}>
+                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2"
+                      strokeLinecap="round" strokeLinejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12M10.5 11v5M13.5 11v5" /></svg>
+                  </button>
                 </li>
               ))}
             </ul>
+          )}
+          {items !== null && items.length > 0 && (
+            <div className="notif-foot">
+              <ConfirmButton label={t.deleteAll} confirmLabel={t.deleteAllConfirm} className="notif-mark notif-clear"
+                onConfirm={() => void deleteAll()} />
+              <small>{t.deleteHint}</small>
+            </div>
           )}
         </div>
       )}
