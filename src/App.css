@@ -841,6 +841,32 @@ html {
   letter-spacing: 0.1em;
 }
 
+/* Proximity network told in football words (networkStory) */
+.network-story {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: rgba(var(--fg), 0.03);
+}
+
+.network-story p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.network-story-label {
+  font-weight: 700;
+}
+
+.network-camera {
+  margin: 12px 0 0;
+}
+
 /* Issue explained in football words, with the frame that shows it (IssueExplanation, PitchExample) */
 .issue-explain {
   margin-top: 4px;
@@ -4431,7 +4457,7 @@ html {
   align-items: start;
   gap: 12px;
   width: 100%;
-  padding: 12px;
+  padding: 12px 40px 12px 12px; /* room for the delete button */
   border: 0;
   border-radius: 12px;
   background: transparent;
@@ -4440,6 +4466,63 @@ html {
   text-align: left;
   cursor: pointer;
   transition: background 0.15s ease;
+}
+
+.notif-list li {
+  position: relative;
+}
+
+/* Delete (trash) button of one notification: shown on hover or keyboard focus, always on touch. */
+.notif-delete {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--chalk-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.notif-list li:hover .notif-delete,
+.notif-list li:focus-within .notif-delete,
+.notif-delete:focus-visible {
+  opacity: 1;
+}
+
+.notif-delete:hover,
+.notif-delete:focus-visible {
+  outline: none;
+  background: rgba(255, 107, 87, 0.15);
+  color: var(--danger-text);
+}
+
+@media (hover: none) {
+  .notif-delete { opacity: 1; }
+}
+
+.notif-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 18px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.notif-foot small {
+  color: var(--chalk-muted);
+  font-size: 0.74rem;
+}
+
+.notif-clear {
+  color: var(--danger-text);
 }
 
 .notif-item:hover,
