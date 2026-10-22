@@ -13,6 +13,7 @@ import {
 } from "../../components/insights/indicators";
 import Pitch from "../../components/tactics/Pitch";
 import { fromConfiguration } from "../../components/tactics/board";
+import { availabilitySummary, isUnavailable } from "../../components/players/availability";
 import { Pill } from "../../components/ui";
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
@@ -394,7 +395,7 @@ function PlayCard({ play }: { play: TacticalPlaySummary | null }) {
 
 function SquadCard({ players }: { players: Player[] }) {
   const available = players.filter((player) => player.status === "ACTIVE");
-  const out = players.filter((player) => player.status === "INJURED" || player.status === "SUSPENDED");
+  const out = players.filter(isUnavailable);
   return (
     <Card className="dash-squad" title={t.squad} action={<Link to="/jugadores" className="btn btn-glass btn-sm">{t.seeAll}</Link>}>
       {players.length === 0 ? <p className="muted">{t.squadEmpty}</p> : (
@@ -410,7 +411,7 @@ function SquadCard({ players }: { players: Player[] }) {
           {out.length > 0 && (
             <ul className="squad-out">
               {out.map((player) => (
-                <li key={player.id}>
+                <li key={player.id} title={availabilitySummary(player)}>
                   <Link to={`/jugadores/${player.id}`}>{player.shirt_number !== null ? `${player.shirt_number} · ` : ""}{player.first_name} {player.last_name}</Link>
                   <Pill tone={PLAYER_STATUS_TONE[player.status]}>{label("playerStatus", player.status)}</Pill>
                 </li>
