@@ -4,6 +4,7 @@ import { api, json } from "../../api/client";
 import { PLAYER_STATUS_TONE } from "../../app/tones";
 import { useTeam } from "../../app/teamState";
 import PlayerForm from "../../components/players/PlayerForm";
+import { isUnavailable, returnText } from "../../components/players/availability";
 import { EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
@@ -74,6 +75,13 @@ export default function PlayerDetailPage() {
         } />
       {notice && <p className="notice" role="status">{notice}</p>}
       <ErrorBanner error={error} />
+      {isUnavailable(current) && mode !== "edit" && (
+        <div className={`absence-callout tone-${PLAYER_STATUS_TONE[current.status]}`} role="note" aria-label={t.absence}>
+          <strong>{label("playerStatus", current.status)}</strong>
+          <span>{current.availability_note || t.noReason}</span>
+          {current.expected_return && <small>{returnText(current.expected_return)}</small>}
+        </div>
+      )}
 
       {mode === "edit" && (
         <PlayerForm teamId={team!.id} player={current} onCancel={() => setMode("view")} onSaved={(saved) => done(saved, t.saved)} />
