@@ -15,6 +15,10 @@ pull request se ejecutan lint, pruebas (Vitest) y build.
 
 ![Página de inicio](docs/capturas/inicio.jpg)
 
+**Estilo visual:** la app flota sobre fotos de estadios reales (una por sección: de noche en el modo
+oscuro y de día en el claro, `public/backdrop`, licencia Unsplash) y cada panel y botón es de vidrio
+esmerilado (`src/glass.css`). Títulos en Anton (letra de camiseta, condensada) y texto en Inter.
+
 ## Pantallas
 
 | | |
