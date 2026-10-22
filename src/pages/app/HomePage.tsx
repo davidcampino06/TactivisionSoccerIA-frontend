@@ -23,6 +23,8 @@ import type {
 } from "../../types";
 
 const t = es.pages.home;
+/** Next match: a stadium at night (public/backdrop). The analysed videos keep the project photos. */
+const MATCH_NIGHT = "/backdrop/noche-tribuna-llena.webp";
 const PHOTOS = ["/hero/01-deteccion.jpg", "/hero/02-seguimiento.jpg", "/hero/03-contexto.jpg", "/hero/04-recomendacion.jpg"];
 const KEY_INDICATORS = ["team_width", "defensive_midfield_distance", "team_compactness_area", "average_player_distance", "max_zone_concentration", "defensive_line_position"];
 
@@ -169,7 +171,7 @@ function HeroCard({ next, teamName, played, pointsShare, goals, openIssues }:
   ];
   return (
     <section className="dash-hero">
-      <img className="dash-hero-photo" src={PHOTOS[0]} alt="" />
+      <img className="dash-hero-photo" src={MATCH_NIGHT} alt="" />
       <div className="dash-hero-body">
         <p className="dash-label">{t.nextMatch}</p>
         {next ? (
