@@ -18,6 +18,8 @@ interface Props {
   readOnly?: boolean;
   /** Player names for tokens linked to the squad (id -> short name). */
   names?: Record<string, string>;
+  /** Linked players who cannot play now (id -> "lesionado (esguince), regreso estimado: ..."): drawn with a red cross. */
+  unavailable?: Record<string, string>;
   /** Mini version for lists: no interaction, no labels below tokens. */
   compact?: boolean;
   onSelect?: (id: string | null) => void;
@@ -53,7 +55,7 @@ function dribblePath(arrow: Pick<Arrow, "x1" | "y1" | "x2" | "y2">): string {
 }
 
 export default function Pitch({
-  board, tool, selectedId, readOnly = false, names = {}, compact = false,
+  board, tool, selectedId, readOnly = false, names = {}, unavailable = {}, compact = false,
   onSelect, onAddToken, onAddArrow, onErase, onDragStart, onDrag, onDragEnd, ariaLabel,
 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -200,8 +202,9 @@ export default function Pitch({
       <g className="tokens">
         {board.tokens.map((token) => {
           const name = token.playerId ? names[token.playerId] : undefined;
+          const out = token.playerId ? unavailable[token.playerId] : undefined;
           return (
-            <g key={token.id} className={`token token-${token.side}${token.id === selectedId ? " is-selected" : ""}`}
+            <g key={token.id} className={`token token-${token.side}${token.id === selectedId ? " is-selected" : ""}${out ? " is-unavailable" : ""}`}
               transform={`translate(${token.x} ${token.y})`} onPointerDown={(event) => startDrag(event, { type: "token", id: token.id })}>
               {token.side === "ball" ? (
                 <>
@@ -214,9 +217,15 @@ export default function Pitch({
                   <circle r={TOKEN_R} className="token-body" />
                   <text className="token-label" dy="0.36em">{token.label}</text>
                   {!compact && name && <text className="token-name" y={TOKEN_R + 2.4}>{name}</text>}
+                  {out && (
+                    <g className="token-out" transform={`translate(${TOKEN_R * 0.75} ${-TOKEN_R * 0.75})`} aria-hidden="true">
+                      <circle r={1.05} />
+                      <path d="M-0.45,-0.45 L0.45,0.45 M0.45,-0.45 L-0.45,0.45" />
+                    </g>
+                  )}
                 </>
               )}
-              {name && <title>{name}</title>}
+              {name && <title>{out ? `${name}: ${out}` : name}</title>}
             </g>
           );
         })}
