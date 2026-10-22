@@ -11,9 +11,10 @@ const POLL_MS = 20_000;
 
 type Filter = "all" | "unread";
 
-/** Where a notification takes you: its analysis, its match, or the team page. */
+/** Where a notification takes you: its analysis, its match, the team or the squad page. */
 function targetOf(item: Notification): string {
   if (item.event === "ANALYST_JOINED") return "/equipo";
+  if (item.event === "PLAYER_RETURN_DUE") return "/jugadores";
   if (item.analysis_id) return `/analisis/${item.analysis_id}`;
   if (item.match_id) return `/partidos/${item.match_id}`;
   return "/panel";
@@ -207,5 +208,7 @@ const ICONS: Record<string, ReactNode> = {
   ANALYSIS_CANCELLED: glyph("M6 12h12"),
   TACTICAL_ALERT: glyph("M12 4 2.8 19.5h18.4zM12 10v4.5M12 17.2v.1"),
   ANALYST_JOINED: glyph("M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M4 20c.8-3.4 3.2-5 6-5s5.2 1.6 6 5M18 8v6M15 11h6"),
+  // A calendar with a check: the day a player should be back.
+  PLAYER_RETURN_DUE: glyph("M5 6h14v14H5zM5 10h14M9 3.5v4M15 3.5v4M9 15l2 2 4-4"),
   default: glyph("M12 7v6M12 16.5v.1"),
 };
