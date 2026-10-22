@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import Logo from "../components/Logo";
 import NotificationBell from "../components/notifications/NotificationBell";
@@ -8,6 +8,7 @@ import { label } from "../i18n/labels";
 import { useTeam } from "./teamState";
 import TeamCrest from "../components/team/TeamCrest";
 import StadiumBackdrop from "../components/backdrop/StadiumBackdrop";
+import { teamAccent } from "../theme/teamAccent";
 
 type NavItem = { to: string; text: string; icon: ReactNode; needsTeam?: boolean; end?: boolean };
 
@@ -106,8 +107,14 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
       ] },
     ];
 
+  // The team's kit colour tints the highlights of the app (glass.css reads these two variables).
+  const accent = teamAccent(team?.kit_color);
+  const accentStyle = accent
+    ? ({ "--team-accent": accent.onDark, "--team-accent-light": accent.onLight } as CSSProperties)
+    : undefined;
+
   return (
-    <div className={`app-shell${menuOpen ? " menu-open" : ""}${collapsed ? " is-collapsed" : ""}`}>
+    <div className={`app-shell${menuOpen ? " menu-open" : ""}${collapsed ? " is-collapsed" : ""}`} style={accentStyle}>
       <StadiumBackdrop />
       <aside className="sidebar">
         <div className="sidebar-top">
