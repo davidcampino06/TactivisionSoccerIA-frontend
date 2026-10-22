@@ -7,6 +7,7 @@ import { es } from "../i18n/es";
 import { label } from "../i18n/labels";
 import { useTeam } from "./teamState";
 import TeamCrest from "../components/team/TeamCrest";
+import StadiumBackdrop from "../components/backdrop/StadiumBackdrop";
 
 type NavItem = { to: string; text: string; icon: ReactNode; needsTeam?: boolean; end?: boolean };
 
@@ -107,6 +108,7 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
 
   return (
     <div className={`app-shell${menuOpen ? " menu-open" : ""}${collapsed ? " is-collapsed" : ""}`}>
+      <StadiumBackdrop />
       <aside className="sidebar">
         <div className="sidebar-top">
           <NavLink to="/" className="sidebar-brand">
