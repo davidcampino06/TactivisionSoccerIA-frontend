@@ -18,6 +18,7 @@ const POLL_MS = 2000;
 const RUNNING = new Set(["PENDING", "PROCESSING"]);
 
 export default function AnalysisPage() {
+  const { team: myTeam } = useTeam();
   const { analysisId = "" } = useParams();
   const navigate = useNavigate();
   const [analysis, setAnalysis] = useState<VideoAnalysis | null>(null);
@@ -67,6 +68,7 @@ export default function AnalysisPage() {
   const matchId = result?.recommendations[0]?.match_id;
   const simulated = analysis.analysis_mode === "SIMULATION_MODE";
   const colors: TeamColors = { TEAM_A: analysis.team_a_color, TEAM_B: analysis.team_b_color };
+  const ownTeam = analysis.own_team ?? null;
 
   return (
     <div className="page">
@@ -108,7 +110,7 @@ export default function AnalysisPage() {
 
       {result && analysis.status === "COMPLETED" && (
         <>
-          <TeamLegend colors={colors} />
+          <TeamLegend colors={colors} ownTeam={ownTeam} myTeam={myTeam} ownKitColor={analysis.own_kit_color} />
           {result.analysis.warning_message && (
             <Section title={t.warnings} className="panel-warning">
               <ul className="warning-list">
@@ -132,18 +134,18 @@ export default function AnalysisPage() {
               <div className="issue-list">
                 {/* Already in priority order: the backend pops them from a heap (most urgent first). */}
                 {result.recommendations.map((item, index) => (
-                  <IssueCard key={item.id} item={item} rank={index + 1} colors={colors} onUpdated={updateRecommendation} onError={setError} />
+                  <IssueCard key={item.id} item={item} rank={index + 1} colors={colors} ownTeam={ownTeam} onUpdated={updateRecommendation} onError={setError} />
                 ))}
               </div>
             )}
           </Section>
 
-          {result.proximity_network && <NetworkSection analysisId={analysis.id} network={result.proximity_network} colors={colors} />}
+          {result.proximity_network && <NetworkSection analysisId={analysis.id} network={result.proximity_network} colors={colors} ownTeam={ownTeam} />}
 
           {!simulated && <TrackSection analysisId={analysis.id} />}
 
           <Section title={t.indicators}>
-            <IndicatorTable indicators={result.indicators} colors={colors}
+            <IndicatorTable indicators={result.indicators} colors={colors} ownTeam={ownTeam}
               flagged={new Set(result.recommendations.filter((item) => item.status !== "DISMISSED").flatMap((item) => item.indicator_names ?? []))} />
           </Section>
 
@@ -169,8 +171,8 @@ function ElapsedTime({ since }: { since: string | null }) {
   return <p className="analysis-elapsed" aria-live="off">{t.elapsed(time)}</p>;
 }
 
-function IssueCard({ item, rank, colors, onUpdated, onError }:
-  { item: Recommendation; rank: number; colors: TeamColors; onUpdated: (item: Recommendation) => void; onError: (error: unknown) => void }) {
+function IssueCard({ item, rank, colors, ownTeam, onUpdated, onError }:
+  { item: Recommendation; rank: number; colors: TeamColors; ownTeam: TeamKey | null; onUpdated: (item: Recommendation) => void; onError: (error: unknown) => void }) {
   const [busy, setBusy] = useState(false);
   const act = async (action: "review" | "confirm" | "dismiss") => {
     setBusy(true);
@@ -189,7 +191,7 @@ function IssueCard({ item, rank, colors, onUpdated, onError }:
       <div className="issue-head">
         <h3><span className="issue-rank" title={t.priority(rank)} aria-label={t.priority(rank)}>{rank}</span>{item.title}</h3>
         <div className="issue-pills">
-          {item.team && <Pill>{item.team === "MATCH" ? label("team", item.team) : <TeamTag team={item.team as TeamKey} colors={colors} />}</Pill>}
+          {item.team && <Pill>{item.team === "MATCH" ? label("team", item.team) : <TeamTag team={item.team as TeamKey} colors={colors} ownTeam={ownTeam} />}</Pill>}
           <Pill tone={SEVERITY_TONE[item.severity]}>{t.severity} {label("severity", item.severity).toLowerCase()}</Pill>
           <Pill tone={RECOMMENDATION_TONE[item.status]}>{label("recommendationStatus", item.status)}</Pill>
         </div>
@@ -216,14 +218,15 @@ function IssueCard({ item, rank, colors, onUpdated, onError }:
 }
 
 /** Graph + BFS of the AI. Track numbers become shirt numbers when a person linked them to a player. */
-function NetworkSection({ analysisId, network, colors }: { analysisId: string; network: Network; colors: TeamColors }) {
+function NetworkSection({ analysisId, network, colors, ownTeam }:
+  { analysisId: string; network: Network; colors: TeamColors; ownTeam: TeamKey | null }) {
   const { team } = useTeam();
   const tracks = useLoad(() => api<Track[]>(`/api/analyses/${analysisId}/tracks`), analysisId);
   const squad = useLoad(() => api<Player[]>(`/api/teams/${team!.id}/players`), team!.id);
   return (
     <Section title={t.network.title} className="network-section">
       <p className="network-subtitle">{t.network.subtitle}</p>
-      <ProximityNetwork network={network} tracks={tracks.data ?? []} players={squad.data ?? []} teamColors={colors} />
+      <ProximityNetwork network={network} tracks={tracks.data ?? []} players={squad.data ?? []} teamColors={colors} ownTeam={ownTeam} />
     </Section>
   );
 }
@@ -324,7 +327,8 @@ function formatThreshold(indicator: Indicator): string {
   return indicator.threshold === null ? "—" : formatIndicatorValue(indicator.threshold, indicator.unit, false);
 }
 
-function IndicatorTable({ indicators, flagged, colors }: { indicators: Indicator[]; flagged: Set<string>; colors: TeamColors }) {
+function IndicatorTable({ indicators, flagged, colors, ownTeam }:
+  { indicators: Indicator[]; flagged: Set<string>; colors: TeamColors; ownTeam: TeamKey | null }) {
   const rows = indicators.map((indicator) => ({ indicator, ...indicatorLabel(indicator.name) }))
     .sort((a, b) => a.team.localeCompare(b.team) || a.name.localeCompare(b.name));
   return (
@@ -337,7 +341,7 @@ function IndicatorTable({ indicators, flagged, colors }: { indicators: Indicator
             return (
               <tr key={indicator.id} className={exceeded ? "row-flag" : undefined}>
                 <td>{name}{exceeded && <span className="flag" title={t.exceeded}> ●</span>}</td>
-                <td>{teamOf(indicator.name) ? <TeamTag team={teamOf(indicator.name)!} colors={colors} /> : team || "—"}</td>
+                <td>{teamOf(indicator.name) ? <TeamTag team={teamOf(indicator.name)!} colors={colors} ownTeam={ownTeam} /> : team || "—"}</td>
                 <td className="num">{formatIndicator(indicator)}</td>
                 <td className="num">{formatThreshold(indicator)}</td>
               </tr>
