@@ -23,6 +23,8 @@ interface Props {
   tracks: Track[];
   players: Player[];
   teamColors?: TeamColors;
+  /** The user's team among the two detected ones, when known. */
+  ownTeam?: "TEAM_A" | "TEAM_B" | null;
 }
 
 interface Who {
@@ -36,7 +38,7 @@ interface Who {
  * The AI's proximity network on a 3D pitch: links between close team-mates drawn on the grass and,
  * from the chosen player, the BFS levels (how many short passes away every other player is).
  */
-export default function ProximityNetwork({ network, tracks, players, teamColors }: Props) {
+export default function ProximityNetwork({ network, tracks, players, teamColors, ownTeam }: Props) {
   const available = TEAMS.filter((team) => network.teams[team]?.nodes.length);
   const [team, setTeam] = useState<TeamKey>(available[0] ?? "TEAM_A");
   const [flat, setFlat] = useState(false);
@@ -86,7 +88,7 @@ export default function ProximityNetwork({ network, tracks, players, teamColors 
             <div className="filter-chips" role="group" aria-label={t.title}>
               {available.map((option) => (
                 <button key={option} type="button" className={`chip${team === option ? " selected" : ""}`} aria-pressed={team === option}
-                  onClick={() => { setTeam(option); setChosen(null); }}><TeamTag team={option} colors={teamColors} /></button>
+                  onClick={() => { setTeam(option); setChosen(null); }}><TeamTag team={option} colors={teamColors} ownTeam={ownTeam} /></button>
               ))}
             </div>
           )}
