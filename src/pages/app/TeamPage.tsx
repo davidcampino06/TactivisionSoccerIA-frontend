@@ -7,6 +7,7 @@ import {
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import type { Team, User } from "../../types";
+import TeamIdentity from "../../components/team/TeamIdentity";
 
 const t = es.pages.team;
 
@@ -148,6 +149,7 @@ function TeamDetails({ team }: { team: Team }) {
         </Section>
 
         <div className="stack">
+          <TeamIdentity team={team} />
           {isCoach && code && (
             <Section title={t.invitation}>
               <p className="muted">{t.invitationBody}</p>
