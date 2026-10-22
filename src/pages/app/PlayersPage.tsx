@@ -4,6 +4,7 @@ import { api } from "../../api/client";
 import { PLAYER_STATUS_TONE } from "../../app/tones";
 import { useTeam } from "../../app/teamState";
 import PlayerForm from "../../components/players/PlayerForm";
+import { isUnavailable, returnText } from "../../components/players/availability";
 import { EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
@@ -12,8 +13,8 @@ import { Trie, searchAll } from "../../structures/Trie";
 import type { Player } from "../../types";
 
 const t = es.pages.players;
-type Filter = "active" | "INJURED" | "SUSPENDED" | "INACTIVE";
-const FILTERS: Filter[] = ["active", "INJURED", "SUSPENDED", "INACTIVE"];
+type Filter = "active" | "INJURED" | "SUSPENDED" | "UNAVAILABLE" | "INACTIVE";
+const FILTERS: Filter[] = ["active", "INJURED", "SUSPENDED", "UNAVAILABLE", "INACTIVE"];
 const GROUP_ORDER = ["GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD", "OTHER", "NONE"] as const;
 type Group = (typeof GROUP_ORDER)[number];
 
@@ -126,6 +127,7 @@ function PlayerCard({ player }: { player: Player }) {
     player.position ? label("position", player.position) : null,
     player.preferred_foot ? label("footShort", player.preferred_foot) : null,
   ].filter(Boolean).join(" · ");
+  const absence = [player.availability_note, returnText(player.expected_return)].filter(Boolean).join(" · ");
   return (
     <Link to={`/jugadores/${player.id}`} className={`player-card${player.status === "INACTIVE" ? " is-inactive" : ""}`}>
       <span className="player-number" aria-label={`${t.shirtShort} ${player.shirt_number ?? t.noShirt}`}>
@@ -135,6 +137,9 @@ function PlayerCard({ player }: { player: Player }) {
         <span className="player-first">{player.first_name}</span>
         <strong className="player-last">{player.last_name}</strong>
         {details && <small>{details}</small>}
+        {isUnavailable(player) && absence && (
+          <small className="player-absence" title={absence}>{absence}</small>
+        )}
       </span>
       {player.status !== "ACTIVE" && (
         <span className="player-status"><Pill tone={PLAYER_STATUS_TONE[player.status]}>{label("playerStatus", player.status)}</Pill></span>
