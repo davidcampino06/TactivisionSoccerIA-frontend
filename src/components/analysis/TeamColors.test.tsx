@@ -44,3 +44,25 @@ describe("TeamLegend and TeamTag", () => {
     expect(screen.getByText("Equipo B")).toBeTruthy();
   });
 });
+
+describe("TeamLegend with the user's team", () => {
+  const myTeam = { id: "t1", name: "Atlético Demo", crest_updated_at: null };
+
+  it("names the user's team and the rival when the AI knew which one is ours", () => {
+    render(<TeamLegend colors={{ TEAM_A: "#515350", TEAM_B: "#a05845" }} ownTeam="TEAM_B" myTeam={myTeam} ownKitColor="#c1272d" />);
+    expect(screen.getByText("Atlético Demo (tu equipo)")).toBeTruthy();
+    expect(screen.getByText("rival")).toBeTruthy();
+    expect(screen.getByText(/se reconoció por el color de camiseta indicado \(camiseta roja\)/)).toBeTruthy();
+  });
+
+  it("stays neutral when the team is unknown (no colour given, or it matched neither)", () => {
+    render(<TeamLegend colors={{ TEAM_A: "#515350", TEAM_B: "#a05845" }} ownTeam={null} myTeam={myTeam} />);
+    expect(screen.queryByText(/tu equipo/)).toBeNull();
+    expect(screen.queryByText("rival")).toBeNull();
+  });
+
+  it("marks the tag of the user's team", () => {
+    render(<TeamTag team="TEAM_A" colors={{ TEAM_A: "#515350" }} ownTeam="TEAM_A" />);
+    expect(screen.getByText("· tu equipo")).toBeTruthy();
+  });
+});
