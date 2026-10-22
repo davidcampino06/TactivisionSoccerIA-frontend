@@ -1,4 +1,4 @@
-/* Design tokens. Cinematic broadcast: near-black ink, chalk white, per-slide team tints, gold mark. */
+/* Design tokens. Night stadium: near-black ink, chalk white, frosted glass, gold mark. */
 :root {
   --ink: #070909;
   --pitch-deep: #06140d;
@@ -13,8 +13,10 @@
   --warn: #f2b544;
   --live: #ff4d4d;
 
-  --font-display: "Archivo Variable", "Arial Narrow", sans-serif;
-  --font-body: "Archivo Variable", "Segoe UI", system-ui, sans-serif;
+  /* Titles: tall, heavy and condensed like football kit lettering (Anton, free licence).
+     Text: Inter, a neutral grotesque close to Apple's San Francisco. */
+  --font-display: "Anton", "Arial Narrow", sans-serif;
+  --font-body: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
 
   font-family: var(--font-body);
