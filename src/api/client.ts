@@ -72,7 +72,16 @@ export async function download(path: string, fileName: string): Promise<void> {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/** An image or file from the API as a Blob (needs the Authorization header, so not a plain <img src>). */
+export async function fetchBlob(path: string): Promise<Blob> {
+  const token = tokenStore.get();
+  const response = await fetch(`${API_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, typeof body.detail === "string" ? body.detail : "Request failed",
+      typeof body.code === "string" ? body.code : null, body);
+  }
+  return response.blob();
+}
+
 export const json = (data: unknown) => JSON.stringify(data);
-
-
-
