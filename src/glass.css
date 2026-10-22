@@ -308,3 +308,104 @@ html,
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------- the team's colour
+   AppLayout sets --team-accent / --team-accent-light from the kit colour (theme/teamAccent.ts);
+   without one the app keeps its gold. Used only for highlights, never for whole surfaces. */
+.app-shell,
+.dash-hero {
+  --accent: var(--team-accent, #f2b544);
+}
+
+:root[data-theme="light"] .app-shell {
+  --accent: var(--team-accent-light, #a86a00);
+}
+
+.nav-link.active {
+  background: color-mix(in srgb, var(--accent) 16%, var(--btn-glass));
+}
+
+.nav-link.active::before {
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.nav-link.active svg,
+.page-eyebrow {
+  color: var(--accent);
+}
+
+/* A faint glow of the club colour from the top corner of the stadium, like its stand lights. */
+.stadium-veil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 55% at 0% 0%, color-mix(in srgb, var(--team-accent, transparent) 20%, transparent), transparent 70%);
+}
+
+/* ---------------------------------------------------------------- loading: glass skeleton */
+.loading {
+  display: grid;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.skeleton {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: var(--glass-edge);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.16) 50%, transparent 80%);
+  animation: skeleton-sweep 1.5s ease-in-out infinite;
+}
+
+:root[data-theme="light"] .skeleton::after {
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.85) 50%, transparent 80%);
+}
+
+.skeleton-title { width: 38%; height: 16px; margin-bottom: 4px; }
+.skeleton-line { width: 100%; }
+.skeleton-line.is-short { width: 62%; }
+
+/* As the whole page: a big title and two glass cards. */
+.page > .loading {
+  gap: 18px;
+}
+
+.page > .loading .skeleton-title {
+  width: min(420px, 60%);
+  height: 52px;
+  border-radius: 14px;
+}
+
+.page > .loading .skeleton-line {
+  height: 150px;
+  border-radius: 22px;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  background: var(--surface);
+}
+
+.page > .loading .skeleton-line.is-short {
+  display: none;
+}
+
+@keyframes skeleton-sweep {
+  to { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
