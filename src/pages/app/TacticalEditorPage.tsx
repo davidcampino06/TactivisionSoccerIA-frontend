@@ -6,6 +6,7 @@ import {
   ACTION_TYPES, FORMATIONS, MAX_ARROWS, MAX_TOKENS, formationTokens, fromConfiguration, newId, nextLabel, sameBoard,
   toConfiguration, type ArrowKind, type Board, type Tool,
 } from "../../components/tactics/board";
+import { availabilitySummary, isUnavailable } from "../../components/players/availability";
 import Pitch from "../../components/tactics/Pitch";
 import { useBoardEditor } from "../../components/tactics/useBoardEditor";
 import { ConfirmButton, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
@@ -19,6 +20,9 @@ import type { Match, Player, TacticalPlay, TacticalVersion } from "../../types";
 const t = es.pages.editor;
 const TOOL_GROUPS: Tool[][] = [["select", "own", "rival", "ball", "erase"], ["pass", "run", "dribble"]];
 const STACK_PREVIEW = 6;
+
+const playerOption = (player: Player) =>
+  `${player.shirt_number !== null ? `${player.shirt_number} · ` : ""}${player.first_name} ${player.last_name}`;
 
 const TOOL_ICONS: Record<Tool, ReactNode> = {
   select: <path d="M6 3l12 9-5.5 1L15 20l-2.5 1-2.6-7L6 17z" />,
@@ -69,6 +73,10 @@ export default function TacticalEditorPage() {
   }, [dirty]);
 
   const names = useMemo(() => Object.fromEntries((squad.data ?? []).map((player) => [player.id, player.last_name])), [squad.data]);
+  // Injured, suspended or unavailable players: marked on the pitch and separated in the list.
+  const unavailable = useMemo(() => Object.fromEntries((squad.data ?? []).filter(isUnavailable)
+    .map((player) => [player.id, availabilitySummary(player)])), [squad.data]);
+  const unavailableInPlay = board.tokens.filter((token) => token.playerId && unavailable[token.playerId]).length;
   const selectedToken = board.tokens.find((token) => token.id === selectedId) ?? null;
   const selectedArrow = board.arrows.find((arrow) => arrow.id === selectedId) ?? null;
 
@@ -243,11 +251,12 @@ export default function TacticalEditorPage() {
           {!readOnly && <p className="tool-hint">{t.toolHint[tool]}</p>}
 
           <div className="pitch-frame">
-            <Pitch board={board} tool={tool} selectedId={selectedId} readOnly={readOnly} names={names}
+            <Pitch board={board} tool={tool} selectedId={selectedId} readOnly={readOnly} names={names} unavailable={unavailable}
               ariaLabel={play.data.name} onSelect={select} onAddToken={addToken} onAddArrow={addArrow} onErase={erase}
               onDragStart={editor.dragStart} onDrag={editor.drag} onDragEnd={editor.dragEnd} />
           </div>
           <p className="pitch-caption">{t.attack} →</p>
+          {unavailableInPlay > 0 && <p className="notice notice-warning" role="status">{t.unavailableInPlay(unavailableInPlay)}</p>}
 
           {!readOnly && (
             <div className="editor-row">
@@ -297,13 +306,28 @@ export default function TacticalEditorPage() {
                         }));
                       }}>
                         <option value="">{t.noPlayer}</option>
-                        {players.map((player) => (
-                          <option key={player.id} value={player.id}>
-                            {player.shirt_number !== null ? `${player.shirt_number} · ` : ""}{player.first_name} {player.last_name}
-                          </option>
-                        ))}
+                        <optgroup label={t.availableGroup}>
+                          {players.filter((player) => !unavailable[player.id]).map((player) => (
+                            <option key={player.id} value={player.id}>{playerOption(player)}</option>
+                          ))}
+                        </optgroup>
+                        {players.some((player) => unavailable[player.id]) && (
+                          <optgroup label={t.unavailableGroup}>
+                            {players.filter((player) => unavailable[player.id]).map((player) => (
+                              <option key={player.id} value={player.id}>
+                                {playerOption(player)} — {label("playerStatus", player.status)}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                     </label>
+                  )}
+                  {selectedToken.playerId && unavailable[selectedToken.playerId] && (
+                    <p className="notice notice-warning small" role="status">
+                      {t.unavailableLinked(names[selectedToken.playerId] ?? "",
+                        unavailable[selectedToken.playerId])}
+                    </p>
                   )}
                   <button type="button" className="btn btn-danger btn-sm" onClick={removeSelected}>{t.remove}</button>
                 </div>
