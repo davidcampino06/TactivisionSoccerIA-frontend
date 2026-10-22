@@ -49,7 +49,7 @@ La interfaz funciona en celular (menú lateral desplegable) y tiene modo claro y
 | `/equipo` | Crear el equipo o unirse con código; miembros e invitación |
 | `/partidos`, `/partidos/:id` | Calendario, resultados, eventos, videos y análisis de cada partido |
 | `/analisis/:id` | Resultado del análisis: problemas, red de cercanía, indicadores |
-| `/jugadores`, `/jugadores/:id`, `/jugadores/ranking` | Plantilla con búsqueda instantánea, ficha y ranking |
+| `/jugadores`, `/jugadores/:id`, `/jugadores/ranking` | Plantilla con búsqueda instantánea, ficha y ranking. Cada jugador puede estar disponible, lesionado, suspendido o no disponible (motivo personal u otro), con el motivo y la fecha estimada de regreso; ese día la campana lo recuerda y el diseño táctico lo marca con una cruz roja |
 | `/diseno-tactico`, `/diseno-tactico/:id` | Jugadas y pizarra táctica |
 | `/comparacion`, `/evolucion` | Comparar dos partidos; tendencia de cada indicador |
 | `/reportes`, `/reportes/:id` | Reportes con la foto de los datos del momento en que se generaron |
