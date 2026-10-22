@@ -49,11 +49,19 @@ export function EmptyState({ title, body, action }: { title: string; body?: stri
   );
 }
 
+/**
+ * Placeholder while data loads: empty glass bars with a light sweeping across (skeleton), shaped
+ * like the content that is coming. Inside a section it looks like a few lines; as the whole page
+ * (`.page > .loading`) it looks like a title and two cards. Screen readers hear the label.
+ */
 export function Loading({ label = es.app.loading }: { label?: string }) {
   return (
     <div className="loading" role="status">
-      <span className="spinner" aria-hidden="true" />
-      {label}
+      <span className="visually-hidden">{label}</span>
+      <span className="skeleton skeleton-title" aria-hidden="true" />
+      <span className="skeleton skeleton-line" aria-hidden="true" />
+      <span className="skeleton skeleton-line" aria-hidden="true" />
+      <span className="skeleton skeleton-line is-short" aria-hidden="true" />
     </div>
   );
 }
