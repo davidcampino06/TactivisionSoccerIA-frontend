@@ -8,6 +8,9 @@ import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { formatDateTime, formatFileSize, formatTimestamp, label } from "../../i18n/labels";
 import type { Match, MatchNeighbors, Video, VideoAnalysis } from "../../types";
+import { shirtColorName } from "../../components/analysis/shirtColor";
+
+const teamIdentity = es.pages.team.identity;
 
 const t = es.pages.match;
 const MAX_VIDEO_MB = 200;
@@ -208,6 +211,10 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
   const [mode, setMode] = useState("REAL_VIDEO_ANALYSIS");
   const [direction, setDirection] = useState("unknown");
   const [detail, setDetail] = useState<keyof typeof DETAIL>("fast");
+  const { team } = useTeam();
+  // Proposed from the team's usual kit; the user can change it (away kit) or not give it at all.
+  const [kitGiven, setKitGiven] = useState(Boolean(team?.kit_color));
+  const [kit, setKit] = useState(team?.kit_color ?? "#ffffff");
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const analyses = useLoad(() => api<VideoAnalysis[]>(`/api/videos/${video.id}/analyses`), video.id + video.status);
@@ -221,7 +228,10 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
     setError(null);
     try {
       const analysis = await api<VideoAnalysis>(`/api/videos/${video.id}/analysis`, {
-        method: "POST", body: json({ mode: effectiveMode, team_a_attack_direction: direction, ...DETAIL[detail] }),
+        method: "POST", body: json({
+          mode: effectiveMode, team_a_attack_direction: direction, ...DETAIL[detail],
+          own_kit_color: effectiveMode === "REAL_VIDEO_ANALYSIS" && kitGiven ? kit : null,
+        }),
       });
       navigate(`/analisis/${analysis.id}`);
     } catch (caught) {
@@ -288,6 +298,20 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
               </select>
               <small className="muted">{t.detailHint}</small>
             </label>
+          )}
+          {effectiveMode === "REAL_VIDEO_ANALYSIS" && (
+            <fieldset className="field kit-field">
+              <legend>{t.kit}</legend>
+              <div className="kit-row">
+                <label className="check">
+                  <input type="checkbox" checked={kitGiven} onChange={(e) => setKitGiven(e.target.checked)} />
+                  <span>{t.kitGiven}</span>
+                </label>
+                <input type="color" value={kit} disabled={!kitGiven} onChange={(e) => setKit(e.target.value)} aria-label={t.kit} />
+                {kitGiven && <span>{teamIdentity.shirt(shirtColorName(kit))}</span>}
+              </div>
+              <small className="muted">{kitGiven && team?.kit_color === kit ? t.kitFromTeam : t.kitHint}</small>
+            </fieldset>
           )}
           <button className="btn btn-primary" disabled={busy}>{busy ? es.auth.working : t.start}</button>
         </form>
