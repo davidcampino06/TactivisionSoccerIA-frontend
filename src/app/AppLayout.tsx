@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import Logo from "../components/Logo";
 import NotificationBell from "../components/notifications/NotificationBell";
@@ -6,6 +6,9 @@ import ThemeToggle from "../components/ThemeToggle";
 import { es } from "../i18n/es";
 import { label } from "../i18n/labels";
 import { useTeam } from "./teamState";
+import TeamCrest from "../components/team/TeamCrest";
+import StadiumBackdrop from "../components/backdrop/StadiumBackdrop";
+import { teamAccent } from "../theme/teamAccent";
 
 type NavItem = { to: string; text: string; icon: ReactNode; needsTeam?: boolean; end?: boolean };
 
@@ -104,8 +107,15 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
       ] },
     ];
 
+  // The team's kit colour tints the highlights of the app (glass.css reads these two variables).
+  const accent = teamAccent(team?.kit_color);
+  const accentStyle = accent
+    ? ({ "--team-accent": accent.onDark, "--team-accent-light": accent.onLight } as CSSProperties)
+    : undefined;
+
   return (
-    <div className={`app-shell${menuOpen ? " menu-open" : ""}${collapsed ? " is-collapsed" : ""}`}>
+    <div className={`app-shell${menuOpen ? " menu-open" : ""}${collapsed ? " is-collapsed" : ""}`} style={accentStyle}>
+      <StadiumBackdrop />
       <aside className="sidebar">
         <div className="sidebar-top">
           <NavLink to="/" className="sidebar-brand">
@@ -128,7 +138,7 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
         <div className="sidebar-body">
           {team && (
             <div className="sidebar-team" title={team.name}>
-              <span className="team-badge" aria-hidden="true">{team.name.split(/\s+/).map((word) => word[0]).slice(0, 2).join("")}</span>
+              <TeamCrest team={team} />
               <span className="sidebar-team-text">
                 <span className="sidebar-team-label">{es.app.nav.team}</span>
                 <strong>{team.name}</strong>

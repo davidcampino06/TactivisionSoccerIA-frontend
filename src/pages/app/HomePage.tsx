@@ -13,6 +13,7 @@ import {
 } from "../../components/insights/indicators";
 import Pitch from "../../components/tactics/Pitch";
 import { fromConfiguration } from "../../components/tactics/board";
+import { availabilitySummary, isUnavailable } from "../../components/players/availability";
 import { Pill } from "../../components/ui";
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
@@ -22,6 +23,8 @@ import type {
 } from "../../types";
 
 const t = es.pages.home;
+/** Next match: a stadium at night (public/backdrop). The analysed videos keep the project photos. */
+const MATCH_NIGHT = "/backdrop/noche-tribuna-llena.webp";
 const PHOTOS = ["/hero/01-deteccion.jpg", "/hero/02-seguimiento.jpg", "/hero/03-contexto.jpg", "/hero/04-recomendacion.jpg"];
 const KEY_INDICATORS = ["team_width", "defensive_midfield_distance", "team_compactness_area", "average_player_distance", "max_zone_concentration", "defensive_line_position"];
 
@@ -168,7 +171,7 @@ function HeroCard({ next, teamName, played, pointsShare, goals, openIssues }:
   ];
   return (
     <section className="dash-hero">
-      <img className="dash-hero-photo" src={PHOTOS[0]} alt="" />
+      <img className="dash-hero-photo" src={MATCH_NIGHT} alt="" />
       <div className="dash-hero-body">
         <p className="dash-label">{t.nextMatch}</p>
         {next ? (
@@ -394,7 +397,7 @@ function PlayCard({ play }: { play: TacticalPlaySummary | null }) {
 
 function SquadCard({ players }: { players: Player[] }) {
   const available = players.filter((player) => player.status === "ACTIVE");
-  const out = players.filter((player) => player.status === "INJURED" || player.status === "SUSPENDED");
+  const out = players.filter(isUnavailable);
   return (
     <Card className="dash-squad" title={t.squad} action={<Link to="/jugadores" className="btn btn-glass btn-sm">{t.seeAll}</Link>}>
       {players.length === 0 ? <p className="muted">{t.squadEmpty}</p> : (
@@ -410,7 +413,7 @@ function SquadCard({ players }: { players: Player[] }) {
           {out.length > 0 && (
             <ul className="squad-out">
               {out.map((player) => (
-                <li key={player.id}>
+                <li key={player.id} title={availabilitySummary(player)}>
                   <Link to={`/jugadores/${player.id}`}>{player.shirt_number !== null ? `${player.shirt_number} · ` : ""}{player.first_name} {player.last_name}</Link>
                   <Pill tone={PLAYER_STATUS_TONE[player.status]}>{label("playerStatus", player.status)}</Pill>
                 </li>

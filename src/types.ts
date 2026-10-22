@@ -20,6 +20,10 @@ export interface Team {
   description?: string | null;
   coach_id?: string;
   invitation_code: string | null;
+  /** Usual shirt colour (#rrggbb), proposed when a video is analysed. */
+  kit_color?: string | null;
+  /** When the crest was last changed; null = no crest (GET /api/teams/{id}/crest). */
+  crest_updated_at?: string | null;
 }
 
 export interface Match {
@@ -63,6 +67,9 @@ export interface VideoAnalysis {
   /** Shirt colour of each team as the AI saw it (#rrggbb); null in old or simulated analyses. */
   team_a_color?: string | null;
   team_b_color?: string | null;
+  /** Kit colour given for this analysis and which detected team wears it (null = unknown). */
+  own_kit_color?: string | null;
+  own_team?: "TEAM_A" | "TEAM_B" | null;
   queue_position: number | null;
 }
 
@@ -176,7 +183,7 @@ export interface Notification {
   read: boolean;
 }
 
-export type PlayerStatus = "ACTIVE" | "INJURED" | "SUSPENDED" | "INACTIVE";
+export type PlayerStatus = "ACTIVE" | "INJURED" | "SUSPENDED" | "UNAVAILABLE" | "INACTIVE";
 
 export interface Player {
   id: string;
@@ -187,6 +194,9 @@ export interface Player {
   position: string | null;
   preferred_foot: string | null;
   status: PlayerStatus;
+  /** Why he cannot play and when he should be back (only while INJURED, SUSPENDED or UNAVAILABLE). */
+  availability_note?: string | null;
+  expected_return?: string | null;
   created_at: string;
 }
 

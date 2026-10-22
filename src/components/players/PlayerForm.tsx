@@ -3,11 +3,12 @@ import { api, json } from "../../api/client";
 import { es } from "../../i18n/es";
 import type { Player } from "../../types";
 import { ErrorBanner, Section } from "../ui";
+import { UNAVAILABLE_STATUSES } from "./availability";
 
 const t = es.pages.player;
 const POSITIONS = Object.keys(es.labels.position);
 const FEET = Object.keys(es.labels.foot);
-const STATUSES = ["ACTIVE", "INJURED", "SUSPENDED"] as const;
+const STATUSES = ["ACTIVE", "INJURED", "SUSPENDED", "UNAVAILABLE"] as const;
 
 interface Props {
   teamId: string;
@@ -26,12 +27,17 @@ export default function PlayerForm({ teamId, player, onSaved, onCancel }: Props)
     position: player?.position ?? "",
     foot: player?.preferred_foot ?? "",
     status: player && player.status !== "INACTIVE" ? player.status : "ACTIVE",
+    note: player?.availability_note ?? "",
+    back: player?.expected_return ?? "",
   });
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const update = (field: keyof typeof form, value: string) => setForm((current) => ({ ...current, [field]: value }));
   // A free-text position saved before the list existed stays selectable.
   const positions = form.position && !POSITIONS.includes(form.position) ? [...POSITIONS, form.position] : POSITIONS;
+  const editable = Boolean(player && player.status !== "INACTIVE");
+  // Reason and return date only while he cannot play; choosing "Disponible" clears them in the backend.
+  const absent = editable && (UNAVAILABLE_STATUSES as readonly string[]).includes(form.status);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -44,7 +50,11 @@ export default function PlayerForm({ teamId, player, onSaved, onCancel }: Props)
       position: form.position || null,
       preferred_foot: form.foot || null,
     };
-    if (player && player.status !== "INACTIVE") body.status = form.status;
+    if (editable) {
+      body.status = form.status;
+      body.availability_note = absent ? form.note.trim() || null : null;
+      body.expected_return = absent ? form.back || null : null;
+    }
     try {
       const saved = player
         ? await api<Player>(`/api/players/${player.id}`, { method: "PUT", body: json(body) })
@@ -89,13 +99,29 @@ export default function PlayerForm({ teamId, player, onSaved, onCancel }: Props)
             {FEET.map((code) => <option key={code} value={code}>{(es.labels.foot as Record<string, string>)[code]}</option>)}
           </select>
         </label>
-        {player && player.status !== "INACTIVE" && (
+        {editable && (
           <label className="field">
             <span>{t.status}</span>
-            <select value={form.status} onChange={(e) => update("status", e.target.value)}>
+            <select value={form.status} onChange={(e) => update("status", e.target.value)} aria-describedby="status-hint">
               {STATUSES.map((code) => <option key={code} value={code}>{es.labels.playerStatus[code]}</option>)}
             </select>
+            <small id="status-hint" className="muted">{t.statusHint}</small>
           </label>
+        )}
+        {absent && (
+          <>
+            <label className="field">
+              <span>{t.availabilityNote}</span>
+              <input value={form.note} onChange={(e) => update("note", e.target.value)} maxLength={255}
+                placeholder={t.availabilityPlaceholder[form.status]} />
+            </label>
+            <label className="field">
+              <span>{t.expectedReturn}</span>
+              <input type="date" value={form.back} onChange={(e) => update("back", e.target.value)}
+                aria-describedby="return-hint" />
+              <small id="return-hint" className="muted">{t.expectedReturnHint}</small>
+            </label>
+          </>
         )}
         <ErrorBanner error={error} />
         <div className="form-actions field-wide">

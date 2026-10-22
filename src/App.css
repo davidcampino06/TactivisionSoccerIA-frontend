@@ -732,6 +732,7 @@ html {
 
 .app-shell .field {
   display: grid;
+  align-content: start; /* a long hint in the next field never stretches this input */
   gap: 6px;
   min-width: 0;
   margin: 0;
@@ -751,7 +752,8 @@ html {
   grid-column: 1 / -1;
 }
 
-.app-shell :is(input:not([type="radio"]):not([type="file"]), select, textarea) {
+/* :where() keeps the specificity of the original rule, so .search-box and other inputs still win. */
+.app-shell :is(input:not([type="radio"]):not([type="file"]):where(:not([type="checkbox"]):not([type="color"])), select, textarea) {
   width: 100%;
   padding: 11px 13px;
   border: 1px solid rgba(var(--fg), 0.14);
@@ -955,6 +957,79 @@ html {
   }
 }
 
+/* Team crest (sidebar, team page, analysis legend) */
+.team-crest {
+  flex: none;
+  object-fit: contain;
+}
+
+.team-crest-sm { width: 34px; height: 34px; }
+.team-crest-md { width: 44px; height: 44px; }
+.team-crest-lg { width: 112px; height: 112px; border-radius: 18px; }
+.team-badge.team-crest-lg { font-size: 2rem; }
+.team-badge.team-crest-md { font-size: 1rem; }
+
+.team-identity {
+  display: grid;
+  gap: 20px;
+}
+
+.team-identity-crest {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.team-identity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-identity-actions small {
+  flex-basis: 100%;
+}
+
+.kit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.check {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.kit-row input[type="color"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.kit-row input[type="color"] {
+  width: 44px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
 /* Shirt colour of a team (AnalysisPage, network chips) */
 .team-tag {
   display: inline-flex;
@@ -987,6 +1062,20 @@ html {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.team-legend-item.is-own {
+  padding: 4px 12px 4px 4px;
+  border-radius: 12px;
+  background: rgba(var(--fg), 0.06);
+}
+
+.team-legend-role {
+  font-weight: 600;
+}
+
+.team-tag-own {
+  font-weight: 700;
 }
 
 .team-legend-item .team-swatch {
@@ -4741,6 +4830,47 @@ html {
   background: color-mix(in srgb, var(--series-1) 12%, transparent);
   color: var(--info-text);
 }
+
+.notice.notice-warning {
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+  color: var(--warn);
+}
+
+.notice.small {
+  padding: 8px 12px;
+  font-size: 0.84rem;
+}
+
+/* Player who cannot play now: the reason, on the player page and in the squad cards. */
+.absence-callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border-left: 4px solid var(--absence, var(--warn));
+  background: color-mix(in srgb, var(--absence, var(--warn)) 12%, transparent);
+}
+
+.absence-callout.tone-danger { --absence: var(--danger); }
+.absence-callout.tone-warning { --absence: var(--warn); }
+.absence-callout.tone-info { --absence: var(--info-text); }
+.absence-callout strong { color: var(--absence, var(--warn)); }
+.absence-callout small { color: var(--chalk-muted); flex-basis: 100%; }
+
+.player-info .player-absence {
+  color: var(--chalk-muted);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tactical editor: a linked player who is injured, suspended or unavailable. */
+.token.is-unavailable .token-body { opacity: 0.55; stroke-dasharray: 0.8 0.5; }
+.token-out circle { fill: var(--danger); stroke: #fff; stroke-width: 0.22; }
+.token-out path { stroke: #fff; stroke-width: 0.32; stroke-linecap: round; }
 
 .ranking-toolbar {
   display: flex;
