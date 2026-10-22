@@ -183,7 +183,7 @@ export interface Notification {
   read: boolean;
 }
 
-export type PlayerStatus = "ACTIVE" | "INJURED" | "SUSPENDED" | "INACTIVE";
+export type PlayerStatus = "ACTIVE" | "INJURED" | "SUSPENDED" | "UNAVAILABLE" | "INACTIVE";
 
 export interface Player {
   id: string;
@@ -194,6 +194,9 @@ export interface Player {
   position: string | null;
   preferred_foot: string | null;
   status: PlayerStatus;
+  /** Why he cannot play and when he should be back (only while INJURED, SUSPENDED or UNAVAILABLE). */
+  availability_note?: string | null;
+  expected_return?: string | null;
   created_at: string;
 }
 
