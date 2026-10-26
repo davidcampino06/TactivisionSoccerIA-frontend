@@ -210,5 +210,7 @@ const ICONS: Record<string, ReactNode> = {
   ANALYST_JOINED: glyph("M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M4 20c.8-3.4 3.2-5 6-5s5.2 1.6 6 5M18 8v6M15 11h6"),
   // A calendar with a check: the day a player should be back.
   PLAYER_RETURN_DUE: glyph("M5 6h14v14H5zM5 10h14M9 3.5v4M15 3.5v4M9 15l2 2 4-4"),
+  // A speech bubble: someone of the staff wrote about a problem.
+  RECOMMENDATION_NOTE: glyph("M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5"),
   default: glyph("M12 7v6M12 16.5v.1"),
 };
