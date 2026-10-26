@@ -9,9 +9,13 @@ const t = es.pages.analysis.explain;
 const TEAM_NAME: Record<string, string> = { TEAM_A: "el Equipo A", TEAM_B: "el Equipo B" };
 const OF_TEAM: Record<string, string> = { TEAM_A: "del Equipo A", TEAM_B: "del Equipo B" };
 
-function overlayCaption(example: IssueExample): string | null {
+function overlayCaption(example: IssueExample, positive: boolean): string | null {
   const overlay = example.overlay;
   if (!overlay) return null;
+  if (positive && overlay.kind in t.goodOverlay) {
+    const good = t.goodOverlay[overlay.kind];
+    return typeof good === "function" ? good(overlay.kind === "pressure" ? overlay.pressing.length : 0) : good;
+  }
   switch (overlay.kind) {
     case "zone": return t.overlay.zone(overlay.players, overlay.of);
     case "third": return t.overlay.third(overlay.team_a, overlay.team_b);
@@ -21,8 +25,13 @@ function overlayCaption(example: IssueExample): string | null {
   }
 }
 
-/** "Ver explicación y jugada": the issue told like a coach would, and the frame that shows it. */
-export default function IssueExplanation({ explanation, colors }: { explanation: Explanation; colors?: TeamColors }) {
+/**
+ * "Ver explicación y jugada": the issue told like a coach would, and the frame that shows it.
+ * With ``positive`` it explains a strength: "how to keep it" instead of "what to work on", and the
+ * drawing marks what went well in green.
+ */
+export default function IssueExplanation({ explanation, colors, positive = false }:
+  { explanation: Explanation; colors?: TeamColors; positive?: boolean }) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const example = explanation.example;
@@ -40,18 +49,19 @@ export default function IssueExplanation({ explanation, colors }: { explanation:
             <section><h4>{t.seen}</h4><p>{explanation.seen}</p></section>
             {explanation.meaning && <section><h4>{t.meaning}</h4><p>{explanation.meaning}</p></section>}
             {explanation.coach && <section><h4>{t.coach}</h4><p>{explanation.coach}</p></section>}
+            {explanation.keep && <section><h4>{t.keep}</h4><p>{explanation.keep}</p></section>}
           </div>
           <figure className="issue-explain-figure">
             <h4>{t.example}</h4>
             {example ? (
               <>
-                <PitchExample example={example} colors={colors} label={`${t.example}: ${t.frame(example.frame_number, formatNumber(example.timestamp_seconds, 1))}`} />
+                <PitchExample example={example} colors={colors} positive={positive} label={`${t.example}: ${t.frame(example.frame_number, formatNumber(example.timestamp_seconds, 1))}`} />
                 <figcaption>
                   <span>
                     <strong>{t.frame(example.frame_number, formatNumber(example.timestamp_seconds, 1))}</strong>
                     {" · "}{example.owner ? t.owner(TEAM_NAME[example.owner] ?? example.owner) : t.looseBall}
                   </span>
-                  {overlayCaption(example) && <span className="issue-explain-legend">{overlayCaption(example)}</span>}
+                  {overlayCaption(example, positive) && <span className="issue-explain-legend">{overlayCaption(example, positive)}</span>}
                   {focusCount > 0 && <span>{t.visible(focusCount, OF_TEAM[example.team] ?? example.team)}</span>}
                   <span className="muted">{t.camera}</span>
                 </figcaption>
