@@ -187,6 +187,25 @@ function MatchBody({ snapshot }: { snapshot: ReportSnapshot }) {
         </ReportSection>
       )}
 
+      {(snapshot.strengths ?? []).length > 0 && (
+        <ReportSection title={t.strengths}>
+          <div className="issue-list">
+            {(snapshot.strengths ?? []).map((strength) => (
+              <article key={`${strength.team}-${strength.title}`} className="issue issue-strength">
+                <div className="issue-head">
+                  <h3><span className="strength-mark" aria-hidden="true">✓</span>{strength.title}</h3>
+                  <div className="issue-pills"><Pill>{es.pages.analysis.teamColors.teams[strength.team] ?? label("team", strength.team)}</Pill></div>
+                </div>
+                <p className="muted small">{es.pages.analysis.strengthConfidence}: {formatPercent(strength.confidence)}</p>
+                {strength.seen && <p><span className="issue-label">{es.pages.analysis.explain.seen}:</span> {strength.seen}</p>}
+                {strength.meaning && <p><span className="issue-label">{es.pages.analysis.explain.meaning}:</span> {strength.meaning}</p>}
+                {strength.keep && <p><span className="issue-label">{es.pages.analysis.explain.keep}:</span> {strength.keep}</p>}
+              </article>
+            ))}
+          </div>
+        </ReportSection>
+      )}
+
       {indicators.length > 0 && (
         <ReportSection title={t.indicators}>
           <div className="table-wrap">
