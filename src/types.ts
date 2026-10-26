@@ -133,7 +133,21 @@ export interface IssueExplanation {
   seen: string;
   meaning?: string;
   coach?: string;
+  /** Strengths only: how to keep doing it. */
+  keep?: string;
   example?: IssueExample | null;
+}
+
+/** Something a team did well (AI tactical_strengths.py, migration 0017). Information, not an alert. */
+export interface Strength {
+  id: string;
+  team: string;
+  code: string;
+  title: string;
+  evidence: string;
+  confidence: number;
+  indicator?: string | null;
+  explanation?: IssueExplanation | null;
 }
 
 export interface AnalysisResult {
@@ -142,6 +156,8 @@ export interface AnalysisResult {
   summary: Record<string, number | boolean>;
   indicators: Indicator[];
   recommendations: Recommendation[];
+  /** What each team did well; empty for analyses made before strengths existed. */
+  strengths?: Strength[];
   /** Graph of supports between team-mates (AI: graph + BFS). Null for older analyses. */
   proximity_network?: ProximityNetwork | null;
 }
@@ -353,6 +369,7 @@ export interface ReportSnapshot {
   tactical_indicators?: { name: string; value: number; unit: string; threshold: number | null }[];
   possible_issues?: { issue: string; evidence: string; confidence: number; severity: string; status: string; related_indicators: string[] }[];
   ai_recommendations?: { recommendation: string; issue: string; confidence: number; status: string }[];
+  strengths?: { title: string; team: string; evidence: string; confidence: number; seen: string; meaning: string; keep: string }[];
   team_evolution?: Evolution;
 }
 
