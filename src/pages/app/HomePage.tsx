@@ -183,7 +183,7 @@ function HeroCard({ next, teamName, played, pointsShare, goals, openIssues }:
               <Countdown to={next.match_date} />
             </div>
             <div className="dash-hero-actions">
-              <Link to={`/partidos/${next.id}`} className="btn btn-primary">{t.prepare}</Link>
+              <Link to={`/partidos/${next.id}/plan`} className="btn btn-primary">{t.prepare}</Link>
               <Link to="/diseno-tactico" className="btn btn-glass">{t.openBoard}</Link>
             </div>
           </>
