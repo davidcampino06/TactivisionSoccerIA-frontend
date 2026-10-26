@@ -15,9 +15,11 @@ export const RECOMMENDATION_TONE: Record<string, Tone> = {
   GENERATED: "neutral", REVIEWED: "info", CONFIRMED: "success", DISMISSED: "neutral",
 };
 
+export const STRENGTH_TONE: Record<string, Tone> = { GENERATED: "neutral", CONFIRMED: "success", DISMISSED: "neutral" };
+
 export const EVENT_TONE: Record<string, Tone> = {
   ANALYSIS_COMPLETED: "success", ANALYSIS_FAILED: "danger", TACTICAL_ALERT: "warning", ANALYSIS_STARTED: "live",
-  ANALYSIS_CANCELLED: "neutral", ANALYST_JOINED: "info", PLAYER_RETURN_DUE: "info",
+  ANALYSIS_CANCELLED: "neutral", ANALYST_JOINED: "info", PLAYER_RETURN_DUE: "info", RECOMMENDATION_NOTE: "info",
 };
 
 export const PLAYER_STATUS_TONE: Record<string, Tone> = {
