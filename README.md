@@ -26,7 +26,7 @@ esmerilado (`src/glass.css`). Títulos en Anton (letra de camiseta, condensada) 
 | ![Panel del entrenador](docs/capturas/panel.jpg) | ![Pizarra táctica](docs/capturas/pizarra.png) |
 | **Centro de mando**: próximo partido con cuenta regresiva, último resultado, salud táctica, tendencia de indicadores y posibles problemas por revisar. | **Pizarra táctica**: jugadores, rivales, balón y flechas de pase, desmarque y conducción; deshacer y rehacer con dos pilas, y versiones guardadas. |
 | ![Posibles problemas](docs/capturas/problemas.png) | ![Red de cercanía](docs/capturas/red-cercania.png) |
-| **Resultado del análisis**: cada posible problema llega con evidencia, confianza y recomendación; el usuario lo revisa, confirma o descarta. | **Red de cercanía en 3D**: el grafo de apoyos entre compañeros y el recorrido BFS desde el jugador elegido (a cuántos pases cortos está cada uno). |
+| **Resultado del análisis**: lo que cada equipo hizo bien y cada posible problema, con evidencia, confianza y explicación en lenguaje de fútbol; los problemas se revisan, confirman o descartan. | **Red de cercanía en 3D**: el grafo de apoyos entre compañeros y el recorrido BFS desde el jugador elegido (a cuántos pases cortos está cada uno). |
 | ![Ranking con árbol binario](docs/capturas/ranking.png) | ![Montículo de prioridades](docs/capturas/monticulo.png) |
 | **Ranking de participación**: el orden sale de un árbol binario de búsqueda; se compara el árbol AVL con el árbol sin balancear. | **Montículo**: la cola de revisión del backend (heap) dibujada como árbol y como arreglo. |
 | ![Evolución](docs/capturas/evolucion.png) | ![Panel de administración](docs/capturas/admin.png) |
