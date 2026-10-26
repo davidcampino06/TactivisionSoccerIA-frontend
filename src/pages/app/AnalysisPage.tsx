@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api, json } from "../../api/client";
-import { ANALYSIS_TONE, RECOMMENDATION_TONE, SEVERITY_TONE } from "../../app/tones";
+import { ANALYSIS_TONE, RECOMMENDATION_TONE, SEVERITY_TONE, STRENGTH_TONE } from "../../app/tones";
 import { useTeam } from "../../app/teamState";
 import { useLoad } from "../../hooks/useLoad";
 import { ConfirmButton, EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
@@ -10,6 +10,7 @@ import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, l
 import ProximityNetwork from "../../components/analysis/ProximityNetwork";
 import { TeamLegend, TeamTag } from "../../components/analysis/TeamColors";
 import IssueExplanation from "../../components/analysis/IssueExplanation";
+import ReviewNotes from "../../components/analysis/ReviewNotes";
 import type { TeamColors, TeamKey } from "../../components/analysis/shirtColor";
 import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Strength, Track, VideoAnalysis } from "../../types";
 
@@ -53,6 +54,13 @@ export default function AnalysisPage() {
 
   const cancel = () => {
     api<VideoAnalysis>(`/api/analyses/${analysisId}/cancel`, { method: "POST" }).then(setAnalysis).catch(setError);
+  };
+
+  const updateStrength = (updated: Strength) => {
+    setResult((current) => current && {
+      ...current,
+      strengths: (current.strengths ?? []).map((item) => (item.id === updated.id ? { ...item, ...updated } : item)),
+    });
   };
 
   const updateRecommendation = (updated: Recommendation) => {
@@ -128,7 +136,8 @@ export default function AnalysisPage() {
             ))}
           </div>}
 
-          <StrengthsSection strengths={result.strengths ?? []} colors={colors} ownTeam={ownTeam} />
+          <StrengthsSection analysisId={analysis.id} strengths={result.strengths ?? []} colors={colors} ownTeam={ownTeam}
+            onUpdated={updateStrength} onError={setError} />
 
           <Section title={t.issues}>
             <p className="muted">{t.issuesHint} {t.issuesOrder}</p>
@@ -208,6 +217,7 @@ function IssueCard({ item, rank, colors, ownTeam, onUpdated, onError }:
       <p><span className="issue-label">{t.evidence}:</span> {item.evidence}</p>
       <p><span className="issue-label">{t.recommendation}:</span> {item.description}</p>
       {item.explanation && <IssueExplanation explanation={item.explanation} colors={colors} />}
+      <ReviewNotes recommendationId={item.id} notes={item.notes ?? []} onChange={(notes) => onUpdated({ ...item, notes })} />
       {open && (
         <div className="issue-actions">
           {item.status === "GENERATED" && <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => void act("review")}>{t.review}</button>}
@@ -219,20 +229,40 @@ function IssueCard({ item, rank, colors, ownTeam, onUpdated, onError }:
   );
 }
 
-/** What each team did well: the user's team first, then by confidence (the backend's order). */
-function StrengthsSection({ strengths, colors, ownTeam }: { strengths: Strength[]; colors: TeamColors; ownTeam: TeamKey | null }) {
+/**
+ * What each team did well: the user's team first, then by confidence (the backend's order). A person
+ * confirms or dismisses each one; the match plan only uses the confirmed ones.
+ */
+function StrengthsSection({ analysisId, strengths, colors, ownTeam, onUpdated, onError }: {
+  analysisId: string; strengths: Strength[]; colors: TeamColors; ownTeam: TeamKey | null;
+  onUpdated: (item: Strength) => void; onError: (error: unknown) => void;
+}) {
+  const [busy, setBusy] = useState<string | null>(null);
+  // The rival's strengths never reach the plan: only the user's team (or both, when unknown) is reviewed.
+  const reviewable = (item: Strength) => ownTeam === null || item.team === ownTeam || item.team === "MATCH";
+  const review = async (item: Strength, action: "confirm" | "dismiss") => {
+    setBusy(item.id);
+    try {
+      onUpdated(await api<Strength>(`/api/analyses/${analysisId}/strengths/${item.id}`, { method: "PATCH", body: json({ action }) }));
+    } catch (caught) {
+      onError(caught);
+    } finally {
+      setBusy(null);
+    }
+  };
   const ordered = ownTeam ? [...strengths].sort((a, b) => Number(b.team === ownTeam) - Number(a.team === ownTeam)) : strengths;
   return (
     <Section title={t.strengths} className="strengths-section">
-      <p className="muted">{t.strengthsHint}</p>
+      <p className="muted">{t.strengthsHint} {t.strengthReviewHint}</p>
       {ordered.length === 0 ? <p className="muted small">{t.noStrengths}</p> : (
         <div className="issue-list">
           {ordered.map((item) => (
-            <article key={item.id} className="issue issue-strength">
+            <article key={item.id} className={`issue issue-strength${item.status === "DISMISSED" ? " issue-dismissed" : ""}`}>
               <div className="issue-head">
                 <h3><span className="strength-mark" aria-hidden="true">✓</span>{item.title}</h3>
                 <div className="issue-pills">
                   <Pill>{item.team === "MATCH" ? label("team", item.team) : <TeamTag team={item.team as TeamKey} colors={colors} ownTeam={ownTeam} />}</Pill>
+                  {reviewable(item) && <Pill tone={STRENGTH_TONE[item.status ?? "GENERATED"]}>{t.strengthStatus[item.status ?? "GENERATED"]}</Pill>}
                 </div>
               </div>
               <div className="confidence">
@@ -244,6 +274,12 @@ function StrengthsSection({ strengths, colors, ownTeam }: { strengths: Strength[
               </div>
               {item.explanation?.meaning && <p>{item.explanation.meaning}</p>}
               {item.explanation && <IssueExplanation explanation={item.explanation} colors={colors} positive />}
+              {(item.status ?? "GENERATED") === "GENERATED" && reviewable(item) && (
+                <div className="issue-actions">
+                  <button type="button" className="btn btn-primary btn-sm" disabled={busy === item.id} onClick={() => void review(item, "confirm")}>{t.confirmStrength}</button>
+                  <button type="button" className="btn btn-ghost btn-sm" disabled={busy === item.id} onClick={() => void review(item, "dismiss")}>{t.dismissStrength}</button>
+                </div>
+              )}
             </article>
           ))}
         </div>
