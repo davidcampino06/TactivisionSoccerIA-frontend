@@ -94,6 +94,8 @@ export interface Recommendation {
   /** TEAM_A, TEAM_B or MATCH; null for analyses stored before the team was saved. */
   team?: string | null;
   indicator_names?: string[];
+  /** What the staff wrote about it, oldest first. */
+  notes?: ReviewNote[];
   /** The issue in football words and a real frame that shows it; null in older analyses. */
   explanation?: IssueExplanation | null;
 }
@@ -138,6 +140,18 @@ export interface IssueExplanation {
   example?: IssueExample | null;
 }
 
+/** A signed note of the coaching staff on a possible problem (migration 0018). */
+export interface ReviewNote {
+  id: string;
+  recommendation_id: string;
+  author_id: string | null;
+  author_name: string | null;
+  author_role: string | null;
+  text: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Something a team did well (AI tactical_strengths.py, migration 0017). Information, not an alert. */
 export interface Strength {
   id: string;
@@ -148,6 +162,46 @@ export interface Strength {
   confidence: number;
   indicator?: string | null;
   explanation?: IssueExplanation | null;
+  /** GENERATED, CONFIRMED or DISMISSED: the match plan only uses confirmed ones. */
+  status?: string;
+}
+
+export interface PlanPlayer {
+  id: string;
+  shirt_number: number | null;
+  name: string;
+  position: string | null;
+}
+
+export interface PlanOccurrence {
+  match_id: string;
+  opponent: string;
+  match_date: string;
+  analysis_id: string | null;
+  team: string | null;
+  team_known: boolean;
+  confidence: number;
+}
+
+/** GET /api/matches/{id}/plan: only data the staff entered and items a person confirmed. */
+export interface MatchPlan {
+  match: { id: string; opponent: string; match_date: string; is_home: boolean; location: string | null; status: string };
+  squad: {
+    available_count: number;
+    groups: { position: string | null; label: string; players: PlanPlayer[] }[];
+    unavailable: (PlanPlayer & { status: PlayerStatus; reason: string | null; expected_return: string | null; back_before_match: boolean })[];
+  };
+  plays: { id: string; name: string; action_type: string | null; description: string | null; formation: string | null; notes: string | null; version: number | null }[];
+  based_on: { match_id: string; opponent: string; match_date: string; analysis_id: string }[];
+  to_correct: {
+    title: string;
+    recommendation: string;
+    severity: string;
+    occurrences: PlanOccurrence[];
+    notes: { author: string | null; role: string | null; text: string; created_at: string; opponent: string }[];
+  }[];
+  to_keep: { title: string; meaning: string | null; keep: string | null; occurrences: PlanOccurrence[] }[];
+  left_out: { problems: number; strengths: number };
 }
 
 export interface AnalysisResult {
