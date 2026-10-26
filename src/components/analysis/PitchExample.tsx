@@ -11,10 +11,12 @@ interface Props {
   example: IssueExample;
   colors?: TeamColors;
   label: string;
+  /** It shows something done well: the marks of the rule are drawn in green instead of red. */
+  positive?: boolean;
 }
 
 /** One real frame of the analysis with the players, the ball and a drawing of the rule. */
-export default function PitchExample({ example, colors, label }: Props) {
+export default function PitchExample({ example, colors, label, positive = false }: Props) {
   const aspect = example.aspect_ratio && example.aspect_ratio > 0.3 && example.aspect_ratio < 1.5 ? example.aspect_ratio : 9 / 16;
   const H = W * aspect;
   const px = (x: number) => x * W;
@@ -26,7 +28,7 @@ export default function PitchExample({ example, colors, label }: Props) {
   const stripes = Array.from({ length: 8 }, (_, index) => index);
 
   return (
-    <svg className="pitch-example" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
+    <svg className={`pitch-example${positive ? " is-positive" : ""}`} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
       <rect className="pitch-example-grass" x={0} y={0} width={W} height={H} />
       {stripes.map((index) => index % 2 === 1 && (
         <rect key={index} className="pitch-example-stripe" x={(index * W) / stripes.length} y={0} width={W / stripes.length} height={H} />
