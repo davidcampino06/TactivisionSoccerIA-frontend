@@ -11,7 +11,7 @@ import ProximityNetwork from "../../components/analysis/ProximityNetwork";
 import { TeamLegend, TeamTag } from "../../components/analysis/TeamColors";
 import IssueExplanation from "../../components/analysis/IssueExplanation";
 import type { TeamColors, TeamKey } from "../../components/analysis/shirtColor";
-import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Track, VideoAnalysis } from "../../types";
+import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Strength, Track, VideoAnalysis } from "../../types";
 
 const t = es.pages.analysis;
 const POLL_MS = 2000;
@@ -128,6 +128,8 @@ export default function AnalysisPage() {
             ))}
           </div>}
 
+          <StrengthsSection strengths={result.strengths ?? []} colors={colors} ownTeam={ownTeam} />
+
           <Section title={t.issues}>
             <p className="muted">{t.issuesHint} {t.issuesOrder}</p>
             {result.recommendations.length === 0 ? <EmptyState title={t.noIssues} /> : (
@@ -214,6 +216,39 @@ function IssueCard({ item, rank, colors, ownTeam, onUpdated, onError }:
         </div>
       )}
     </article>
+  );
+}
+
+/** What each team did well: the user's team first, then by confidence (the backend's order). */
+function StrengthsSection({ strengths, colors, ownTeam }: { strengths: Strength[]; colors: TeamColors; ownTeam: TeamKey | null }) {
+  const ordered = ownTeam ? [...strengths].sort((a, b) => Number(b.team === ownTeam) - Number(a.team === ownTeam)) : strengths;
+  return (
+    <Section title={t.strengths} className="strengths-section">
+      <p className="muted">{t.strengthsHint}</p>
+      {ordered.length === 0 ? <p className="muted small">{t.noStrengths}</p> : (
+        <div className="issue-list">
+          {ordered.map((item) => (
+            <article key={item.id} className="issue issue-strength">
+              <div className="issue-head">
+                <h3><span className="strength-mark" aria-hidden="true">✓</span>{item.title}</h3>
+                <div className="issue-pills">
+                  <Pill>{item.team === "MATCH" ? label("team", item.team) : <TeamTag team={item.team as TeamKey} colors={colors} ownTeam={ownTeam} />}</Pill>
+                </div>
+              </div>
+              <div className="confidence">
+                <span>{t.strengthConfidence}</span>
+                <div className="meter is-good" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(item.confidence * 100)}>
+                  <span style={{ width: `${Math.round(item.confidence * 100)}%` }} />
+                </div>
+                <strong>{formatPercent(item.confidence)}</strong>
+              </div>
+              {item.explanation?.meaning && <p>{item.explanation.meaning}</p>}
+              {item.explanation && <IssueExplanation explanation={item.explanation} colors={colors} positive />}
+            </article>
+          ))}
+        </div>
+      )}
+    </Section>
   );
 }
 
