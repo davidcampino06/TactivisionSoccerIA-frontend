@@ -1352,6 +1352,27 @@ html {
 .issue-high { border-left-color: #ff6b57; }
 .issue-medium { border-left-color: var(--warn); }
 .issue-low { border-left-color: #7db4ff; }
+/* What the team did well: green, with a check instead of the priority number. */
+.issue-strength { border-left-color: var(--success); }
+
+.strength-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--success) 20%, transparent);
+  color: var(--success);
+  font-size: 0.8rem;
+  font-weight: 800;
+  vertical-align: 2px;
+}
+
+.meter.is-good > span { background: var(--success); }
+
+.pitch-example.is-positive .pitch-example-gap { fill: rgba(126, 226, 168, 0.4); stroke: #7ee2a8; }
+.pitch-example.is-positive .pitch-example-pressure { fill: rgba(126, 226, 168, 0.18); stroke: #7ee2a8; }
 
 .issue-dismissed {
   opacity: 0.55;
