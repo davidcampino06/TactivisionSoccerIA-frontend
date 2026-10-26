@@ -44,6 +44,7 @@ export default function MatchDetailPage() {
             {data.result
               ? <Pill tone={RESULT_TONE[data.result]}>{label("matchResult", data.result)} {data.home_score}-{data.away_score}</Pill>
               : <Pill>{label("matchStatus", data.status)}</Pill>}
+            <Link to={`/partidos/${data.id}/plan`} className="btn btn-primary btn-sm">{t.plan}</Link>
             <Link to={`/reportes?nuevo=1&tipo=MATCH&partido=${data.id}`} className="btn btn-ghost btn-sm">{es.pages.reports.create}</Link>
             {isCoach && (
               <ConfirmButton label={t.deleteMatch} confirmLabel={t.deleteMatchConfirm} onConfirm={() => {
