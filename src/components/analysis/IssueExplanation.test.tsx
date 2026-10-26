@@ -65,4 +65,20 @@ describe("IssueExplanation captions", () => {
     fireEvent.click(screen.getByRole("button"));
     expect(screen.getByText(/^3 grupos sin conexión entre sí, 2 jugadores solos/)).toBeTruthy();
   });
+
+  it("explains a strength: how to keep it, and the drawing in green", () => {
+    const strength: Explanation = {
+      seen: "Cuando el rival tenía el balón (unos 3 segundos de juego), en el Equipo A hubo al menos un jugador encima del rival que llevaba el balón en el 90 % de esos momentos.",
+      meaning: "El rival casi nunca pudo jugar tranquilo.",
+      keep: "Mantener la reacción del jugador más cercano.",
+      example: { ...explanation.example!, team: "TEAM_A", owner: "TEAM_B", overlay: { kind: "pressure", radius: 0.1, pressing: [1] } },
+    };
+    const { container } = render(<IssueExplanation explanation={strength} positive />);
+    fireEvent.click(screen.getByRole("button"));
+    expect(screen.getByText("Cómo mantenerlo")).toBeTruthy();
+    expect(screen.getByText(strength.keep!)).toBeTruthy();
+    expect(screen.queryByText("Qué podría trabajar el cuerpo técnico")).toBeNull();
+    expect(container.querySelector("svg.pitch-example.is-positive")).not.toBeNull();
+    expect(screen.getByText("Círculo: zona de presión alrededor del balón; 1 defensor encima.")).toBeTruthy();
+  });
 });
