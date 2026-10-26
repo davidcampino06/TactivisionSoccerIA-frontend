@@ -7,6 +7,7 @@ import ComparisonPage from "../pages/app/ComparisonPage";
 import EvolutionPage from "../pages/app/EvolutionPage";
 import HomePage from "../pages/app/HomePage";
 import MatchDetailPage from "../pages/app/MatchDetailPage";
+import MatchPlanPage from "../pages/app/MatchPlanPage";
 import MatchesPage from "../pages/app/MatchesPage";
 import PlayerDetailPage from "../pages/app/PlayerDetailPage";
 import PlayerRankingPage from "../pages/app/PlayerRankingPage";
@@ -61,6 +62,7 @@ export default function AppRoutes({ user, onUserChange, onLogout }: Props) {
             <Route path="equipo" element={user.role === "ADMINISTRATOR" ? <Navigate to="/admin" replace /> : <TeamPage />} />
             <Route path="partidos" element={<TeamOnly><MatchesPage /></TeamOnly>} />
             <Route path="partidos/:matchId" element={<TeamOnly><MatchDetailPage /></TeamOnly>} />
+            <Route path="partidos/:matchId/plan" element={<TeamOnly><MatchPlanPage /></TeamOnly>} />
             <Route path="analisis/:analysisId" element={<TeamOnly><AnalysisPage /></TeamOnly>} />
             <Route path="jugadores" element={<TeamOnly><PlayersPage /></TeamOnly>} />
             <Route path="jugadores/ranking" element={<TeamOnly><PlayerRankingPage /></TeamOnly>} />
