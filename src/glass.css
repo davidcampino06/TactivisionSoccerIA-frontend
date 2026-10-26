@@ -409,3 +409,9 @@ html,
     animation: none;
   }
 }
+
+/* The bell panel opens inside the sidebar, whose own blur stops it from blurring the page behind
+   (a nested backdrop-filter only sees its parent): give it an almost solid surface so it stays legible. */
+.notif-panel {
+  background: color-mix(in srgb, var(--surface-solid) 98%, transparent);
+}
