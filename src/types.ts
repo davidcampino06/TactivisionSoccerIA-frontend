@@ -203,6 +203,24 @@ export interface PlanOccurrence {
   confidence: number;
 }
 
+export type TrackingState = "CONFIRMED" | "DETECTED" | "DISMISSED" | "NOT_DETECTED" | "NOT_MEASURED";
+export type TrackingTrend = "RECURRING" | "IMPROVING" | "GONE" | "NO_DATA";
+
+/** Follow-up of a confirmed problem: what each analysed match after the confirmation shows. */
+export interface Tracking {
+  trend: TrackingTrend;
+  timeline: { match_id: string; opponent: string; match_date: string; analysis_id: string; state: TrackingState }[];
+  /** Matches after the first confirmation where the indicator was measured, and how many raised it again. */
+  measured_after: number;
+  came_back: number;
+}
+
+/** GET /api/teams/{id}/problem-tracking */
+export interface TrackedProblem extends Tracking {
+  title: string;
+  first_confirmed: Tracking["timeline"][number];
+}
+
 /** GET /api/matches/{id}/plan: only data the staff entered and items a person confirmed. */
 export interface MatchPlan {
   match: { id: string; opponent: string; match_date: string; is_home: boolean; location: string | null; status: string };
@@ -219,6 +237,8 @@ export interface MatchPlan {
     severity: string;
     occurrences: PlanOccurrence[];
     notes: { author: string | null; role: string | null; text: string; created_at: string; opponent: string }[];
+    /** Did it come back after it was confirmed (up to this match)? */
+    tracking?: Tracking | null;
   }[];
   to_keep: { title: string; meaning: string | null; keep: string | null; occurrences: PlanOccurrence[] }[];
   left_out: { problems: number; strengths: number };
