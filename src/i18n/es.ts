@@ -313,6 +313,31 @@ export const es = {
       created: "Partido registrado.",
       vs: "vs",
     },
+    tracking: {
+      title: "Seguimiento de problemas confirmados",
+      hint: "Por cada problema que el cuerpo técnico confirmó: qué mostró cada partido analizado desde entonces. «No se pudo juzgar» es cuando el video tuvo muy pocos momentos de esa fase de juego o el análisis es anterior a esta función: no cuenta como que no apareció.",
+      empty: "Todavía no hay problemas confirmados. Confírmalos en la cola de revisión o en cada análisis.",
+      goReview: "Ir a la cola de revisión",
+      label: "Seguimiento",
+      steps: "Partidos analizados desde que se confirmó",
+      state: {
+        CONFIRMED: "confirmado", DETECTED: "detectado, sin revisar", DISMISSED: "detectado y descartado",
+        NOT_DETECTED: "no apareció", NOT_MEASURED: "no se pudo juzgar",
+      } as Record<string, string>,
+      trend: { RECURRING: "Sigue apareciendo", IMPROVING: "Mejorando", GONE: "No ha vuelto", NO_DATA: "Sin datos todavía" } as Record<string, string>,
+      sentence: (trend: string, after: number, back: number, later: number) => {
+        const played = after === 1 ? "partido analizado" : "partidos analizados";
+        if (trend === "NO_DATA" && later > 0) {
+          return later === 1
+            ? "Hay 1 partido analizado después de confirmarlo, pero en él no se pudo juzgar."
+            : `Hay ${later} partidos analizados después de confirmarlo, pero en ninguno se pudo juzgar.`;
+        }
+        if (trend === "NO_DATA") return "Todavía no hay partidos analizados después de confirmarlo.";
+        if (trend === "RECURRING") return `Volvió a aparecer en el último partido analizado (${back} de ${after} ${played} después de confirmarlo).`;
+        if (trend === "IMPROVING") return `No apareció en el último partido analizado (sí en ${back} de ${after} ${played} después de confirmarlo).`;
+        return `No ha vuelto a aparecer en ${after} ${played} después de confirmarlo.`;
+      },
+    },
     review: {
       eyebrow: "Cola de revisión",
       title: "Por revisar",
