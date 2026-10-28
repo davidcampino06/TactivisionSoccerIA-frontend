@@ -166,6 +166,26 @@ export interface Strength {
   status?: string;
 }
 
+/** Where an item of the review inbox comes from. */
+export interface InboxContext {
+  match_id: string;
+  opponent: string;
+  match_date: string;
+  analysis_id: string | null;
+  team_a_color: string | null;
+  team_b_color: string | null;
+  own_team: string | null;
+}
+
+/** GET /api/teams/{id}/review-inbox: what of our team still waits for a person, across all matches. */
+export interface ReviewInbox {
+  problems: (Recommendation & { context: InboxContext })[];
+  strengths: (Strength & { context: InboxContext })[];
+  matches: { match_id: string; opponent: string; match_date: string; problems: number; strengths: number }[];
+  /** Open problems of the rival: never in the plan, read in each analysis. */
+  rival_problems: number;
+}
+
 export interface PlanPlayer {
   id: string;
   shirt_number: number | null;
