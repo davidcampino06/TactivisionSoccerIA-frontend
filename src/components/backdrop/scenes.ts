@@ -42,6 +42,7 @@ const SECTIONS: [string, keyof typeof NIGHT][] = [
   ["/panel", "home"],
   ["/partidos", "matches"],
   ["/analisis", "analysis"],
+  ["/revision", "analysis"],
   ["/diseno-tactico", "tactics"],
   ["/jugadores", "players"],
   ["/equipo", "team"],
