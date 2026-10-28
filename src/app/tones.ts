@@ -25,3 +25,6 @@ export const EVENT_TONE: Record<string, Tone> = {
 export const PLAYER_STATUS_TONE: Record<string, Tone> = {
   ACTIVE: "success", INJURED: "danger", SUSPENDED: "warning", UNAVAILABLE: "info", INACTIVE: "neutral",
 };
+
+/** Follow-up of a confirmed problem: still appearing (bad) ... not coming back (good). */
+export const TREND_TONE: Record<string, Tone> = { RECURRING: "danger", IMPROVING: "warning", GONE: "success", NO_DATA: "neutral" };
