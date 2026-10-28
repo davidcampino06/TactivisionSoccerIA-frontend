@@ -535,8 +535,9 @@
   font-family: var(--font-display);
   font-stretch: 62%;
   font-weight: 900;
-  font-size: clamp(3.4rem, 7.6vw, 8rem);
-  line-height: 0.86;
+  font-size: clamp(2.8rem, 5.6vw, 5.8rem);
+  /* Above 1 so the accents of a lower line (Í, Ó) never touch the line above. */
+  line-height: 1.1;
   letter-spacing: 0;
   text-transform: uppercase;
   text-wrap: balance;
@@ -719,7 +720,7 @@
 
 .philosophy-eyebrow {
   grid-area: eyebrow;
-  margin: 0;
+  margin: 0 0 6px;
   font: 500 0.78rem var(--font-mono);
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -732,8 +733,8 @@
   font-family: var(--font-display);
   font-stretch: 62%;
   font-weight: 900;
-  font-size: clamp(3.6rem, 9vw, 9.5rem);
-  line-height: 0.84;
+  font-size: clamp(2.8rem, 5.6vw, 5.6rem);
+  line-height: 1.12;
   text-transform: uppercase;
   text-wrap: balance;
 }
@@ -906,8 +907,8 @@
   font-family: var(--font-display);
   font-stretch: 62%;
   font-weight: 900;
-  font-size: 2.8rem;
-  line-height: 0.9;
+  font-size: 2.6rem;
+  line-height: 1.02;
   text-transform: uppercase;
 }
 
