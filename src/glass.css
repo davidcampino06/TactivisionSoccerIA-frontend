@@ -259,7 +259,8 @@ html,
   font-weight: 400;
   font-stretch: normal;
   letter-spacing: 0.005em;
-  line-height: 0.95;
+  /* Above 1: the accents of Í, Á, Ú need room, or they climb onto the line or the eyebrow above. */
+  line-height: 1.06;
 }
 
 /* Titles sit directly on the stadium: a soft shadow keeps them readable over the bright grass. */
