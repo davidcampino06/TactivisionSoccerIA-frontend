@@ -4,6 +4,7 @@ import { api, download } from "../../api/client";
 import { PLAYER_STATUS_TONE, SEVERITY_TONE } from "../../app/tones";
 import { EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
 import { returnText, todayIso } from "../../components/players/availability";
+import TrackingSteps from "../../components/insights/TrackingSteps";
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { formatDate, formatDateTime, label } from "../../i18n/labels";
@@ -108,6 +109,7 @@ export default function MatchPlanPage() {
                 </header>
                 <p className="small"><strong>{t.seenIn(item.occurrences.length, matchCount)}:</strong> <Occurrences items={item.occurrences} /></p>
                 <p><strong>{t.recommendation}:</strong> {item.recommendation}</p>
+                {item.tracking && <TrackingSteps tracking={item.tracking} compact />}
                 {item.notes.length > 0 && (
                   <ul className="plan-notes">
                     {item.notes.map((note, index) => (
