@@ -5,6 +5,7 @@ import { RESULT_TONE } from "../../app/tones";
 import { useTeam } from "../../app/teamState";
 import TrendChart from "../../components/charts/TrendChart";
 import TeamFilter from "../../components/insights/TeamFilter";
+import TrackingSteps from "../../components/insights/TrackingSteps";
 import {
   TEAM_GROUPS, countByGroup, deltaFormatter, formatShortDate, groupOf, indicatorName, valueFormatter, type TeamGroup,
 } from "../../components/insights/indicators";
@@ -12,7 +13,7 @@ import { EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section, type Tone 
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { label } from "../../i18n/labels";
-import type { Assessment, Evolution, EvolutionTrend } from "../../types";
+import type { Assessment, Evolution, EvolutionTrend, TrackedProblem } from "../../types";
 
 const t = es.pages.evolution;
 const ti = es.pages.insights;
@@ -59,7 +60,32 @@ export default function EvolutionPage() {
           <EvolutionResult data={evolution.data} refreshing={evolution.loading} group={chosenGroup} setGroup={setGroup}
             asTable={asTable} setAsTable={setAsTable} />
         )}
+      <ProblemTrackingSection teamId={team!.id} />
     </div>
+  );
+}
+
+/** Each confirmed problem and whether it came back in the matches analysed after (real analyses only). */
+function ProblemTrackingSection({ teamId }: { teamId: string }) {
+  const tracked = useLoad(() => api<TrackedProblem[]>(`/api/teams/${teamId}/problem-tracking`), teamId);
+  const tt = es.pages.tracking;
+  return (
+    <Section title={tt.title} className="tracking-section">
+      <p className="muted">{tt.hint}</p>
+      {tracked.loading ? <Loading /> : tracked.error ? <ErrorBanner error={tracked.error} onRetry={tracked.reload} />
+        : !tracked.data?.length ? (
+          <EmptyState title={tt.empty} action={<Link to="/revision" className="btn btn-ghost btn-sm">{tt.goReview}</Link>} />
+        ) : (
+          <div className="issue-list">
+            {tracked.data.map((item) => (
+              <article key={item.title} className="issue tracking-item">
+                <h3>{item.title}</h3>
+                <TrackingSteps tracking={item} />
+              </article>
+            ))}
+          </div>
+        )}
+    </Section>
   );
 }
 
