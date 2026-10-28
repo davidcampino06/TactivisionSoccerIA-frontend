@@ -301,7 +301,8 @@ function ProfileCard({ result }: { result: AnalysisResult | null }) {
 function PendingCard({ data, queue, analysisOf }:
   { data: PendingReviews | null; queue: ReviewQueue | null; analysisOf: Map<string, string> }) {
   return (
-    <Card className="dash-pending" title={t.pending}>
+    <Card className="dash-pending" title={t.pending}
+      action={data && data.total > 0 ? <Link to="/revision" className="btn btn-ghost btn-sm">{t.reviewAll}</Link> : undefined}>
       {!data || data.total === 0 ? (
         <div className="pending-clear">
           <span className="pending-check" aria-hidden="true">✓</span>
