@@ -76,6 +76,12 @@ export const es = {
     pause: "Pausar presentación",
     play: "Reanudar presentación",
     goToSlide: "Ir a la diapositiva",
+    analyzing: "Analizando",
+    frame: "Cuadro",
+    modules: "Módulos de análisis",
+    confidence: "Confianza media",
+    trend: "Compactación del bloque",
+    backToLanding: "Volver al inicio",
     hero: {
       label: "Presentación de TactiVision IA",
       eyebrow: "IA táctica para cuerpos técnicos",
