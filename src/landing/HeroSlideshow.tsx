@@ -15,12 +15,10 @@ type Props = {
   paused: boolean;
   onStart: () => void;
   onLogin: () => void;
-  /** Goes back to the landing, at the philosophy section. */
-  onPhilosophy?: () => void;
 };
 
 /** Full-screen hero: photo slides revealed in vertical strips, with AI detection overlays. */
-export default function HeroSlideshow({ paused, onStart, onLogin, onPhilosophy }: Props) {
+export default function HeroSlideshow({ paused, onStart, onLogin }: Props) {
   const rootRef = useRef<HTMLElement>(null);
   const [index, setIndex] = useState(0);
   const [incoming, setIncoming] = useState<number | null>(null);
@@ -152,11 +150,6 @@ export default function HeroSlideshow({ paused, onStart, onLogin, onPhilosophy }
             <ArrowIcon />
           </button>
           <button type="button" className="cta-ghost" onClick={onLogin}>{es.landing.login}</button>
-          <a className="cta-link" href="#filosofia" onClick={(event) => {
-            if (!onPhilosophy) return;
-            event.preventDefault();
-            onPhilosophy();
-          }}>{es.landing.readPhilosophy}</a>
         </div>
       </div>
 
