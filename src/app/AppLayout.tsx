@@ -34,6 +34,8 @@ const ICONS = {
   profile: icon("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"),
   // A tray with a check: what is waiting for a person.
   review: icon("M4 13h4l1.5 3h5l1.5-3h4M4 13l2.5-8h11L20 13v6H4zM9.5 9l2 2 3.5-3.5"),
+  // A film strip: the team's analysed clips.
+  library: icon("M4 5h16v14H4zM8 5v14M16 5v14M4 9h4M4 15h4M16 9h4M16 15h4"),
   structures: icon("M10 3.5h4v4h-4zM3.5 16.5h4v4h-4zM10 16.5h4v4h-4zM16.5 16.5h4v4h-4zM12 7.5v9M5.5 16.5V12h13v4.5"),
 };
 
@@ -94,6 +96,7 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
         { to: "/panel", text: es.app.nav.home, icon: ICONS.home, needsTeam: true },
         { to: "/partidos", text: es.app.nav.matches, icon: ICONS.matches, needsTeam: true },
         { to: "/revision", text: es.app.nav.review, icon: ICONS.review, needsTeam: true },
+        { to: "/biblioteca", text: es.app.nav.library, icon: ICONS.library, needsTeam: true },
         { to: "/diseno-tactico", text: es.app.nav.tactics, icon: ICONS.tactics, needsTeam: true },
       ] },
       { title: es.app.nav.sectionTeam, items: [
