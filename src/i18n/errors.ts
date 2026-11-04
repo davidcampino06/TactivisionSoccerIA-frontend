@@ -31,6 +31,7 @@ const SIMPLE_CODES: Record<string, string> = {
   SIMULATION_DISABLED: es.errors.simulationDisabled,
   VIDEO_FILE_MISSING: es.errors.videoFileMissing,
   AI_UNAVAILABLE: es.errors.aiUnavailable,
+  INVALID_SITUATION: es.errors.invalidSituation,
   NOTE_NOT_YOURS: es.errors.noteNotYours,
   INVALID_STRENGTH_STATE: es.errors.invalidStrengthState,
   ANALYSIS_IN_PROGRESS: es.errors.analysisInProgress,
