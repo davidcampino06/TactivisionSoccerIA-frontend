@@ -11,6 +11,7 @@ export const es = {
     heroFeatures: ["Detección de jugadores", "Seguimiento cuadro a cuadro", "Recomendaciones con evidencia"],
     loginTab: "Iniciar sesión",
     registerTab: "Crear cuenta",
+    privacy: "Los videos y análisis de tu equipo solo los ve tu cuerpo técnico.",
     loginTitle: "Bienvenido de nuevo",
     loginSubtitle: "Entra para ver los análisis de tu equipo.",
     registerTitle: "Crea tu cuenta",
