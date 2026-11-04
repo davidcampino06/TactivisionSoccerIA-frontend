@@ -43,6 +43,16 @@ describe("AuthPage", () => {
     expect(slideshow()).toBeNull();
   });
 
+  it("the login screen's top bar only offers the way back, its buttons are in the middle", () => {
+    render(<AuthPage onAuthenticated={() => {}} />);
+    fireEvent.click(screen.getAllByRole("button", { name: /crear cuenta/i })[0]);
+    fireEvent.click(screen.getByRole("button", { name: /cerrar/i }));
+    const topbar = document.querySelector(".topbar-landing") as HTMLElement;
+    expect([...topbar.querySelectorAll("button")].map((b) => b.textContent)).toEqual(["Volver al inicio"]);
+    fireEvent.click(screen.getByRole("button", { name: "Volver al inicio" }));
+    expect(videoHero()).toBeTruthy();
+  });
+
   it("an expired session opens the login over the slideshow directly", () => {
     render(<AuthPage onAuthenticated={() => {}} sessionNotice="Tu sesión expiró" />);
     expect(slideshow()).toBeTruthy();
