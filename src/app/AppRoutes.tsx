@@ -16,6 +16,7 @@ import ProfilePage from "../pages/app/ProfilePage";
 import ReportDetailPage from "../pages/app/ReportDetailPage";
 import ReportsPage from "../pages/app/ReportsPage";
 import ReviewInboxPage from "../pages/app/ReviewInboxPage";
+import ClipLibraryPage from "../pages/app/ClipLibraryPage";
 import StructuresPage from "../pages/app/StructuresPage";
 import { NotFoundPage } from "../pages/app/PlaceholderPages";
 import TacticalEditorPage from "../pages/app/TacticalEditorPage";
@@ -66,6 +67,7 @@ export default function AppRoutes({ user, onUserChange, onLogout }: Props) {
             <Route path="partidos/:matchId/plan" element={<TeamOnly><MatchPlanPage /></TeamOnly>} />
             <Route path="analisis/:analysisId" element={<TeamOnly><AnalysisPage /></TeamOnly>} />
             <Route path="revision" element={<TeamOnly><ReviewInboxPage /></TeamOnly>} />
+            <Route path="biblioteca" element={<TeamOnly><ClipLibraryPage /></TeamOnly>} />
             <Route path="jugadores" element={<TeamOnly><PlayersPage /></TeamOnly>} />
             <Route path="jugadores/ranking" element={<TeamOnly><PlayerRankingPage /></TeamOnly>} />
             <Route path="jugadores/:playerId" element={<TeamOnly><PlayerDetailPage /></TeamOnly>} />
