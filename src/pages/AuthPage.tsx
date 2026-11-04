@@ -48,23 +48,18 @@ export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props)
     resetToken ? { open: true, mode: "reset" } : { open: Boolean(sessionNotice), mode: "login" }
   ));
   const [screen, setScreen] = useState<"landing" | "auth">(() => (drawer.open ? "auth" : "landing"));
-  const [scrollTo, setScrollTo] = useState<string | null>(null);
   const openDrawer = (mode: AuthMode) => {
     setScreen("auth");
     setDrawer({ open: true, mode });
   };
   const closeDrawer = useCallback(() => setDrawer((current) => ({ ...current, open: false })), []);
-  const backToLanding = (section: string | null = null) => {
+  const backToLanding = () => {
     setDrawer((current) => ({ ...current, open: false }));
     setScreen("landing");
-    setScrollTo(section);
   };
 
-  // Each screen starts at its top; going back to the philosophy scrolls to it once the landing is shown.
-  useEffect(() => {
-    if (scrollTo) document.getElementById(scrollTo)?.scrollIntoView();
-    else window.scrollTo(0, 0);
-  }, [screen, scrollTo]);
+  // Each screen starts at its top.
+  useEffect(() => { window.scrollTo(0, 0); }, [screen]);
 
   return (
     <div className={`landing is-${screen}`}>
@@ -102,8 +97,7 @@ export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props)
         </div>
       ) : (
         <div className="screen-fade" key="auth">
-          <HeroSlideshow paused={drawer.open} onStart={() => openDrawer("register")} onLogin={() => openDrawer("login")}
-            onPhilosophy={() => backToLanding("filosofia")} />
+          <HeroSlideshow paused={drawer.open} onStart={() => openDrawer("register")} onLogin={() => openDrawer("login")} />
         </div>
       )}
 
