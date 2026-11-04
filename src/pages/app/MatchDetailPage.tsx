@@ -141,18 +141,19 @@ function MatchNavigation({ matchId }: { matchId: string }) {
 }
 
 function UploadVideo({ matchId, onUploaded }: { matchId: string; onUploaded: () => void }) {
-  return <VideoFilePicker url={`/api/matches/${matchId}/videos`} method="POST" action={t.upload} onDone={onUploaded} />;
+  return <VideoFilePicker url={`/api/matches/${matchId}/videos`} method="POST" action={t.upload} onDone={onUploaded} withSituation />;
 }
 
 /** Chooses a video file, checks its size and sends it (new video, or the file of an existing one). */
-function VideoFilePicker({ url, method, action, onDone }:
-  { url: string; method: "POST" | "PUT"; action: string; onDone: () => void }) {
+function VideoFilePicker({ url, method, action, onDone, withSituation = false }:
+  { url: string; method: "POST" | "PUT"; action: string; onDone: () => void; withSituation?: boolean }) {
   const input = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [localError, setLocalError] = useState("");
   const [duration, setDuration] = useState<number | null>(null);
+  const [situation, setSituation] = useState({ situation: "", note: "" });
 
   const choose = (selected: File | null) => {
     setLocalError("");
@@ -173,8 +174,11 @@ function VideoFilePicker({ url, method, action, onDone }:
     try {
       const data = new FormData();
       data.append("video", file);
+      if (withSituation && situation.situation) data.append("situation", situation.situation);
+      if (withSituation && situation.note.trim()) data.append("situation_note", situation.note.trim());
       await api(url, { method, body: data });
       setFile(null);
+      setSituation({ situation: "", note: "" });
       if (input.current) input.current.value = "";
       onDone();
     } catch (caught) {
@@ -197,6 +201,9 @@ function VideoFilePicker({ url, method, action, onDone }:
           {busy ? t.uploading : action}
         </button>
       </div>
+      {withSituation && file && (
+        <SituationFields value={situation} onChange={setSituation} />
+      )}
       {localError && <p className="field-error">{localError}</p>}
       {file && duration !== null && duration > coveredSeconds("fast") + 0.5 && (
         <p className="upload-note" role="status">
@@ -205,6 +212,61 @@ function VideoFilePicker({ url, method, action, onDone }:
       )}
       <ErrorBanner error={error} />
     </div>
+  );
+}
+
+const SITUATIONS = ["BUILD_UP", "POSITIONAL_ATTACK", "COUNTER_ATTACK", "DEFENSIVE_TRANSITION", "PRESSING",
+  "DEFENSIVE_BLOCK", "SET_PIECE"] as const;
+
+/** Which tactical situation the clip shows, chosen by a person, and an optional short note. */
+function SituationFields({ value, onChange }:
+  { value: { situation: string; note: string }; onChange: (value: { situation: string; note: string }) => void }) {
+  return (
+    <div className="situation-fields">
+      <label className="field">
+        <span>{t.situation}</span>
+        <select value={value.situation} onChange={(e) => onChange({ ...value, situation: e.target.value })}>
+          <option value="">{t.situationNone}</option>
+          {SITUATIONS.map((code) => <option key={code} value={code}>{label("situation", code)}</option>)}
+        </select>
+      </label>
+      <label className="field">
+        <span>{t.situationNote}</span>
+        <input type="text" maxLength={200} value={value.note} placeholder={t.situationNotePlaceholder}
+          onChange={(e) => onChange({ ...value, note: e.target.value })} />
+      </label>
+      <small className="muted situation-hint">{t.situationHint}</small>
+    </div>
+  );
+}
+
+/** Classifies an uploaded clip (PATCH /videos/{id}): situation and note. */
+function SituationEditor({ video, onSaved, onCancel }: { video: Video; onSaved: (video: Video) => void; onCancel: () => void }) {
+  const [value, setValue] = useState({ situation: video.situation ?? "", note: video.situation_note ?? "" });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  const save = async (event: FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      onSaved(await api<Video>(`/api/videos/${video.id}`, {
+        method: "PATCH", body: json({ situation: value.situation || null, situation_note: value.note.trim() || null }),
+      }));
+    } catch (caught) {
+      setError(caught);
+      setBusy(false);
+    }
+  };
+  return (
+    <form className="situation-editor" onSubmit={save}>
+      <SituationFields value={value} onChange={setValue} />
+      <div className="issue-actions">
+        <button className="btn btn-primary btn-sm" disabled={busy}>{t.saveSituation}</button>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onCancel}>{t.cancelSituation}</button>
+      </div>
+      <ErrorBanner error={error} />
+    </form>
   );
 }
 
@@ -247,6 +309,8 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const [check, setCheck] = useState<ClipCheck | null>(null);
+  const [classifying, setClassifying] = useState(false);
+  const [tag, setTag] = useState({ situation: video.situation ?? null, note: video.situation_note ?? null });
   const [checking, setChecking] = useState(false);
   const analyses = useLoad(() => api<VideoAnalysis[]>(`/api/videos/${video.id}/analyses`), video.id + video.status);
   // Without the file only a simulated analysis is possible (it does not read the video).
@@ -293,6 +357,10 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
         </span>
         <Pill tone={VIDEO_TONE[video.status]}>{label("videoStatus", video.status)}</Pill>
         {fileMissing && <Pill tone="warning">{t.fileMissing}</Pill>}
+        <Pill tone={tag.situation ? "info" : "neutral"}>{label("situation", tag.situation ?? "NONE")}</Pill>
+        <button type="button" className="btn btn-ghost btn-sm" aria-expanded={classifying} onClick={() => setClassifying((v) => !v)}>
+          {t.editSituation}
+        </button>
         <button type="button" className="btn btn-primary btn-sm" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
           {t.analyze}
         </button>
@@ -303,6 +371,12 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
         )}
       </div>
 
+      {tag.note && !classifying && <p className="muted small video-note">{tag.note}</p>}
+      {classifying && (
+        <SituationEditor video={{ ...video, situation: tag.situation, situation_note: tag.note }}
+          onCancel={() => setClassifying(false)}
+          onSaved={(saved) => { setTag({ situation: saved.situation ?? null, note: saved.situation_note ?? null }); setClassifying(false); }} />
+      )}
       {fileMissing && (
         <div className="video-missing" role="status">
           <strong>{t.fileMissingTitle}</strong>
