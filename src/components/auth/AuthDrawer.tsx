@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { es } from "../../i18n/es";
+import Logo from "../Logo";
 import type { User } from "../../types";
 import { ForgotPasswordForm, LoginForm, RegisterForm, ResetPasswordForm } from "./AuthForms";
 
@@ -53,6 +54,12 @@ export default function AuthDrawer({ open, mode, onModeChange, onClose, onAuthen
       <div className="drawer-backdrop" onClick={onClose} />
       <div ref={panelRef} className="drawer-panel" role="dialog" aria-modal="true" aria-label={TITLES[mode]}>
         <div className="drawer-head">
+          <span className="drawer-brand"><Logo size={26} /><span>{es.brand.name}</span></span>
+          <button type="button" className="drawer-close" onClick={onClose} aria-label={es.landing.close}>
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+        <div className="drawer-body">
           <div className="auth-tabs" role="tablist">
             {(["login", "register"] as const).map((tab) => (
               <button key={tab} type="button" role="tab" aria-selected={mode === tab}
@@ -61,37 +68,38 @@ export default function AuthDrawer({ open, mode, onModeChange, onClose, onAuthen
               </button>
             ))}
           </div>
-          <button type="button" className="drawer-close" onClick={onClose} aria-label={es.landing.close}>
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
-          </button>
+          {open && mode === "login" && (
+            <LoginForm key="login" notice={notice.text} noticeTone={notice.tone} onAuthenticated={onAuthenticated}
+              onForgotPassword={() => switchMode("forgot")} />
+          )}
+          {open && mode === "register" && (
+            <RegisterForm
+              key="register"
+              onRegistered={() => {
+                setNotice({ text: es.auth.registered, tone: "success" });
+                onModeChange("login");
+              }}
+            />
+          )}
+          {open && mode === "forgot" && (
+            <ForgotPasswordForm key="forgot" onBack={() => switchMode("login")} onDevelopmentToken={onResetToken} />
+          )}
+          {open && mode === "reset" && (
+            <ResetPasswordForm
+              key={resetToken}
+              token={resetToken}
+              onRequestNewLink={() => switchMode("forgot")}
+              onDone={() => {
+                setNotice({ text: es.auth.passwordUpdated, tone: "success" });
+                onModeChange("login");
+              }}
+            />
+          )}
         </div>
-        {open && mode === "login" && (
-          <LoginForm key="login" notice={notice.text} noticeTone={notice.tone} onAuthenticated={onAuthenticated}
-            onForgotPassword={() => switchMode("forgot")} />
-        )}
-        {open && mode === "register" && (
-          <RegisterForm
-            key="register"
-            onRegistered={() => {
-              setNotice({ text: es.auth.registered, tone: "success" });
-              onModeChange("login");
-            }}
-          />
-        )}
-        {open && mode === "forgot" && (
-          <ForgotPasswordForm key="forgot" onBack={() => switchMode("login")} onDevelopmentToken={onResetToken} />
-        )}
-        {open && mode === "reset" && (
-          <ResetPasswordForm
-            key={resetToken}
-            token={resetToken}
-            onRequestNewLink={() => switchMode("forgot")}
-            onDone={() => {
-              setNotice({ text: es.auth.passwordUpdated, tone: "success" });
-              onModeChange("login");
-            }}
-          />
-        )}
+        <p className="drawer-foot">
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /></svg>
+          {es.auth.privacy}
+        </p>
       </div>
     </div>
   );
