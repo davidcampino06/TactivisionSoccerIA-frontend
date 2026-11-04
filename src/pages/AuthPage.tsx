@@ -3,8 +3,10 @@ import { useCallback, useState } from "react";
 import AuthDrawer, { type AuthMode } from "../components/auth/AuthDrawer";
 import Logo from "../components/Logo";
 import { es } from "../i18n/es";
-import HeroSlideshow from "../landing/HeroSlideshow";
+import "../landing/landing.css";
+import HowItWorks from "../landing/HowItWorks";
 import PhilosophyFooter from "../landing/PhilosophyFooter";
+import VideoHero from "../landing/VideoHero";
 import type { User } from "../types";
 
 type Props = { onAuthenticated: (user: User) => void; sessionNotice?: string };
@@ -30,7 +32,7 @@ function takeResetToken(): string {
   return token;
 }
 
-/** Public landing: hero slideshow, philosophy footer and the login / register drawer. */
+/** Public landing: video hero with real detections, how it works, philosophy and the login / register drawer. */
 export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props) {
   const [resetToken, setResetToken] = useState(takeResetToken);
   // A recovery link opens the "new password" form; an expired session opens the login with the explanation.
@@ -48,7 +50,7 @@ export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props)
           <span>{es.brand.name}</span>
         </a>
         <nav className="topnav" aria-label={es.brand.name}>
-          <a href="#inicio">{es.landing.nav.platform}</a>
+          <a href="#como-funciona">{es.landing.nav.how}</a>
           <a href="#filosofia">{es.landing.nav.philosophy}</a>
         </nav>
         <div className="topbar-actions">
@@ -57,7 +59,8 @@ export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props)
         </div>
       </header>
 
-      <HeroSlideshow paused={drawer.open} onStart={() => openDrawer("register")} onLogin={() => openDrawer("login")} />
+      <VideoHero paused={drawer.open} onStart={() => openDrawer("register")} />
+      <HowItWorks />
       <PhilosophyFooter />
 
       <AuthDrawer
