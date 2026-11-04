@@ -146,7 +146,7 @@ export default function HeroSlideshow({ paused, onStart, onLogin }: Props) {
         <p className="hero-body">{target.body}</p>
         <div className="hero-actions">
           <button type="button" className="cta-primary" onClick={onStart}>
-            {es.landing.start}
+            {es.landing.register}
             <ArrowIcon />
           </button>
           <button type="button" className="cta-ghost" onClick={onLogin}>{es.landing.login}</button>
