@@ -38,7 +38,7 @@ function takeResetToken(): string {
  * Public pages, in two screens:
  *   landing  the video hero with real detections, how it works and the philosophy;
  *   auth     the moving photo slideshow behind the login / register drawer. "Empezar ahora",
- *            "Iniciar sesión" and "Crear cuenta" open it; the logo goes back to the landing.
+ *            "Iniciar sesión" and "Crear cuenta" open it; the logo and "Volver al inicio" go back.
  * A recovery link or an expired session opens the auth screen directly.
  */
 export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props) {
@@ -74,24 +74,29 @@ export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props)
           <span>{es.brand.name}</span>
         </a>
         {screen === "landing" ? (
-          <nav className="topnav" aria-label={es.brand.name}>
-            <a href="#como-funciona">{es.landing.nav.how}</a>
-            <a href="#filosofia">{es.landing.nav.philosophy}</a>
-          </nav>
+          <>
+            <nav className="topnav" aria-label={es.brand.name}>
+              <a href="#como-funciona">{es.landing.nav.how}</a>
+              <a href="#filosofia">{es.landing.nav.philosophy}</a>
+            </nav>
+            <div className="topbar-actions">
+              <button type="button" className="cta-ghost small" onClick={() => openDrawer("login")}>{es.landing.login}</button>
+              <button type="button" className="cta-primary small" onClick={() => openDrawer("register")}>{es.landing.register}</button>
+            </div>
+          </>
         ) : (
-          <nav className="topnav" aria-label={es.brand.name}>
-            <a href="#inicio" onClick={(event) => { event.preventDefault(); backToLanding(); }}>← {es.landing.backToLanding}</a>
-          </nav>
+          <div className="topbar-actions">
+            <button type="button" className="cta-ghost small topbar-back" onClick={backToLanding}>
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span className="topbar-back-text">{es.landing.backToLanding}</span>
+            </button>
+          </div>
         )}
-        <div className="topbar-actions">
-          <button type="button" className="cta-ghost small" onClick={() => openDrawer("login")}>{es.landing.login}</button>
-          <button type="button" className="cta-primary small" onClick={() => openDrawer("register")}>{es.landing.register}</button>
-        </div>
       </header>
 
       {screen === "landing" ? (
         <div className="screen-fade" key="landing">
-          <VideoHero paused={drawer.open} onStart={() => openDrawer("register")} />
+          <VideoHero paused={drawer.open} onStart={() => openDrawer("register")} onLogin={() => openDrawer("login")} />
           <HowItWorks />
           <PhilosophyFooter />
         </div>
