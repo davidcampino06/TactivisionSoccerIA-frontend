@@ -71,7 +71,6 @@ export const es = {
     register: "Crear cuenta",
     start: "Empezar ahora",
     seeHow: "Ver cómo funciona",
-    readPhilosophy: "Nuestra filosofía",
     close: "Cerrar",
     pause: "Pausar presentación",
     play: "Reanudar presentación",
