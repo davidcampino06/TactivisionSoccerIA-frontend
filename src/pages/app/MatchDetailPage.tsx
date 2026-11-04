@@ -7,7 +7,8 @@ import { ConfirmButton, EmptyState, ErrorBanner, Loading, PageHeader, Pill, Sect
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { formatDateTime, formatFileSize, formatTimestamp, label } from "../../i18n/labels";
-import type { Match, MatchNeighbors, Video, VideoAnalysis } from "../../types";
+import type { ClipCheck, Match, MatchNeighbors, Video, VideoAnalysis } from "../../types";
+import ClipCheckPanel from "../../components/analysis/ClipCheckPanel";
 import { shirtColorName } from "../../components/analysis/shirtColor";
 
 const teamIdentity = es.pages.team.identity;
@@ -151,15 +152,18 @@ function VideoFilePicker({ url, method, action, onDone }:
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [localError, setLocalError] = useState("");
+  const [duration, setDuration] = useState<number | null>(null);
 
   const choose = (selected: File | null) => {
     setLocalError("");
+    setDuration(null);
     if (selected && selected.size > MAX_VIDEO_MB * 1_048_576) {
       setLocalError(t.fileTooBig(MAX_VIDEO_MB));
       setFile(null);
       return;
     }
     setFile(selected);
+    if (selected) void readDuration(selected).then(setDuration);
   };
 
   const upload = async () => {
@@ -194,16 +198,40 @@ function VideoFilePicker({ url, method, action, onDone }:
         </button>
       </div>
       {localError && <p className="field-error">{localError}</p>}
+      {file && duration !== null && duration > coveredSeconds("fast") + 0.5 && (
+        <p className="upload-note" role="status">
+          {t.durationNote(seconds(duration), seconds(coveredSeconds("fast")), seconds(coveredSeconds("full")))}
+        </p>
+      )}
       <ErrorBanner error={error} />
     </div>
   );
 }
+
+/** Duration the browser reads from the file before uploading it (null if it cannot read it). */
+function readDuration(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    if (typeof URL.createObjectURL !== "function") return resolve(null);
+    const url = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    const done = (value: number | null) => { URL.revokeObjectURL(url); resolve(value); };
+    video.preload = "metadata";
+    video.onloadedmetadata = () => done(Number.isFinite(video.duration) ? video.duration : null);
+    video.onerror = () => done(null);
+    video.src = url;
+  });
+}
+
+const seconds = (value: number) => (value >= 10 ? value.toFixed(0) : value.toFixed(1).replace(".", ","));
 
 /** Frames sent to the AI: on Render Free each frame costs close to a second, so "fast" is the default. */
 const DETAIL = {
   fast: { frame_stride: 5, max_frames: 120 },
   full: { frame_stride: 3, max_frames: 300 },
 } as const;
+
+/** Seconds of video each detail reaches at 30 fps: the AI takes frames from the start until the cap. */
+const coveredSeconds = (detail: keyof typeof DETAIL) => (DETAIL[detail].frame_stride * DETAIL[detail].max_frames) / 30;
 
 function VideoItem({ video, canDelete, canUpload, onChange }:
   { video: Video; canDelete: boolean; canUpload: boolean; onChange: () => void }) {
@@ -218,10 +246,25 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
   const [kit, setKit] = useState(team?.kit_color ?? "#ffffff");
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
+  const [check, setCheck] = useState<ClipCheck | null>(null);
+  const [checking, setChecking] = useState(false);
   const analyses = useLoad(() => api<VideoAnalysis[]>(`/api/videos/${video.id}/analyses`), video.id + video.status);
   // Without the file only a simulated analysis is possible (it does not read the video).
   const fileMissing = video.file_available === false;
   const effectiveMode = fileMissing ? "SIMULATION_MODE" : mode;
+
+  const runCheck = async () => {
+    setChecking(true);
+    setError(null);
+    try {
+      setCheck(await api<ClipCheck>(`/api/videos/${video.id}/quality`, { method: "POST" }));
+    } catch (caught) {
+      setError(caught);
+    } finally {
+      setChecking(false);
+    }
+  };
+  const coverage = check?.checks.find((item) => item.code === "coverage");
 
   const start = async (event: FormEvent) => {
     event.preventDefault();
@@ -271,6 +314,18 @@ function VideoItem({ video, canDelete, canUpload, onChange }:
 
       {open && (
         <form className="analysis-form" onSubmit={start}>
+          {effectiveMode === "REAL_VIDEO_ANALYSIS" && (
+            <div className="clip-check-box">
+              {!check && <p className="muted small">{t.clipCheck.intro}</p>}
+              <button type="button" className="btn btn-ghost btn-sm" disabled={checking} onClick={() => void runCheck()}>
+                {checking ? t.clipCheck.running : t.clipCheck.run}
+              </button>
+              {check && <ClipCheckPanel result={check} />}
+              {coverage?.status === "warn" && (detail === "fast"
+                ? <button type="button" className="btn btn-primary btn-sm" onClick={() => setDetail("full")}>{t.clipCheck.useFull}</button>
+                : <p className="small clip-check-chosen">{t.clipCheck.fullChosen}</p>)}
+            </div>
+          )}
           <label className="field">
             <span>{t.mode}</span>
             <select value={effectiveMode} onChange={(e) => setMode(e.target.value)}>
