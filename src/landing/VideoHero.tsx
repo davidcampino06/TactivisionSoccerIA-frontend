@@ -24,7 +24,7 @@ interface Detections {
  * in it (YOLO26n + ByteTrack, exported once from the same pipeline the app uses), drawn in sync with
  * the video. The numbers at the bottom come from that same run: nothing on this screen is made up.
  */
-export default function VideoHero({ paused, onStart }: { paused: boolean; onStart: () => void }) {
+export default function VideoHero({ paused, onStart, onLogin }: { paused: boolean; onStart: () => void; onLogin: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [detections, setDetections] = useState<Detections | null>(null);
@@ -124,6 +124,7 @@ export default function VideoHero({ paused, onStart }: { paused: boolean; onStar
             {es.landing.start}
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
+          <button type="button" className="cta-ghost" onClick={onLogin}>{es.landing.login}</button>
         </div>
         <ul className="vhero-points">
           {t.points.map((point, index) => (
