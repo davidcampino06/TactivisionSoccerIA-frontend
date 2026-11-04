@@ -166,6 +166,14 @@ export interface Strength {
   status?: string;
 }
 
+/** POST /api/videos/{id}/quality: is the clip fit for the analysis (advice, never blocks). */
+export interface ClipCheck {
+  verdict: "ok" | "warn" | "bad";
+  video: { fps: number; frame_count: number; width: number; height: number; duration_seconds: number | null };
+  sampled_frames: number;
+  checks: { code: string; status: "ok" | "warn" | "bad"; measured: boolean; title: string; detail: string; value?: unknown }[];
+}
+
 /** Where an item of the review inbox comes from. */
 export interface InboxContext {
   match_id: string;
