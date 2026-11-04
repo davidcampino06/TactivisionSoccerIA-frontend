@@ -262,3 +262,15 @@
   .vhero-copy,
   .how-step img { animation: none; transition: none; }
 }
+
+/* Changing screen (landing <-> auth) fades the new one in. */
+.screen-fade { animation: screen-in 0.6s ease both; }
+
+@keyframes screen-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-fade { animation: none; }
+}
