@@ -50,6 +50,26 @@ export interface Video {
   uploaded_at?: string;
   /** False when the server lost the file (ephemeral disk): a new real analysis needs it again. */
   file_available?: boolean;
+  /** Tactical situation the clip shows, chosen by a person; null: not classified. */
+  situation?: string | null;
+  situation_note?: string | null;
+}
+
+/** GET /api/teams/{id}/clip-library */
+export interface ClipLibrary {
+  clips: {
+    video_id: string;
+    file_name: string;
+    situation: string | null;
+    situation_note: string | null;
+    match: { id: string; opponent: string; match_date: string };
+    analysis: { id: string; mode: string; completed_at: string | null; own_team_known: boolean };
+    /** team: TEAM_A, TEAM_B or MATCH; shown when the analysis does not know which team is ours. */
+    problems: { title: string; severity: string; status: string; team?: string | null }[];
+    strengths: { title: string; status: string; team?: string | null }[];
+  }[];
+  /** Inverted index: each facet value with the ids of its clips (HashTable in the backend). */
+  facets: Record<"situations" | "problems" | "strengths", { key: string; count: number; clips: string[] }[]>;
 }
 
 export type AnalysisStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED";
