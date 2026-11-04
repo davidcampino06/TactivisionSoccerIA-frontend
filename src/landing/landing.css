@@ -18,6 +18,7 @@
   inset: 0;
 }
 
+/* The clip is a seamless loop: its last second fades into its first one (built with ffmpeg xfade). */
 .vhero-media {
   z-index: -2;
   /* A slow push-in on top of the drone's own drift: the field feels alive without distracting. */
@@ -73,11 +74,13 @@
 
 .vhero-title {
   margin: 0;
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: clamp(2.3rem, 4.6vw, 3.9rem);
-  line-height: 1.06;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.8rem, 5.6vw, 5rem);
+  /* Above 1 so the accent of "CÓMO" never touches the line above. */
+  line-height: 1.04;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
   text-wrap: balance;
 }
 
