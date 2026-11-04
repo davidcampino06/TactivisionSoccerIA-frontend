@@ -33,6 +33,7 @@
   font-size: 1.4rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .topnav {
@@ -105,6 +106,10 @@
 .cta-ghost.small {
   padding: 10px 18px;
   font-size: 0.88rem;
+}
+
+.cta-ghost.topbar-back {
+  gap: 8px;
 }
 
 .cta-link {
@@ -229,8 +234,8 @@
 .drawer-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(2, 3, 3, 0.6);
-  backdrop-filter: blur(3px);
+  background: rgba(2, 3, 3, 0.7);
+  backdrop-filter: blur(6px);
   opacity: 0;
   transition: opacity 0.35s ease;
 }
@@ -244,7 +249,9 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(480px, 100%);
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100%);
   overflow-y: auto;
   padding: calc(env(safe-area-inset-top, 0px) + 24px) clamp(20px, 3vw, 36px) calc(env(safe-area-inset-bottom, 0px) + 32px);
   /* Frosted glass over the landing, like the panels of the app. */
@@ -264,11 +271,53 @@
 .drawer-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.drawer-head .auth-tabs {
-  flex: 1;
+.drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-stretch: 75%;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Short forms (login) sit in the middle of the panel; long ones (register) scroll from the top. */
+.drawer-body {
+  margin-block: auto;
+  padding-block: 22px;
+}
+
+.drawer-body .auth-form {
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.drawer-body .auth-heading h2 {
+  font-size: 2.3rem;
+}
+
+.drawer-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--chalk-muted);
+}
+
+.drawer-foot svg {
+  flex: none;
 }
 
 .drawer-close {
@@ -649,8 +698,37 @@
     display: none;
   }
 
-  .topbar-actions .cta-ghost {
+  .topbar-actions .cta-ghost:not(.topbar-back) {
     display: none;
+  }
+
+  /* On a phone "Volver al inicio" is the arrow alone; the text stays for screen readers. */
+  .cta-ghost.topbar-back {
+    padding: 11px;
+  }
+
+  .topbar-back-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The two hero buttons share one row, same width. */
+  .landing .vhero-actions,
+  .landing .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .landing .vhero-actions > button,
+  .landing .hero-actions > button {
+    justify-content: center;
+    padding: 14px 12px;
+    font-size: 0.92rem;
   }
 
   .philosophy-grid {
