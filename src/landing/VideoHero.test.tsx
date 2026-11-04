@@ -15,7 +15,7 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe("VideoHero", () => {
   it("shows the numbers of the real detection of the clip, not invented ones", async () => {
-    render(<VideoHero paused={false} onStart={() => {}} />);
+    render(<VideoHero paused={false} onStart={() => {}} onLogin={() => {}} />);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Mira cómo juega tu equipo, jugada por jugada");
     expect(await screen.findByText("15")).toBeTruthy();
     expect(screen.getByText("48")).toBeTruthy();
@@ -24,7 +24,7 @@ describe("VideoHero", () => {
   });
 
   it("pauses the video while the login drawer is open", () => {
-    render(<VideoHero paused onStart={() => {}} />);
+    render(<VideoHero paused onStart={() => {}} onLogin={() => {}} />);
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
   });
 });
