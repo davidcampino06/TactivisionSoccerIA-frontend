@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { api, json } from "../../api/client";
 import { ANALYSIS_TONE, RECOMMENDATION_TONE, SEVERITY_TONE, STRENGTH_TONE } from "../../app/tones";
 import { useTeam } from "../../app/teamState";
@@ -10,12 +10,13 @@ import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, l
 import ProximityNetwork from "../../components/analysis/ProximityNetwork";
 import { TeamLegend, TeamTag } from "../../components/analysis/TeamColors";
 import IssueExplanation from "../../components/analysis/IssueExplanation";
-import AnalysisVideo from "../../components/analysis/AnalysisVideo";
+import AnalysisVideo, { type IdentityChange } from "../../components/analysis/AnalysisVideo";
+import { isIdentified } from "../../components/analysis/trackLabel";
 import TrackPhoto from "../../components/analysis/TrackPhoto";
 import { formatClock } from "../../components/analysis/clock";
 import ReviewNotes from "../../components/analysis/ReviewNotes";
 import type { TeamColors, TeamKey } from "../../components/analysis/shirtColor";
-import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Strength, Track, VideoAnalysis } from "../../types";
+import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Strength, Track, TrackRole, VideoAnalysis } from "../../types";
 
 const t = es.pages.analysis;
 const POLL_MS = 2000;
@@ -318,24 +319,56 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
   const [error, setError] = useState<unknown>(null);
 
   const list = [...(tracks.data ?? [])].sort((a, b) => b.detections - a.detections);
+  // Coming from "Ver video" (…#video): go straight to the player once the section is on the page.
+  const { hash } = useLocation();
+  const ready = list.length > 0;
+  useEffect(() => {
+    if (hash === "#video" && ready) document.getElementById("video")?.scrollIntoView({ block: "start" });
+  }, [hash, ready]);
   if (tracks.loading && !tracks.data) return null;
   if (list.length === 0 && !tracks.error) return null;
   const shown = showAll ? list : list.slice(0, TRACKS_PREVIEW);
   const players = [...(squad.data ?? [])].sort((a, b) => (a.shirt_number ?? 100) - (b.shirt_number ?? 100));
 
-  const assign = async (track: Track, playerId: string) => {
+  const patchTrack = (trackId: number, changes: Partial<Track>) =>
+    tracks.setData((tracks.data ?? []).map((item) => (item.track_id === trackId ? { ...item, ...changes } : item)));
+
+  const assign = async (track: Track, value: string) => {
+    // The same select also says "not a player": the referee or someone outside the game.
+    if (value.startsWith("role:")) {
+      await identify(track, { role: value.slice(5) as TrackRole, shirt_number: null }).catch(() => undefined);
+      return;
+    }
     setSavingId(track.track_id);
     setError(null);
     setNotice("");
     try {
       await api(`/api/analyses/${analysisId}/tracks/${track.track_id}/player`, {
-        method: "PUT", body: json({ player_id: playerId || null }),
+        method: "PUT", body: json({ player_id: value || null }),
       });
-      tracks.setData((tracks.data ?? []).map((item) => (
-        item.track_id === track.track_id ? { ...item, player_id: playerId || null } : item)));
+      const player = players.find((item) => item.id === value);
+      patchTrack(track.track_id, { player_id: value || null, player_number: player?.shirt_number ?? null, role: "PLAYER" });
       setNotice(t.saved);
     } catch (caught) {
       setError(caught);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  // Typed on the video: a shirt number (linked to the squad player who wears it) or "not a player".
+  const identify = async (track: Track, change: IdentityChange) => {
+    setSavingId(track.track_id);
+    setError(null);
+    setNotice("");
+    try {
+      const saved = await api<{ role: TrackRole; player_id: string | null; player_number: number | null }>(
+        `/api/analyses/${analysisId}/tracks/${track.track_id}/identity`, { method: "PUT", body: json(change) });
+      patchTrack(track.track_id, { role: saved.role, player_id: saved.player_id, player_number: saved.player_number });
+      setNotice(t.saved);
+    } catch (caught) {
+      setError(caught);
+      throw caught;
     } finally {
       setSavingId(null);
     }
@@ -345,7 +378,7 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
     <Section title={t.tracks}>
       <p className="muted">{t.tracksHint}</p>
       <p className="track-progress">
-        <strong>{t.tracksProgress(list.filter((track) => track.player_id).length, list.length)}</strong>
+        <strong>{t.tracksProgress(list.filter(isIdentified).length, list.length)}</strong>
         <span className="muted"> · {t.tracksProgressHint}</span>
       </p>
       {!list.some((track) => track.has_snapshot) && <p className="muted small">{t.noPhotosNote}</p>}
@@ -354,7 +387,7 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
           <h3 className="mini-title">{t.video.title}</h3>
           <p className="muted small">{t.video.hint}</p>
           <AnalysisVideo analysisId={analysisId} videoId={videoId} matchId={matchId} tracks={list} players={players}
-            savingId={savingId} onAssign={(track, playerId) => void assign(track, playerId)} />
+            savingId={savingId} onAssign={(track, playerId) => void assign(track, playerId)} onIdentity={identify} />
         </div>
       )}
       {notice && <p className="notice" role="status">{notice}</p>}
@@ -376,14 +409,21 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
                   <td className="num">{track.detections}</td>
                   <td className="num">{formatPercent(track.mean_confidence)}</td>
                   <td>
-                    <select className="track-select" value={track.player_id ?? ""} disabled={savingId === track.track_id}
+                    <select className="track-select" value={selectValue(track)} disabled={savingId === track.track_id}
                       aria-label={`${t.player} · ${track.label}`} onChange={(e) => void assign(track, e.target.value)}>
                       <option value="">{t.unassigned}</option>
+                      {!track.player_id && track.player_number !== null && track.player_number !== undefined && (track.role ?? "PLAYER") === "PLAYER" && (
+                        <option value={`number:${track.player_number}`} disabled>{t.numberOnly(track.player_number)}</option>
+                      )}
                       {players.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.shirt_number !== null ? `${player.shirt_number} · ` : ""}{player.first_name} {player.last_name}
                         </option>
                       ))}
+                      <optgroup label={t.notPlayer}>
+                        <option value="role:REFEREE">{t.refereeOption}</option>
+                        <option value="role:OTHER">{t.outsiderOption}</option>
+                      </optgroup>
                     </select>
                   </td>
                 </tr>
@@ -399,6 +439,13 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
       )}
     </Section>
   );
+}
+
+/** Value of a track's select: its squad player, "not a player", or only the number typed on the video. */
+function selectValue(track: Track): string {
+  if (track.role && track.role !== "PLAYER") return `role:${track.role}`;
+  if (track.player_id) return track.player_id;
+  return track.player_number !== null && track.player_number !== undefined ? `number:${track.player_number}` : "";
 }
 
 /** "team_a.team_width" -> "TEAM_A"; match-level indicators have no team. */
