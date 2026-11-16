@@ -9,6 +9,7 @@ import { formatServerDate, label } from "../../i18n/labels";
 import { withEncryptedPasswords } from "../../security/crypto";
 import { tokenExpiresAt } from "../../security/session";
 import type { User } from "../../types";
+import { CountedLabel } from "../../components/CharCount";
 
 const t = es.pages.profile;
 // Same rule as the backend (schemas.ProfileUpdate): digits, spaces, dashes, parentheses and an optional +.
@@ -90,11 +91,11 @@ function PersonalData() {
       <form className="profile-form" onSubmit={submit}>
         <div className="field-row">
           <label className="field">
-            <span>{es.auth.firstName}</span>
+            <CountedLabel text={es.auth.firstName} value={firstName} max={60} />
             <input value={firstName} onChange={(e) => edit(setFirstName)(e.target.value)} autoComplete="given-name" maxLength={60} required />
           </label>
           <label className="field">
-            <span>{es.auth.lastName}</span>
+            <CountedLabel text={es.auth.lastName} value={lastName} max={60} />
             <input value={lastName} onChange={(e) => edit(setLastName)(e.target.value)} autoComplete="family-name" maxLength={60} required />
           </label>
         </div>
