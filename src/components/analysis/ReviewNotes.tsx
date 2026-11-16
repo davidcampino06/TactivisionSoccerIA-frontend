@@ -5,6 +5,7 @@ import { es } from "../../i18n/es";
 import { formatTimestamp } from "../../i18n/labels";
 import type { ReviewNote } from "../../types";
 import { ConfirmButton, ErrorBanner } from "../ui";
+import { CharCount } from "../CharCount";
 
 const t = es.pages.analysis.notes;
 const MAX = 1000;
@@ -77,6 +78,7 @@ export default function ReviewNotes({ recommendationId, notes, onChange }: Props
         <label htmlFor={fieldId} className="visually-hidden">{t.add}</label>
         <textarea id={fieldId} value={text} onChange={(e) => setText(e.target.value)} maxLength={MAX} rows={2}
           placeholder={t.placeholder} />
+        <CharCount value={text} max={MAX} />
         <button className="btn btn-ghost btn-sm" disabled={busy || !text.trim()}>{busy ? t.adding : t.add}</button>
       </form>
       <ErrorBanner error={error} />
