@@ -20,11 +20,11 @@ describe("CountedField", () => {
   it("counts down the characters left: 50, 49, 48...", () => {
     render(<Name />);
     const input = screen.getByLabelText(/Nombre de la jugada/) as HTMLInputElement;
-    expect(screen.getByRole("status").textContent).toBe("50");
+    expect(screen.getByTestId("chars-left").dataset.left).toBe("50");
     fireEvent.change(input, { target: { value: "a" } });
-    expect(screen.getByRole("status").textContent).toBe("49");
+    expect(screen.getByTestId("chars-left").dataset.left).toBe("49");
     fireEvent.change(input, { target: { value: "ab" } });
-    expect(screen.getByRole("status").textContent).toBe("48");
+    expect(screen.getByTestId("chars-left").dataset.left).toBe("48");
     expect(screen.getByText("Quedan 48 caracteres de 50")).toBeTruthy();
   });
 
@@ -34,7 +34,7 @@ describe("CountedField", () => {
     fireEvent.change(input, { target: { value: "x".repeat(80) } });
     expect(input.value.length).toBe(50);
     expect(input.maxLength).toBe(50);
-    expect(screen.getByRole("status").textContent).toBe("0");
+    expect(screen.getByTestId("chars-left").dataset.left).toBe("0");
   });
 });
 
@@ -57,7 +57,7 @@ describe("ActionTypeField", () => {
     render(<Picker />);
     fireEvent.change(screen.getByLabelText("Tipo de acción"), { target: { value: "__write__" } });
     fireEvent.change(screen.getByLabelText(/Nuevo tipo de acción/), { target: { value: "  Saque de   banda largo " } });
-    expect(screen.getByRole("status").textContent).toBe(String(40 - "  Saque de   banda largo ".length));
+    expect(screen.getByTestId("chars-left").dataset.left).toBe(String(40 - "  Saque de   banda largo ".length));
     fireEvent.click(screen.getByRole("button", { name: "Guardar tipo" }));
     await waitFor(() => expect(screen.getByTestId("value").textContent).toBe("Saque de banda largo"));
     const post = fetchMock.mock.calls.find(([, init]) => init?.method === "POST")!;
