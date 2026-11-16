@@ -18,6 +18,7 @@ import { formatDateTime, formatTimestamp, label } from "../../i18n/labels";
 import type { HistoryEntry } from "../../structures/UndoHistory";
 import type { Stack } from "../../structures/Stack";
 import type { Match, Player, TacticalPlay, TacticalVersion } from "../../types";
+import { CharCount } from "../../components/CharCount";
 
 const t = es.pages.editor;
 const TOOL_GROUPS: Tool[][] = [["select", "own", "rival", "ball", "erase"], ["pass", "run", "dribble"]];
@@ -429,13 +430,24 @@ function StacksPanel({ undoStack, redoStack }: { undoStack: Stack<HistoryEntry<B
 function NotesPanel({ board, readOnly, onCommit }: { board: Board; readOnly: boolean; onCommit: (notes: string) => void }) {
   return (
     <Section title={t.notes}>
-      {readOnly ? <p className="notes-text">{board.notes || "—"}</p> : (
-        <textarea key={board.notes} rows={4} maxLength={1000} defaultValue={board.notes} placeholder={t.notesPlaceholder}
-          aria-label={t.notes} onBlur={(e) => { if (e.target.value !== board.notes) onCommit(e.target.value); }} />
-      )}
+      {readOnly ? <p className="notes-text">{board.notes || "—"}</p> : <NotesField key={board.notes} saved={board.notes} onCommit={onCommit} />}
     </Section>
   );
 }
+
+/** The play's notes: saved when the field loses focus (one undoable step), with the characters left. */
+function NotesField({ saved, onCommit }: { saved: string; onCommit: (notes: string) => void }) {
+  const [text, setText] = useState(saved);
+  return (
+    <div className="notes-field">
+      <textarea rows={4} maxLength={NOTES_MAX} value={text} placeholder={t.notesPlaceholder} aria-label={t.notes}
+        onChange={(e) => setText(e.target.value)} onBlur={() => { if (text !== saved) onCommit(text); }} />
+      <CharCount value={text} max={NOTES_MAX} />
+    </div>
+  );
+}
+
+const NOTES_MAX = 1000;
 
 function MatchesPanel({ playId, teamId }: { playId: string; teamId: string }) {
   const linked = useLoad(() => api<Match[]>(`/api/tactical-plays/${playId}/matches`), playId);
