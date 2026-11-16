@@ -9,6 +9,7 @@ import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { label } from "../../i18n/labels";
 import type { ClipLibrary } from "../../types";
+import { useTrackPhoto } from "../../components/analysis/trackPhotoCache";
 
 const t = es.pages.library;
 type Facet = ClipLibrary["facets"]["situations"][number];
@@ -83,6 +84,13 @@ export default function ClipLibraryPage() {
                     <Pill tone={clip.situation ? "info" : "neutral"}>{label("situation", clip.situation ?? "NONE")}</Pill>
                     {clip.analysis.mode === "SIMULATION_MODE" && <Pill tone="warning">{t.simulated}</Pill>}
                   </header>
+                  {clip.photos && clip.photos.length > 0 && (
+                    <Link to={`/analisis/${clip.analysis.id}#video`} className="library-photos" aria-label={`${t.watch} · ${clip.file_name}`}>
+                      <span className="visually-hidden">{t.photosLabel}</span>
+                      {clip.photos.map((trackId) => <LibraryPhoto key={trackId} analysisId={clip.analysis.id} trackId={trackId} />)}
+                      {clip.file_available !== false && <span className="library-play" aria-hidden="true">▶</span>}
+                    </Link>
+                  )}
                   <h3>{es.pages.matches.vs} {clip.match.opponent} <span className="muted small">· {formatShortDate(clip.match.match_date)}</span></h3>
                   <p className="muted small library-file">{clip.file_name}</p>
                   {clip.situation_note && <p className="library-note">{clip.situation_note}</p>}
@@ -116,8 +124,12 @@ export default function ClipLibraryPage() {
                       </ul>
                     )}
                   </div>
+                  {clip.file_available === false && <p className="muted small">{t.fileGone}</p>}
                   <div className="library-actions">
-                    <Link to={`/analisis/${clip.analysis.id}`} className="btn btn-primary btn-sm">{t.openAnalysis}</Link>
+                    {clip.file_available !== false && clip.analysis.mode !== "SIMULATION_MODE" && (
+                      <Link to={`/analisis/${clip.analysis.id}#video`} className="btn btn-primary btn-sm">{t.watch}</Link>
+                    )}
+                    <Link to={`/analisis/${clip.analysis.id}`} className="btn btn-ghost btn-sm">{t.openAnalysis}</Link>
                     {!clip.situation && <Link to={`/partidos/${clip.match.id}`} className="btn btn-ghost btn-sm">{t.classify}</Link>}
                   </div>
                 </article>
@@ -128,6 +140,12 @@ export default function ClipLibraryPage() {
       )}
     </div>
   );
+}
+
+/** One player of the clip, cut from the video itself (track_snapshots). */
+function LibraryPhoto({ analysisId, trackId }: { analysisId: string; trackId: number }) {
+  const url = useTrackPhoto(analysisId, trackId, true);
+  return url ? <img src={url} alt="" /> : <span className="library-photo-empty" />;
 }
 
 /** "(Equipo A)" after an item when the analysis does not know which detected team is ours. */
