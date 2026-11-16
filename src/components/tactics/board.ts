@@ -39,6 +39,11 @@ export interface Board {
 export const EMPTY_BOARD: Board = { formation: null, tokens: [], arrows: [], notes: "" };
 
 export const FORMATIONS = ["4-3-3", "4-4-2", "4-2-3-1", "3-5-2", "5-3-2", "4-1-4-1"] as const;
+/** Limits of a play's texts (the backend and the database enforce the same ones). */
+export const PLAY_NAME_MAX = 50;
+export const PLAY_DESCRIPTION_MAX = 100;
+export const ACTION_TYPE_MAX = 40;
+
 export const ACTION_TYPES = ["BUILD_UP", "PRESSING", "COUNTER_ATTACK", "POSITIONAL_ATTACK", "DEFENSIVE_BLOCK", "SET_PIECE"] as const;
 export const MAX_TOKENS = 30;
 export const MAX_ARROWS = 40;
