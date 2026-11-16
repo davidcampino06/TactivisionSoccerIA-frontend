@@ -2,7 +2,10 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { api, json } from "../../api/client";
 import { useTeam } from "../../app/teamState";
-import { ACTION_TYPES, EMPTY_BOARD, FORMATIONS, formationTokens, fromConfiguration, toConfiguration } from "../../components/tactics/board";
+import {
+  EMPTY_BOARD, FORMATIONS, PLAY_DESCRIPTION_MAX, PLAY_NAME_MAX, formationTokens, fromConfiguration, toConfiguration,
+} from "../../components/tactics/board";
+import { ActionTypeField, CountedField } from "../../components/tactics/PlayFields";
 import Pitch from "../../components/tactics/Pitch";
 import { EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
 import { useLoad } from "../../hooks/useLoad";
@@ -86,18 +89,9 @@ function PlayForm({ teamId, onCancel }: { teamId: string; onCancel: () => void }
   return (
     <Section title={t.create}>
       <form className="form-grid" onSubmit={submit}>
-        <label className="field">
-          <span>{t.name}</span>
-          <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t.namePlaceholder}
-            maxLength={120} required autoFocus />
-        </label>
-        <label className="field">
-          <span>{t.actionType}</span>
-          <select value={form.actionType} onChange={(e) => setForm({ ...form, actionType: e.target.value })}>
-            <option value="">—</option>
-            {ACTION_TYPES.map((code) => <option key={code} value={code}>{label("actionType", code)}</option>)}
-          </select>
-        </label>
+        <CountedField text={t.name} value={form.name} max={PLAY_NAME_MAX} onChange={(name) => setForm({ ...form, name })}
+          placeholder={t.namePlaceholder} required autoFocus />
+        <ActionTypeField teamId={teamId} value={form.actionType} onChange={(actionType) => setForm({ ...form, actionType })} />
         <label className="field">
           <span>{t.startWith}</span>
           <select value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })}>
@@ -105,10 +99,8 @@ function PlayForm({ teamId, onCancel }: { teamId: string; onCancel: () => void }
             <option value="">{t.blank}</option>
           </select>
         </label>
-        <label className="field">
-          <span>{t.descriptionLabel}</span>
-          <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={250} />
-        </label>
+        <CountedField text={t.descriptionLabel} value={form.description} max={PLAY_DESCRIPTION_MAX}
+          onChange={(description) => setForm({ ...form, description })} />
         <ErrorBanner error={error} />
         <div className="form-actions field-wide">
           <button type="button" className="btn btn-ghost" onClick={onCancel}>{es.app.cancel}</button>
