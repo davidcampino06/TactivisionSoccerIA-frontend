@@ -10,6 +10,7 @@ import { formatDateTime, formatFileSize, formatTimestamp, label } from "../../i1
 import type { ClipCheck, Match, MatchNeighbors, Video, VideoAnalysis } from "../../types";
 import ClipCheckPanel from "../../components/analysis/ClipCheckPanel";
 import { shirtColorName } from "../../components/analysis/shirtColor";
+import { CountedLabel } from "../../components/CharCount";
 
 const teamIdentity = es.pages.team.identity;
 
@@ -231,7 +232,7 @@ function SituationFields({ value, onChange }:
         </select>
       </label>
       <label className="field">
-        <span>{t.situationNote}</span>
+        <CountedLabel text={t.situationNote} value={value.note} max={200} />
         <input type="text" maxLength={200} value={value.note} placeholder={t.situationNotePlaceholder}
           onChange={(e) => onChange({ ...value, note: e.target.value })} />
       </label>
