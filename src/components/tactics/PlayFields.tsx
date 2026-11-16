@@ -3,6 +3,7 @@ import { api, json } from "../../api/client";
 import { es } from "../../i18n/es";
 import { label } from "../../i18n/labels";
 import { ACTION_TYPES, ACTION_TYPE_MAX } from "./board";
+import { CountedLabel } from "../CharCount";
 
 const t = es.pages.tactics;
 const WRITE = "__write__";
@@ -20,20 +21,14 @@ type CountedProps = {
 
 /** A text field with its limit and a box that counts down the characters left (50, 49, 48...). */
 export function CountedField({ text, value, max, onChange, multiline, required, placeholder, autoFocus }: CountedProps) {
-  const left = max - value.length;
+  const left = Math.max(0, max - value.length);
   const shared = {
     value, maxLength: max, required, placeholder, autoFocus,
     onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(event.target.value.slice(0, max)),
   };
   return (
     <label className="field counted-field">
-      <span className="counted-head">
-        <span>{text}</span>
-        {/* A span, not <output>: an <output> inside the label would become the labelled control. */}
-        <span className={`counted-left${left <= 5 ? " is-low" : ""}`} role="status" aria-label={t.charsLeftLabel(left)}>
-          {left}
-        </span>
-      </span>
+      <CountedLabel text={text} value={value} max={max} />
       {multiline ? <textarea rows={2} {...shared} /> : <input {...shared} />}
       <span className="muted small">{t.charsLeft(left, max)}</span>
     </label>
