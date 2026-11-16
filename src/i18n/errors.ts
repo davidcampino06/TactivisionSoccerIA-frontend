@@ -32,6 +32,7 @@ const SIMPLE_CODES: Record<string, string> = {
   VIDEO_FILE_MISSING: es.errors.videoFileMissing,
   AI_UNAVAILABLE: es.errors.aiUnavailable,
   INVALID_SITUATION: es.errors.invalidSituation,
+  PLAY_TEXT_TOO_LONG: es.errors.playTextTooLong,
   NOTE_NOT_YOURS: es.errors.noteNotYours,
   INVALID_STRENGTH_STATE: es.errors.invalidStrengthState,
   ANALYSIS_IN_PROGRESS: es.errors.analysisInProgress,
