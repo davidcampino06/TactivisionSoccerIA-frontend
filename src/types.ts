@@ -384,6 +384,38 @@ export interface Track {
 
 export type TrackRole = "PLAYER" | "REFEREE" | "OTHER";
 
+/** Two tracks the AI thinks are one player cut in two (hidden for a moment); a person decides. */
+export interface TrackLinkHint {
+  from_track: number;
+  to_track: number;
+  gap_seconds: number;
+  /** Distance between where he should be and where the new track starts, in box heights. */
+  distance_heights: number;
+  color_distance: number | null;
+  same_team: boolean | null;
+  confidence: number;
+  status: "SUGGESTED" | "ACCEPTED" | "REJECTED";
+  decided_at: string | null;
+}
+
+/** Tracks with a shirt of no team, grouped by colour: possible referee or goalkeeper. */
+export interface KitHint {
+  kit_group: number;
+  kit_color: string;
+  suggestion: "REFEREE" | "GOALKEEPER_OR_REFEREE";
+  reason: string;
+  confidence: number;
+  tracks: number[];
+  dismissed: boolean;
+}
+
+export interface IdentificationHints {
+  links: TrackLinkHint[];
+  kits: KitHint[];
+  /** Track -> first track of its chain of accepted links (the same player). */
+  same_player: Record<string, number>;
+}
+
 export interface TacticalPlay {
   id: string;
   team_id: string;
