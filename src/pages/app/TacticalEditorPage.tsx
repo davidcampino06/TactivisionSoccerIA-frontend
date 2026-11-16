@@ -8,6 +8,7 @@ import {
 } from "../../components/tactics/board";
 import { availabilitySummary, isUnavailable } from "../../components/players/availability";
 import Pitch from "../../components/tactics/Pitch";
+import FormationPicker from "../../components/tactics/FormationPicker";
 import { ActionTypeField, CountedField } from "../../components/tactics/PlayFields";
 import { useBoardEditor } from "../../components/tactics/useBoardEditor";
 import { ConfirmButton, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
@@ -262,12 +263,7 @@ export default function TacticalEditorPage() {
           {!readOnly && (
             <div className="editor-row">
               <div className="formation-picker">
-                <label className="field">
-                  <span>{t.formation}</span>
-                  <select value={formation} onChange={(e) => setFormation(e.target.value)}>
-                    {FORMATIONS.map((item) => <option key={item} value={item}>{item}</option>)}
-                  </select>
-                </label>
+                <FormationPicker label={t.formation} value={formation} onChange={setFormation} />
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => placeFormation("own")}>{t.placeOwn}</button>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => placeFormation("rival")}>{t.placeRival}</button>
               </div>
