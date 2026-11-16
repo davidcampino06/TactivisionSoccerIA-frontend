@@ -8,6 +8,7 @@ import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import type { Team, User } from "../../types";
 import TeamIdentity from "../../components/team/TeamIdentity";
+import { CountedLabel } from "../../components/CharCount";
 
 const t = es.pages.team;
 
@@ -55,15 +56,15 @@ function TeamSetup({ role }: { role: User["role"] }) {
           {coach ? (
             <>
               <label className="field field-wide">
-                <span>{t.name}</span>
+                <CountedLabel text={t.name} value={form.name} max={120} />
                 <input value={form.name} onChange={(e) => update("name", e.target.value)} minLength={2} maxLength={120} required />
               </label>
               <label className="field">
-                <span>{t.category}</span>
+                <CountedLabel text={t.category} value={form.category} max={120} />
                 <input value={form.category} placeholder={t.categoryPlaceholder} onChange={(e) => update("category", e.target.value)} maxLength={120} />
               </label>
               <label className="field">
-                <span>{t.city}</span>
+                <CountedLabel text={t.city} value={form.city} max={120} />
                 <input value={form.city} onChange={(e) => update("city", e.target.value)} maxLength={120} />
               </label>
             </>
@@ -126,19 +127,19 @@ function TeamDetails({ team }: { team: Team }) {
           <form className="form-grid" onSubmit={save}>
             <fieldset disabled={!isCoach} className="form-grid-fieldset">
               <label className="field field-wide">
-                <span>{t.name}</span>
+                <CountedLabel text={t.name} value={form.name} max={120} />
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} minLength={2} maxLength={120} required />
               </label>
               <label className="field">
-                <span>{t.category}</span>
+                <CountedLabel text={t.category} value={form.category} max={120} />
                 <input value={form.category} placeholder={t.categoryPlaceholder} onChange={(e) => setForm({ ...form, category: e.target.value })} maxLength={120} />
               </label>
               <label className="field">
-                <span>{t.city}</span>
+                <CountedLabel text={t.city} value={form.city} max={120} />
                 <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} maxLength={120} />
               </label>
               <label className="field field-wide">
-                <span>{t.description}</span>
+                <CountedLabel text={t.description} value={form.description} max={250} />
                 <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={250} />
               </label>
             </fieldset>
@@ -166,7 +167,8 @@ function TeamDetails({ team }: { team: Team }) {
           )}
 
           <Section title={t.analysts}>
-            {analysts.loading ? <Loading /> : (analysts.data ?? []).length === 0 ? <EmptyState title={t.noAnalysts} /> : (
+            {analysts.loading ? <Loading /> : analysts.error ? <ErrorBanner error={analysts.error} onRetry={analysts.reload} />
+              : (analysts.data ?? []).length === 0 ? <EmptyState title={t.noAnalysts} /> : (
               <ul className="row-list">
                 {(analysts.data ?? []).map((analyst) => (
                   <li key={analyst.id} className="row">
