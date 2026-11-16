@@ -6,6 +6,7 @@ import { withEncryptedPasswords } from "../../security/crypto";
 import type { Role, User } from "../../types";
 import PasswordInput from "../PasswordInput";
 import NewPasswordFields from "./NewPasswordFields";
+import { CountedLabel } from "../CharCount";
 
 type SelfRegisterRole = Exclude<Role, "ADMINISTRATOR">;
 
@@ -286,7 +287,7 @@ function TextField({ label, value, onChange, type = "text", autoComplete, placeh
   const id = `field-${autoComplete}`;
   return (
     <div className="field">
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}>{type === "email" ? label : <CountedLabel text={label} value={value} max={maxLength} />}</label>
       <input id={id} type={type} autoComplete={autoComplete} value={value} placeholder={placeholder}
         maxLength={maxLength} onChange={(event) => onChange(event.target.value)} required />
     </div>
