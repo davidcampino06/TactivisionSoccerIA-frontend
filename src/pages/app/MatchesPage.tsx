@@ -22,6 +22,7 @@ function defaultDateTime(): string {
 export default function MatchesPage() {
   const { team } = useTeam();
   const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
   const showForm = params.get("nuevo") === "1";
   const matches = useLoad(() => api<Match[]>(`/api/teams/${team!.id}/matches`), team!.id);
   const list = [...(matches.data ?? [])].sort((a, b) => b.match_date.localeCompare(a.match_date));
@@ -42,8 +43,12 @@ export default function MatchesPage() {
                 <tr><th>{t.date}</th><th>{t.opponent}</th><th>{t.venue}</th><th>{t.status}</th><th>{t.result}</th></tr>
               </thead>
               <tbody>
+                {/* The whole row opens the match; the rival's name stays a real link for the keyboard and screen readers. */}
                 {list.map((match) => (
-                  <tr key={match.id}>
+                  <tr key={match.id} className="is-clickable" onClick={(event) => {
+                    if ((event.target as HTMLElement).closest("a, button")) return;
+                    navigate(`/partidos/${match.id}`);
+                  }}>
                     <td className="nowrap">{formatDateTime(match.match_date)}</td>
                     <td><Link to={`/partidos/${match.id}`} className="table-link">{match.opponent}</Link></td>
                     <td>{match.is_home ? t.home : t.away}</td>
