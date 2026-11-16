@@ -1,5 +1,8 @@
-/** One box the AI found: [x, y, width, height, track id or null, "P" player / "B" ball / "O" other], in video pixels. */
-export type OverlayBox = [number, number, number, number, number | null, "P" | "B" | "O"];
+/**
+ * One box the AI found: [x, y, width, height, track id or null, "P" player / "B" ball / "O" other,
+ * confidence], in pixels of the original video. Older overlays have no confidence.
+ */
+export type OverlayBox = [number, number, number, number, number | null, "P" | "B" | "O", number?];
 export type OverlayFrame = [number, OverlayBox[]];
 
 export interface Overlay {
@@ -39,8 +42,19 @@ export function boxesAt(overlay: Overlay, seconds: number): OverlayBox[] {
     const target = box[4] === null ? undefined : later.get(box[4]);
     if (!target) return box;
     const mix = (from: number, to: number) => from + (to - from) * progress;
-    return [mix(box[0], target[0]), mix(box[1], target[1]), mix(box[2], target[2]), mix(box[3], target[3]), box[4], box[5]];
+    return [mix(box[0], target[0]), mix(box[1], target[1]), mix(box[2], target[2]), mix(box[3], target[3]), box[4], box[5], box[6]];
   });
+}
+
+/**
+ * Where the picture really is inside its element. A <video> keeps its proportions (object-fit:
+ * contain), so when the element is wider or taller than the clip there are black bands, and the
+ * boxes must be scaled and moved by the same amount or they drift away from the players.
+ */
+export function fitRect(boxWidth: number, boxHeight: number, videoWidth: number, videoHeight: number) {
+  if (!videoWidth || !videoHeight || !boxWidth || !boxHeight) return { scale: 0, x: 0, y: 0 };
+  const scale = Math.min(boxWidth / videoWidth, boxHeight / videoHeight);
+  return { scale, x: (boxWidth - videoWidth * scale) / 2, y: (boxHeight - videoHeight * scale) / 2 };
 }
 
 /** The tracked player under a point (video pixels); the smallest box wins when several overlap. */
