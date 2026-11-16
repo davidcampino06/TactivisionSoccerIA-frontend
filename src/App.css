@@ -6975,3 +6975,121 @@ html {
 }
 
 .library-pills { display: inline-flex; flex-wrap: nowrap; gap: 4px; }
+
+/* Suggestions of the AI to tell who is who (IdentificationHints): a person says yes or no. */
+.hints {
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid rgba(var(--fg), 0.14);
+  border-radius: 14px;
+}
+
+.hint-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.hint-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(var(--fg), 0.04);
+}
+
+.hint-item.is-dismissed { opacity: 0.6; }
+
+.hint-photos {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint-photos .track-photo { height: 72px; min-width: 36px; }
+
+.hint-arrow {
+  color: var(--chalk-muted);
+  font-size: 1.2rem;
+}
+
+.hint-text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hint-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.hint-keeper {
+  display: flex;
+  gap: 6px;
+}
+
+.hint-keeper input { width: 6.5rem; }
+
+.hint-subtitle {
+  margin: 16px 0 0;
+  font-size: 0.95rem;
+}
+
+.hint-more { margin-top: 8px; }
+
+/* A kit: photos and its reason on one row, the actions on the next. */
+.hint-kit { grid-template-columns: auto 1fr; }
+
+.hint-kit .hint-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-start;
+}
+
+.kit-swatch {
+  width: 18px;
+  height: 72px;
+  border-radius: 6px;
+  border: 1px solid rgba(var(--fg), 0.28);
+}
+
+.hint-decided { margin-top: 10px; }
+
+.hint-decided summary {
+  cursor: pointer;
+  color: var(--chalk-muted);
+}
+
+.hint-decided-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.hint-decided-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.track-same {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--chalk-muted);
+}
+
+@media (max-width: 720px) {
+  .hint-item { grid-template-columns: 1fr; }
+  .hint-actions { justify-content: flex-start; }
+}
