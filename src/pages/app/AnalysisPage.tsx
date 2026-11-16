@@ -13,10 +13,14 @@ import IssueExplanation from "../../components/analysis/IssueExplanation";
 import AnalysisVideo, { type IdentityChange } from "../../components/analysis/AnalysisVideo";
 import { isIdentified } from "../../components/analysis/trackLabel";
 import TrackPhoto from "../../components/analysis/TrackPhoto";
+import IdentificationHints from "../../components/analysis/IdentificationHints";
 import { formatClock } from "../../components/analysis/clock";
 import ReviewNotes from "../../components/analysis/ReviewNotes";
 import type { TeamColors, TeamKey } from "../../components/analysis/shirtColor";
-import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Strength, Track, TrackRole, VideoAnalysis } from "../../types";
+import type {
+  AnalysisResult, IdentificationHints as Hints, Indicator, Player, ProximityNetwork as Network, Recommendation, Strength, Track,
+  TrackRole, VideoAnalysis,
+} from "../../types";
 
 const t = es.pages.analysis;
 const POLL_MS = 2000;
@@ -313,6 +317,8 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
   const { team } = useTeam();
   const tracks = useLoad(() => api<Track[]>(`/api/analyses/${analysisId}/tracks`), analysisId);
   const squad = useLoad(() => api<Player[]>(`/api/teams/${team!.id}/players`), team!.id);
+  // Suggestions of the AI (analyses from before them answer with nothing to suggest).
+  const hints = useLoad(() => api<Hints>(`/api/analyses/${analysisId}/identification-hints`), analysisId);
   const [showAll, setShowAll] = useState(false);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [notice, setNotice] = useState("");
@@ -382,6 +388,10 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
         <span className="muted"> · {t.tracksProgressHint}</span>
       </p>
       {!list.some((track) => track.has_snapshot) && <p className="muted small">{t.noPhotosNote}</p>}
+      {hints.data && (
+        <IdentificationHints analysisId={analysisId} hints={hints.data} tracks={list} onError={setError}
+          onChanged={(fresh) => { hints.setData(fresh); tracks.reload(); }} />
+      )}
       {videoId && (
         <div id="video">
           <h3 className="mini-title">{t.video.title}</h3>
@@ -404,7 +414,14 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
               {shown.map((track) => (
                 <tr key={track.track_id}>
                   <td><TrackPhoto analysisId={analysisId} track={track} /></td>
-                  <td className="nowrap">{track.label}</td>
+                  <td className="nowrap">
+                    {track.label}
+                    {sameAs(hints.data, track.track_id) !== null && (
+                      <span className="track-same" title={t.hints.sameAsTitle(sameAs(hints.data, track.track_id)!)}>
+                        {t.hints.sameAs(sameAs(hints.data, track.track_id)!)}
+                      </span>
+                    )}
+                  </td>
                   <td className="num nowrap">{formatClock(track.first_seconds)}–{formatClock(track.last_seconds)}</td>
                   <td className="num">{track.detections}</td>
                   <td className="num">{formatPercent(track.mean_confidence)}</td>
@@ -439,6 +456,12 @@ function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; vi
       )}
     </Section>
   );
+}
+
+/** The first track of the chain this track was joined to (accepted links), or null. */
+function sameAs(hints: Hints | null, trackId: number): number | null {
+  const person = hints?.same_player[String(trackId)];
+  return person !== undefined && person !== trackId ? person : null;
 }
 
 /** Value of a track's select: its squad player, "not a player", or only the number typed on the video. */
