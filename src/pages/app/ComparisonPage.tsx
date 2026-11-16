@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { api } from "../../api/client";
+import { api, download } from "../../api/client";
 import { RESULT_TONE } from "../../app/tones";
 import { useTeam } from "../../app/teamState";
+import ChangeBars from "../../components/charts/ChangeBars";
 import ComparisonBars from "../../components/charts/ComparisonBars";
 import TeamFilter from "../../components/insights/TeamFilter";
 import {
@@ -84,7 +85,7 @@ export default function ComparisonPage() {
           </Section>
 
           {selected.length < 2 ? <Section><EmptyState title={t.needTwo} /></Section> : (
-            <ComparisonResult comparison={comparison.data} loading={comparison.loading} error={comparison.error}
+            <ComparisonResult teamId={team!.id} comparison={comparison.data} loading={comparison.loading} error={comparison.error}
               onRetry={comparison.reload} group={chosenGroup} setGroup={setGroup} asTable={asTable} setAsTable={setAsTable} slotOf={slotOf} />
           )}
         </>
@@ -94,6 +95,7 @@ export default function ComparisonPage() {
 }
 
 interface ResultProps {
+  teamId: string;
   comparison: Comparison | null;
   loading: boolean;
   error: unknown;
@@ -105,15 +107,39 @@ interface ResultProps {
   slotOf: (matchId: string) => number;
 }
 
-function ComparisonResult({ comparison, loading, error, onRetry, group: chosen, setGroup, asTable, setAsTable, slotOf }: ResultProps) {
+function ComparisonResult({ teamId, comparison, loading, error, onRetry, group: chosen, setGroup, asTable, setAsTable, slotOf }: ResultProps) {
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<unknown>(null);
   if (error && !comparison) return <ErrorBanner error={error} onRetry={onRetry} />;
   if (!comparison) return <Section><Loading /></Section>;
+
+  // The PDF is made by the backend from the same comparison, for exactly the matches shown here.
+  const downloadPdf = async () => {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      const query = comparison.matches.map((match) => `match_ids=${encodeURIComponent(match.match_id)}`).join("&");
+      await download(`/api/teams/${teamId}/comparisons/pdf?${query}`, "comparacion-de-partidos.pdf");
+    } catch (caught) {
+      setDownloadError(caught);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const counts = countByGroup(comparison.indicators.map((row) => row.indicator));
   // Until the user picks one, show the first team that has indicators (a clip may only show one team).
   const group = chosen ?? TEAM_GROUPS.find((item) => counts[item] > 0) ?? "team_a";
   const rows = comparison.indicators.filter((row) => groupOf(row.indicator) === group && row.values.some((value) => value !== null));
   const matches = comparison.matches;
+  const changes = rows
+    .filter((row) => row.change_percent !== null && row.change_percent !== undefined && row.difference_last_vs_first !== null)
+    .map((row) => ({
+      name: indicatorName(row.indicator), percent: row.change_percent as number, assessment: row.change_assessment ?? null,
+      delta: deltaFormatter(row.unit)(row.difference_last_vs_first as number),
+    }))
+    .sort((a, b) => Math.abs(b.percent) - Math.abs(a.percent));
+  const matchName = (index: number) => `${ti.vs(matches[index].opponent)} (${formatShortDate(matches[index].match_date)})`;
 
   return (
     <div className={`stack${loading ? " is-refreshing" : ""}`}>
@@ -144,6 +170,16 @@ function ComparisonResult({ comparison, loading, error, onRetry, group: chosen, 
         </div>
       </Section>
 
+      <Section title={t.downloadPdf}>
+        <div className="download-row">
+          <p className="muted small">{t.downloadHint}</p>
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => void downloadPdf()} disabled={downloading}>
+            {downloading ? t.downloading : t.downloadPdf}
+          </button>
+        </div>
+        <ErrorBanner error={downloadError} />
+      </Section>
+
       <div className="insights-toolbar">
         <TeamFilter value={group} onChange={setGroup} counts={counts} />
         <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAsTable(!asTable)}>
@@ -156,6 +192,17 @@ function ComparisonResult({ comparison, loading, error, onRetry, group: chosen, 
           <span key={match.match_id}><span className={`swatch series-${slotOf(match.match_id)}`} aria-hidden="true" />{ti.vs(match.opponent)} · {formatShortDate(match.match_date)}</span>
         ))}
       </div>
+
+      {rows.length > 0 && (
+        <Section title={t.differences}>
+          {changes.length === 0 ? <p className="muted">{t.noDifferences}</p> : (
+            <>
+              <p className="muted small">{t.differencesHint(matchName(0), matchName(matches.length - 1))}</p>
+              <ChangeBars rows={changes} />
+            </>
+          )}
+        </Section>
+      )}
 
       {rows.length === 0 ? <Section><EmptyState title={t.noIndicators} /></Section> : asTable ? (
         <Section>
