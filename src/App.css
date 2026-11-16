@@ -576,10 +576,6 @@ html {
   font-variant-numeric: tabular-nums;
 }
 
-.stat-value-sm {
-  font-size: 1.6rem;
-}
-
 .stat-value a {
   color: inherit;
 }
@@ -705,19 +701,6 @@ html {
   color: var(--chalk-muted);
 }
 
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(var(--fg), 0.2);
-  border-top-color: var(--chalk);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 @keyframes blink {
   50% { opacity: 0.25; }
 }
@@ -831,10 +814,14 @@ html {
   min-width: 2.6em;
   padding: 2px 8px;
   border-radius: 8px;
-  border: 1px solid var(--line, rgba(255, 255, 255, 0.16));
+  border: 1px solid rgba(var(--fg), 0.28);
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.82rem;
   text-align: center;
+}
+
+.counted-left::before {
+  content: attr(data-left);
 }
 
 .counted-left.is-low {
@@ -3671,28 +3658,6 @@ html {
   box-shadow: 0 0 30px rgba(126, 226, 168, 0.25);
 }
 
-.pending-list {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.pending-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.pending-list li span {
-  display: grid;
-  min-width: 0;
-}
-
-.pending-list small { color: var(--chalk-muted); }
-
 /* analyses table */
 .dash-analyses { grid-column: span 8; }
 .dash-play { grid-column: span 4; }
@@ -6434,7 +6399,6 @@ html {
     transition: none;
   }
 
-  .spinner,
   .service-dot,
   .queue-item,
   .scan-bar span,
@@ -6526,6 +6490,16 @@ html {
   display: flex;
   gap: 8px;
   align-items: flex-end;
+}
+
+.review-note-form .counted-left,
+.notes-field .counted-left {
+  align-self: flex-end;
+}
+
+.notes-field {
+  display: grid;
+  gap: 6px;
 }
 
 .review-note-form textarea {
