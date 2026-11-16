@@ -8,6 +8,7 @@ import { es } from "../../i18n/es";
 import { formatDateTime, label } from "../../i18n/labels";
 import type { Match } from "../../types";
 import { RESULT_TONE } from "../../app/tones";
+import { CountedLabel } from "../../components/CharCount";
 
 const t = es.pages.matches;
 
@@ -93,7 +94,7 @@ function MatchForm({ teamId, onClose }: { teamId: string; onClose: () => void })
     <Section title={t.create}>
       <form className="form-grid" onSubmit={submit}>
         <label className="field">
-          <span>{t.opponent}</span>
+          <CountedLabel text={t.opponent} value={form.opponent} max={120} />
           <input value={form.opponent} onChange={(e) => setForm({ ...form, opponent: e.target.value })} maxLength={120} required autoFocus />
         </label>
         <label className="field">
@@ -110,7 +111,7 @@ function MatchForm({ teamId, onClose }: { teamId: string; onClose: () => void })
           </label>
         </fieldset>
         <label className="field">
-          <span>{t.location}</span>
+          <CountedLabel text={t.location} value={form.location} max={120} />
           <input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} maxLength={120} />
         </label>
         <ErrorBanner error={error} />
