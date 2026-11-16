@@ -3,11 +3,12 @@ import { Link, useNavigate, useParams } from "react-router";
 import { api, json } from "../../api/client";
 import { useTeam } from "../../app/teamState";
 import {
-  ACTION_TYPES, FORMATIONS, MAX_ARROWS, MAX_TOKENS, formationTokens, fromConfiguration, newId, nextLabel, sameBoard,
+  FORMATIONS, MAX_ARROWS, MAX_TOKENS, PLAY_DESCRIPTION_MAX, PLAY_NAME_MAX, formationTokens, fromConfiguration, newId, nextLabel, sameBoard,
   toConfiguration, type ArrowKind, type Board, type Tool,
 } from "../../components/tactics/board";
 import { availabilitySummary, isUnavailable } from "../../components/players/availability";
 import Pitch from "../../components/tactics/Pitch";
+import { ActionTypeField, CountedField } from "../../components/tactics/PlayFields";
 import { useBoardEditor } from "../../components/tactics/useBoardEditor";
 import { ConfirmButton, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
 import { useLoad } from "../../hooks/useLoad";
@@ -524,21 +525,10 @@ function DetailsPanel({ play, onSaved, onDeleted }: { play: TacticalPlay; onSave
     <Section title={t.details} actions={!open && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(true)}>{t.editDetails}</button>}>
       {open ? (
         <form className="form-grid form-grid-single" onSubmit={submit}>
-          <label className="field">
-            <span>{tt.name}</span>
-            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={120} required />
-          </label>
-          <label className="field">
-            <span>{tt.actionType}</span>
-            <select value={form.actionType} onChange={(e) => setForm({ ...form, actionType: e.target.value })}>
-              <option value="">—</option>
-              {ACTION_TYPES.map((code) => <option key={code} value={code}>{label("actionType", code)}</option>)}
-            </select>
-          </label>
-          <label className="field">
-            <span>{tt.descriptionLabel}</span>
-            <textarea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={250} />
-          </label>
+          <CountedField text={tt.name} value={form.name} max={PLAY_NAME_MAX} onChange={(name) => setForm({ ...form, name })} required />
+          <ActionTypeField teamId={play.team_id} value={form.actionType} onChange={(actionType) => setForm({ ...form, actionType })} />
+          <CountedField text={tt.descriptionLabel} value={form.description} max={PLAY_DESCRIPTION_MAX} multiline
+            onChange={(description) => setForm({ ...form, description })} />
           <ErrorBanner error={error} />
           <div className="form-actions">
             <button type="button" className="btn btn-ghost btn-sm" onClick={() => setOpen(false)}>{es.app.cancel}</button>
