@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { boxesAt, trackAt, type Overlay } from "./overlay";
+import { boxesAt, fitRect, trackAt, type Overlay } from "./overlay";
 
 const overlay: Overlay = {
   interval: 0.2, until: 0.4,
@@ -33,6 +33,22 @@ describe("boxesAt", () => {
     const gap: Overlay = { interval: 0.2, until: 5, frames: [[0, [[0, 0, 10, 10, 1, "P"]]], [5, [[500, 0, 10, 10, 1, "P"]]]] };
     expect(boxesAt(gap, 0.1)).toEqual([[0, 0, 10, 10, 1, "P"]]);
     expect(boxesAt(gap, 2.5)).toEqual([]);
+  });
+});
+
+describe("fitRect", () => {
+  it("adds side bands when the element is wider than the clip", () => {
+    // A 1920x1080 clip in a 1000x400 element: height limits, 400/1080 scale, centred horizontally.
+    const fit = fitRect(1000, 400, 1920, 1080);
+    expect(fit.scale).toBeCloseTo(400 / 1080);
+    expect(fit.y).toBe(0);
+    expect(fit.x).toBeCloseTo((1000 - 1920 * (400 / 1080)) / 2);
+  });
+
+  it("adds bands above and below when the element is taller, and nothing when they match", () => {
+    expect(fitRect(960, 1000, 1920, 1080)).toEqual({ scale: 0.5, x: 0, y: (1000 - 540) / 2 });
+    expect(fitRect(960, 540, 1920, 1080)).toEqual({ scale: 0.5, x: 0, y: 0 });
+    expect(fitRect(0, 0, 1920, 1080).scale).toBe(0);
   });
 });
 
