@@ -36,6 +36,7 @@ const SIMPLE_CODES: Record<string, string> = {
   NOTE_NOT_YOURS: es.errors.noteNotYours,
   INVALID_STRENGTH_STATE: es.errors.invalidStrengthState,
   ANALYSIS_IN_PROGRESS: es.errors.analysisInProgress,
+  TRACK_IDENTITY_CONFLICT: es.errors.trackIdentityConflict,
   PLAYER_REMOVE_REQUIRES_REASON: es.errors.removeRequiresReason,
   COACH_HAS_TEAM: es.errors.coachHasTeam,
   ALREADY_IN_TEAM: es.errors.alreadyInTeam,
