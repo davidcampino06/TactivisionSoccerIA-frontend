@@ -1,16 +1,24 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { ApiError, api, apiUrl } from "../../api/client";
 import { es } from "../../i18n/es";
-import type { Player, Track } from "../../types";
+import type { Player, Track, TrackRole } from "../../types";
 import { formatClock } from "./clock";
-import { boxesAt, trackAt, type Overlay, type OverlayBox } from "./overlay";
-import { playerLabel } from "./playerLabel";
+import { boxesAt, fitRect, type Overlay, type OverlayBox } from "./overlay";
+import { trackLabel, type LabelKind } from "./trackLabel";
 import TrackPhoto from "./TrackPhoto";
 
 const t = es.pages.analysis.video;
-const SPEEDS = [0.25, 0.5, 1];
-const ASSIGNED = "#f2b544";
+const SPEEDS = [0.1, 0.25, 0.5, 1];
+const COLORS: Record<LabelKind, { box: string; tag: string; text: string }> = {
+  unknown: { box: "rgba(255, 255, 255, 0.9)", tag: "rgba(10, 12, 12, 0.72)", text: "#ffffff" },
+  player: { box: "#f2b544", tag: "#f2b544", text: "#141414" },
+  number: { box: "#f2b544", tag: "#f2b544", text: "#141414" },
+  referee: { box: "#5fb3ff", tag: "#5fb3ff", text: "#0b1a2a" },
+  other: { box: "rgba(255, 255, 255, 0.35)", tag: "rgba(10, 12, 12, 0.6)", text: "rgba(255, 255, 255, 0.7)" },
+};
+
+export interface IdentityChange { role: TrackRole; shirt_number: number | null }
 
 type Props = {
   analysisId: string;
@@ -20,17 +28,23 @@ type Props = {
   players: Player[];
   savingId: number | null;
   onAssign: (track: Track, playerId: string) => void;
+  onIdentity: (track: Track, change: IdentityChange) => Promise<void>;
 };
+
+/** A drawn box and its label, in pixels of the element, to know what was touched. */
+interface Hit { id: number; box: [number, number, number, number]; tag: [number, number, number, number] }
 
 /**
  * The uploaded clip, playing with what the AI saw drawn on top (the detections stored with the
- * analysis, moved between analysed frames by `boxesAt`). Touching a player's box pauses the video
- * and lets the staff say who he is; from then on his number and name ride on his box.
+ * analysis, moved between analysed frames by `boxesAt`), in the style of the landing page. Touching
+ * a box or its "ID" label pauses the video and opens a small editor right there: type the shirt
+ * number and the label follows that player for the whole track, or mark the referee or someone
+ * outside the game.
  */
-export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, players, savingId, onAssign }: Props) {
+export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, players, savingId, onAssign, onIdentity }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const drawnRef = useRef<OverlayBox[]>([]);
+  const hitsRef = useRef<Hit[]>([]);
   const [source, setSource] = useState<string | null>(null);
   const [problem, setProblem] = useState<"missing" | "unsupported" | "error" | null>(null);
   const [overlay, setOverlay] = useState<Overlay | null>(null);
@@ -40,7 +54,7 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
   const [aspect, setAspect] = useState(16 / 9);
   const [speed, setSpeed] = useState(1);
   const [showBoxes, setShowBoxes] = useState(true);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<{ id: number; x: number; y: number } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -55,12 +69,8 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
     return () => { alive = false; };
   }, [analysisId, videoId]);
 
-  const byTrack = useRef(new Map<number, Track>());
-  const byPlayer = useRef(new Map<string, Player>());
-  useEffect(() => {
-    byTrack.current = new Map(tracks.map((track) => [track.track_id, track]));
-    byPlayer.current = new Map(players.map((player) => [player.id, player]));
-  }, [tracks, players]);
+  const byTrack = useMemo(() => new Map(tracks.map((track) => [track.track_id, track])), [tracks]);
+  const byPlayer = useMemo(() => new Map(players.map((player) => [player.id, player])), [players]);
 
   const draw = useCallback(() => {
     const video = videoRef.current;
@@ -77,17 +87,17 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
     if (!context) return;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.clearRect(0, 0, width, height);
-    const boxes = overlay && showBoxes && video.videoWidth ? boxesAt(overlay, video.currentTime) : [];
-    drawnRef.current = boxes;
-    const scale = width / (video.videoWidth || 1);
-    // On a phone the picture is small: full labels would cover the players, so only the identified
-    // ones carry their number and the selected one its whole label.
-    const compact = width < 560;
-    for (const [x, y, w, h, id, kind] of boxes) {
-      const left = x * scale;
-      const top = y * scale;
-      const boxWidth = w * scale;
-      const boxHeight = h * scale;
+    const boxes: OverlayBox[] = overlay && showBoxes && video.videoWidth ? boxesAt(overlay, video.currentTime) : [];
+    // The picture keeps its proportions inside the element: scale and shift the boxes the same way.
+    const fit = fitRect(width, height, video.videoWidth, video.videoHeight);
+    const compact = width < 560;   // on a phone only identified players carry a label
+    const hits: Hit[] = [];
+    context.font = "500 10px 'JetBrains Mono', ui-monospace, monospace";
+    for (const [x, y, w, h, id, kind, confidence] of boxes) {
+      const left = fit.x + x * fit.scale;
+      const top = fit.y + y * fit.scale;
+      const boxWidth = w * fit.scale;
+      const boxHeight = h * fit.scale;
       if (kind === "B") {
         context.strokeStyle = "rgba(255, 255, 255, 0.95)";
         context.lineWidth = 1.5;
@@ -96,27 +106,32 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
         context.stroke();
         continue;
       }
-      const track = id === null ? undefined : byTrack.current.get(id);
-      const player = track?.player_id ? byPlayer.current.get(track.player_id) : undefined;
-      const isSelected = id !== null && id === selected;
-      const color = player ? ASSIGNED : "#ffffff";
-      context.globalAlpha = id === null ? 0.45 : 1;
-      corners(context, left, top, boxWidth, boxHeight, color, isSelected ? 3 : 1.6, isSelected);
-      context.globalAlpha = 1;
-      if (id === null || (compact && !player && !isSelected)) continue;
-      const short = player && compact && !isSelected;
-      const text = player
-        ? (short && player.shirt_number !== null ? String(player.shirt_number) : playerLabel(player))
-        : `ID ${String(id).padStart(2, "0")}`;
-      context.font = `${player ? 700 : 500} 11px 'JetBrains Mono', ui-monospace, monospace`;
-      const textWidth = context.measureText(text).width;
-      const labelTop = top - 18 < 0 ? top + boxHeight + 3 : top - 18;
-      context.fillStyle = player ? ASSIGNED : "rgba(10, 12, 12, 0.72)";
-      context.fillRect(left - 1, labelTop, textWidth + 10, 15);
-      context.fillStyle = player ? "#141414" : "#ffffff";
-      context.fillText(text, left + 4, labelTop + 11);
+      if (id === null) {
+        corners(context, left, top, boxWidth, boxHeight, "rgba(255, 255, 255, 0.4)", 1.2, false);
+        continue;
+      }
+      const label = trackLabel(byTrack.get(id), id, byPlayer, confidence);
+      const colors = COLORS[label.kind];
+      const isSelected = selected?.id === id;
+      corners(context, left, top, boxWidth, boxHeight, colors.box, isSelected ? 2.6 : 1.5, isSelected);
+      const known = label.kind !== "unknown";
+      const showTag = isSelected || !compact || (known && label.kind !== "other");
+      let tag: Hit["tag"] = [left, top - 16, 0, 0];
+      if (showTag) {
+        context.font = `${known ? 700 : 500} ${known ? 11 : 10}px 'JetBrains Mono', ui-monospace, monospace`;
+        const text = compact && label.kind === "player" && !isSelected ? label.text.split(" · ")[0] : label.text;
+        const tagWidth = context.measureText(text).width + 8;
+        const tagTop = top - 16 < 0 ? top + boxHeight + 2 : top - 16;
+        tag = [left - 1, tagTop, tagWidth, 14];
+        context.fillStyle = colors.tag;
+        context.fillRect(tag[0], tag[1], tag[2], tag[3]);
+        context.fillStyle = colors.text;
+        context.fillText(text, left + 3, tagTop + 10.5);
+      }
+      hits.push({ id, box: [left, top, boxWidth, boxHeight], tag });
     }
-  }, [overlay, showBoxes, selected]);
+    hitsRef.current = hits;
+  }, [overlay, showBoxes, selected, byTrack, byPlayer]);
 
   // Redraw on every animation frame while playing, and once whenever something that is drawn changes.
   useEffect(() => {
@@ -129,15 +144,16 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
       if (!video.paused && !video.ended) frame = requestAnimationFrame(loop);
     };
     const start = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(loop); };
-    for (const name of ["play", "seeked", "loadeddata", "timeupdate"]) video.addEventListener(name, start);
+    const events = ["play", "seeked", "loadeddata", "timeupdate"];
+    for (const name of events) video.addEventListener(name, start);
     window.addEventListener("resize", start);
     start();
     return () => {
       cancelAnimationFrame(frame);
-      for (const name of ["play", "seeked", "loadeddata", "timeupdate"]) video.removeEventListener(name, start);
+      for (const name of events) video.removeEventListener(name, start);
       window.removeEventListener("resize", start);
     };
-  }, [draw, source, tracks, players]);
+  }, [draw, source]);
 
   const toggle = () => {
     const video = videoRef.current;
@@ -146,18 +162,24 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
   };
 
   const pick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas || !video.videoWidth) return;
+    if (!canvas) return;
     const bounds = canvas.getBoundingClientRect();
-    const scale = video.videoWidth / bounds.width;
-    const track = trackAt(drawnRef.current, (event.clientX - bounds.left) * scale, (event.clientY - bounds.top) * scale, 6 * scale);
-    if (track === null) {
-      if (selected !== null) setSelected(null); else toggle();
+    const x = event.clientX - bounds.left;
+    const y = event.clientY - bounds.top;
+    const inside = (rect: number[], pad = 0) =>
+      x >= rect[0] - pad && x <= rect[0] + rect[2] + pad && y >= rect[1] - pad && y <= rect[1] + rect[3] + pad;
+    // The label wins (it is what people aim at), then the smallest box under the pointer.
+    const onTag = hitsRef.current.find((hit) => hit.tag[2] > 0 && inside(hit.tag, 2));
+    const onBox = hitsRef.current.filter((hit) => inside(hit.box, 4))
+      .sort((a, b) => a.box[2] * a.box[3] - b.box[2] * b.box[3])[0];
+    const hit = onTag ?? onBox;
+    if (!hit) {
+      if (selected) setSelected(null); else toggle();
       return;
     }
-    video.pause();
-    setSelected(track);
+    videoRef.current?.pause();
+    setSelected({ id: hit.id, x: hit.box[0] / bounds.width, y: (hit.box[1] + hit.box[3]) / bounds.height });
   };
 
   if (problem === "missing") {
@@ -171,21 +193,28 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
   if (problem === "error") return null;   // the rest of the analysis is still useful
   if (!source) return <p className="muted" role="status">{t.loading}</p>;
 
-  const selectedTrack = selected === null ? undefined : tracks.find((track) => track.track_id === selected);
+  const selectedTrack = selected ? byTrack.get(selected.id) : undefined;
   return (
     <div className="analysis-video">
-      <div className="analysis-video-stage" style={{ aspectRatio: String(aspect) }}>
-        <video ref={videoRef} src={source} playsInline preload="metadata"
-          onLoadedMetadata={(event) => {
-            const video = event.currentTarget;
-            setDuration(Number.isFinite(video.duration) ? video.duration : 0);
-            if (video.videoWidth && video.videoHeight) setAspect(video.videoWidth / video.videoHeight);
-          }}
-          onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)}
-          onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)}
-          onError={() => setProblem("unsupported")} />
-        <canvas ref={canvasRef} onClick={pick} role="img" aria-label={t.canvasLabel} />
-        {problem === "unsupported" && <p className="analysis-video-unsupported" role="alert">{t.unsupported}</p>}
+      <div className="analysis-video-frame">
+        <div className="analysis-video-stage" style={{ aspectRatio: String(aspect) }}>
+          <video ref={videoRef} src={source} playsInline preload="metadata"
+            onLoadedMetadata={(event) => {
+              const video = event.currentTarget;
+              setDuration(Number.isFinite(video.duration) ? video.duration : 0);
+              if (video.videoWidth && video.videoHeight) setAspect(video.videoWidth / video.videoHeight);
+            }}
+            onDurationChange={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)}
+            onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)}
+            onError={() => setProblem("unsupported")} />
+          <canvas ref={canvasRef} onClick={pick} role="img" aria-label={t.canvasLabel} />
+          {problem === "unsupported" && <p className="analysis-video-unsupported" role="alert">{t.unsupported}</p>}
+        </div>
+        {selected && selectedTrack && (
+          <LabelEditor key={selected.id} track={selectedTrack} saving={savingId === selected.id}
+            position={{ left: `${Math.min(selected.x, 0.7) * 100}%`, top: `${Math.min(selected.y, 0.86) * 100}%` }}
+            onSave={(change) => onIdentity(selectedTrack, change)} onClose={() => setSelected(null)} />
+        )}
       </div>
 
       <div className="analysis-video-controls">
@@ -200,7 +229,7 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
             setSpeed(value);
             if (videoRef.current) videoRef.current.playbackRate = value;
           }}>
-            {SPEEDS.map((value) => <option key={value} value={value}>{value}×</option>)}
+            {SPEEDS.map((value) => <option key={value} value={value}>{String(value).replace(".", ",")}×</option>)}
           </select>
         </label>
         <label className="analysis-video-check">
@@ -228,13 +257,55 @@ export default function AnalysisVideo({ analysisId, videoId, matchId, tracks, pl
               </select>
             </label>
           </div>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSelected(null)}>{t.close}</button>
         </div>
       ) : <p className="muted small">{t.pickHint}</p>}
       {overlay && duration > 0 && overlay.until < duration - 1 && (
         <p className="muted small">{t.coverage(formatClock(overlay.until))}</p>
       )}
     </div>
+  );
+}
+
+/** Small editor that opens on the touched box: the shirt number, or "not a player". */
+export function LabelEditor({ track, position, saving, onSave, onClose }: {
+  track: Track; position: { left: string; top: string }; saving: boolean;
+  onSave: (change: IdentityChange) => Promise<void>; onClose: () => void;
+}) {
+  const [number, setNumber] = useState(track.player_number === null || track.player_number === undefined ? "" : String(track.player_number));
+  const [error, setError] = useState("");
+  const save = async (change: IdentityChange) => {
+    setError("");
+    try {
+      await onSave(change);
+      onClose();
+    } catch {
+      setError(t.labelNotSaved);
+    }
+  };
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const value = number.trim();
+    if (value !== "" && !/^\d{1,2}$/.test(value)) { setError(t.numberRule); return; }
+    void save({ role: "PLAYER", shirt_number: value === "" ? null : Number(value) });
+  };
+  return (
+    <form className="label-editor" style={position} onSubmit={submit} aria-label={t.editLabel(track.track_id)}>
+      <label>
+        <span>{t.shirt}</span>
+        <input inputMode="numeric" autoFocus value={number} maxLength={2} placeholder="10"
+          onChange={(event) => setNumber(event.target.value.replace(/\D/g, "").slice(0, 2))} />
+      </label>
+      <button className="btn btn-primary btn-sm" disabled={saving}>{t.saveNumber}</button>
+      <div className="label-editor-roles">
+        <button type="button" className={`btn btn-ghost btn-sm${track.role === "REFEREE" ? " is-on" : ""}`} disabled={saving}
+          onClick={() => void save({ role: "REFEREE", shirt_number: null })}>{t.referee}</button>
+        <button type="button" className={`btn btn-ghost btn-sm${track.role === "OTHER" ? " is-on" : ""}`} disabled={saving}
+          onClick={() => void save({ role: "OTHER", shirt_number: null })}>{t.outsider}</button>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} aria-label={t.close}>✕</button>
+      </div>
+      {error && <p className="field-error" role="alert">{error}</p>}
+      <p className="muted small">{t.followsTrack}</p>
+    </form>
   );
 }
 
