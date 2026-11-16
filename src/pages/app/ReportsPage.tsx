@@ -8,6 +8,7 @@ import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { formatTimestamp, label } from "../../i18n/labels";
 import type { AnalysedMatch, Match, Report, ReportDetail, ReportType } from "../../types";
+import { CountedLabel } from "../../components/CharCount";
 
 const t = es.pages.reports;
 const TYPES: ReportType[] = ["MATCH", "VIDEO_ANALYSIS", "TEAM_EVOLUTION"];
@@ -141,7 +142,7 @@ function ReportForm({ teamId, initialType, initialMatch, initialAnalysis, onCanc
           </label>
         )}
         <label className={`field${type === "TEAM_EVOLUTION" ? " field-wide" : ""}`}>
-          <span>{t.reportTitle}</span>
+          <CountedLabel text={t.reportTitle} value={title} max={200} />
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t.titlePlaceholder} maxLength={200} />
         </label>
 
