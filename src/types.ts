@@ -67,6 +67,10 @@ export interface ClipLibrary {
     /** team: TEAM_A, TEAM_B or MATCH; shown when the analysis does not know which team is ours. */
     problems: { title: string; severity: string; status: string; team?: string | null }[];
     strengths: { title: string; status: string; team?: string | null }[];
+    /** False when the server no longer keeps the file: the analysis is there, the video cannot be watched. */
+    file_available?: boolean;
+    /** Tracks with a photo, the ones followed the longest first (up to 4). */
+    photos?: number[];
   }[];
   /** Inverted index: each facet value with the ids of its clips (HashTable in the backend). */
   facets: Record<"situations" | "problems" | "strengths", { key: string; count: number; clips: string[] }[]>;
@@ -372,7 +376,13 @@ export interface Track {
   /** The best crop of the video (null/false in analyses from before the photos). */
   has_snapshot: boolean;
   snapshot_seconds: number | null;
+  /** PLAYER unless a person marked the track as the referee or someone outside the game. */
+  role?: TrackRole;
+  /** Shirt number typed for the track (also when no squad player wears it). */
+  player_number?: number | null;
 }
+
+export type TrackRole = "PLAYER" | "REFEREE" | "OTHER";
 
 export interface TacticalPlay {
   id: string;
