@@ -5,6 +5,7 @@ import { useTeam } from "../../app/teamState";
 import {
   EMPTY_BOARD, FORMATIONS, PLAY_DESCRIPTION_MAX, PLAY_NAME_MAX, formationTokens, fromConfiguration, toConfiguration,
 } from "../../components/tactics/board";
+import FormationPicker from "../../components/tactics/FormationPicker";
 import { ActionTypeField, CountedField } from "../../components/tactics/PlayFields";
 import Pitch from "../../components/tactics/Pitch";
 import { EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
@@ -92,13 +93,8 @@ function PlayForm({ teamId, onCancel }: { teamId: string; onCancel: () => void }
         <CountedField text={t.name} value={form.name} max={PLAY_NAME_MAX} onChange={(name) => setForm({ ...form, name })}
           placeholder={t.namePlaceholder} required autoFocus />
         <ActionTypeField teamId={teamId} value={form.actionType} onChange={(actionType) => setForm({ ...form, actionType })} />
-        <label className="field">
-          <span>{t.startWith}</span>
-          <select value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })}>
-            {FORMATIONS.map((formation) => <option key={formation} value={formation}>{t.formationStart(formation)}</option>)}
-            <option value="">{t.blank}</option>
-          </select>
-        </label>
+        <FormationPicker label={t.startWith} value={form.start} onChange={(start) => setForm({ ...form, start })}
+          optionText={t.formationStart} extra={[{ value: "", text: t.blank }]} />
         <CountedField text={t.descriptionLabel} value={form.description} max={PLAY_DESCRIPTION_MAX}
           onChange={(description) => setForm({ ...form, description })} />
         <ErrorBanner error={error} />
