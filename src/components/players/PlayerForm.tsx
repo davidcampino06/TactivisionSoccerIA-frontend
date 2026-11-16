@@ -4,6 +4,7 @@ import { es } from "../../i18n/es";
 import type { Player } from "../../types";
 import { ErrorBanner, Section } from "../ui";
 import { UNAVAILABLE_STATUSES } from "./availability";
+import { CountedLabel } from "../CharCount";
 
 const t = es.pages.player;
 const POSITIONS = Object.keys(es.labels.position);
@@ -70,11 +71,11 @@ export default function PlayerForm({ teamId, player, onSaved, onCancel }: Props)
     <Section title={player ? t.editTitle : t.createTitle}>
       <form className="form-grid" onSubmit={submit}>
         <label className="field">
-          <span>{t.firstName}</span>
+          <CountedLabel text={t.firstName} value={form.firstName} max={80} />
           <input value={form.firstName} onChange={(e) => update("firstName", e.target.value)} maxLength={80} required autoFocus />
         </label>
         <label className="field">
-          <span>{t.lastName}</span>
+          <CountedLabel text={t.lastName} value={form.lastName} max={80} />
           <input value={form.lastName} onChange={(e) => update("lastName", e.target.value)} maxLength={80} required />
         </label>
         <label className="field">
@@ -111,7 +112,7 @@ export default function PlayerForm({ teamId, player, onSaved, onCancel }: Props)
         {absent && (
           <>
             <label className="field">
-              <span>{t.availabilityNote}</span>
+              <CountedLabel text={t.availabilityNote} value={form.note} max={255} />
               <input value={form.note} onChange={(e) => update("note", e.target.value)} maxLength={255}
                 placeholder={t.availabilityPlaceholder[form.status]} />
             </label>
