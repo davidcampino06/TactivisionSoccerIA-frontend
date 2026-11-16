@@ -10,6 +10,7 @@ import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { formatDateTime, formatPercent, formatServerDate, label } from "../../i18n/labels";
 import type { Player, PlayerAppearance, PlayerHistory } from "../../types";
+import { CountedLabel } from "../../components/CharCount";
 
 const t = es.pages.player;
 type Mode = "view" | "edit" | "remove";
@@ -178,7 +179,7 @@ function RemoveForm({ player, onCancel, onRemoved }: { player: Player; onCancel:
       <p className="muted">{t.removeBody}</p>
       <form className="form-grid" onSubmit={submit}>
         <label className="field field-wide">
-          <span>{t.reason}</span>
+          <CountedLabel text={t.reason} value={reason} max={200} />
           <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t.reasonPlaceholder}
             minLength={2} maxLength={200} required autoFocus />
         </label>
