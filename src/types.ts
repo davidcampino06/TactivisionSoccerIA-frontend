@@ -366,6 +366,12 @@ export interface Track {
   last_frame: number;
   mean_confidence: number;
   player_id: string | null;
+  /** Seconds of the video where the track first and last appears. */
+  first_seconds: number;
+  last_seconds: number;
+  /** The best crop of the video (null/false in analyses from before the photos). */
+  has_snapshot: boolean;
+  snapshot_seconds: number | null;
 }
 
 export interface TacticalPlay {
@@ -420,6 +426,10 @@ export interface ComparisonRow {
   statuses: ThresholdStatus[];
   values: (number | null)[];
   difference_last_vs_first: number | null;
+  /** Change first -> last as a percentage of the first value (null when it cannot be computed). */
+  change_percent?: number | null;
+  /** Whether that change moves away from the risky side (better) or towards it (worse). */
+  change_assessment?: "BETTER" | "WORSE" | "SAME" | null;
   range: number | null;
 }
 
