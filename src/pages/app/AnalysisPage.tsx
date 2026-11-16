@@ -10,6 +10,9 @@ import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, l
 import ProximityNetwork from "../../components/analysis/ProximityNetwork";
 import { TeamLegend, TeamTag } from "../../components/analysis/TeamColors";
 import IssueExplanation from "../../components/analysis/IssueExplanation";
+import AnalysisVideo from "../../components/analysis/AnalysisVideo";
+import TrackPhoto from "../../components/analysis/TrackPhoto";
+import { formatClock } from "../../components/analysis/clock";
 import ReviewNotes from "../../components/analysis/ReviewNotes";
 import type { TeamColors, TeamKey } from "../../components/analysis/shirtColor";
 import type { AnalysisResult, Indicator, Player, ProximityNetwork as Network, Recommendation, Strength, Track, VideoAnalysis } from "../../types";
@@ -153,7 +156,7 @@ export default function AnalysisPage() {
 
           {result.proximity_network && <NetworkSection analysisId={analysis.id} network={result.proximity_network} colors={colors} ownTeam={ownTeam} />}
 
-          {!simulated && <TrackSection analysisId={analysis.id} />}
+          {!simulated && <TrackSection analysisId={analysis.id} videoId={analysis.video_id} matchId={matchId} />}
 
           <Section title={t.indicators}>
             <IndicatorTable indicators={result.indicators} colors={colors} ownTeam={ownTeam}
@@ -305,7 +308,7 @@ function NetworkSection({ analysisId, network, colors, ownTeam }:
 const TRACKS_PREVIEW = 8;
 
 /** Manual identification: a person links a detected trajectory to a squad player (no biometrics). */
-function TrackSection({ analysisId }: { analysisId: string }) {
+function TrackSection({ analysisId, videoId, matchId }: { analysisId: string; videoId?: string; matchId?: string }) {
   const { team } = useTeam();
   const tracks = useLoad(() => api<Track[]>(`/api/analyses/${analysisId}/tracks`), analysisId);
   const squad = useLoad(() => api<Player[]>(`/api/teams/${team!.id}/players`), team!.id);
@@ -341,6 +344,19 @@ function TrackSection({ analysisId }: { analysisId: string }) {
   return (
     <Section title={t.tracks}>
       <p className="muted">{t.tracksHint}</p>
+      <p className="track-progress">
+        <strong>{t.tracksProgress(list.filter((track) => track.player_id).length, list.length)}</strong>
+        <span className="muted"> · {t.tracksProgressHint}</span>
+      </p>
+      {!list.some((track) => track.has_snapshot) && <p className="muted small">{t.noPhotosNote}</p>}
+      {videoId && (
+        <div id="video">
+          <h3 className="mini-title">{t.video.title}</h3>
+          <p className="muted small">{t.video.hint}</p>
+          <AnalysisVideo analysisId={analysisId} videoId={videoId} matchId={matchId} tracks={list} players={players}
+            savingId={savingId} onAssign={(track, playerId) => void assign(track, playerId)} />
+        </div>
+      )}
       {notice && <p className="notice" role="status">{notice}</p>}
       <ErrorBanner error={error ?? tracks.error} />
       {squad.data && players.length === 0 ? <EmptyState title={t.noSquad}
@@ -348,15 +364,16 @@ function TrackSection({ analysisId }: { analysisId: string }) {
         <div className="table-wrap">
           <table className="table">
             <thead>
-              <tr><th>{t.track}</th><th className="num">{t.detections}</th><th className="num">{t.frames}</th>
+              <tr><th>{t.photo}</th><th>{t.track}</th><th className="num">{t.appears}</th><th className="num">{t.detections}</th>
                 <th className="num">{t.meanConfidence}</th><th>{t.player}</th></tr>
             </thead>
             <tbody>
               {shown.map((track) => (
                 <tr key={track.track_id}>
+                  <td><TrackPhoto analysisId={analysisId} track={track} /></td>
                   <td className="nowrap">{track.label}</td>
+                  <td className="num nowrap">{formatClock(track.first_seconds)}–{formatClock(track.last_seconds)}</td>
                   <td className="num">{track.detections}</td>
-                  <td className="num nowrap">{track.first_frame}–{track.last_frame}</td>
                   <td className="num">{formatPercent(track.mean_confidence)}</td>
                   <td>
                     <select className="track-select" value={track.player_id ?? ""} disabled={savingId === track.track_id}
