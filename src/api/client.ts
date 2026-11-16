@@ -19,6 +19,9 @@ export class ApiError extends Error {
   }
 }
 
+/** Absolute URL of a backend path (for media elements, which load their own source). */
+export const apiUrl = (path: string) => `${API_URL}${path}`;
+
 export const tokenStore = {
   get: () => localStorage.getItem(TOKEN_KEY),
   set: (token: string) => localStorage.setItem(TOKEN_KEY, token),
