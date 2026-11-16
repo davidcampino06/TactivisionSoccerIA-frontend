@@ -39,10 +39,12 @@ export function valueFormatter(unit: string | null, withUnit = false) {
 /** Signed change: "+4 pts", "−0,12". Ratios change in percentage points. */
 export function deltaFormatter(unit: string | null) {
   return (value: number) => {
-    const sign = value > 0 ? "+" : value < 0 ? "−" : "±";
     const magnitude = Math.abs(value);
-    if (unit?.endsWith("_ratio")) return `${sign}${Math.round(magnitude * 100)} pts`;
-    return `${sign}${magnitude.toLocaleString("es-CO", { maximumFractionDigits: 2 })}`;
+    const ratio = Boolean(unit?.endsWith("_ratio"));
+    const shown = ratio ? String(Math.round(magnitude * 100)) : magnitude.toLocaleString("es-CO", { maximumFractionDigits: 2 });
+    // A change that rounds to zero has no direction: "±0", never "−0".
+    const sign = shown === "0" ? "±" : value > 0 ? "+" : "−";
+    return ratio ? `${sign}${shown} pts` : `${sign}${shown}`;
   };
 }
 
