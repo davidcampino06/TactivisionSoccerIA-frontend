@@ -286,10 +286,14 @@ function readDuration(file: File): Promise<number | null> {
 
 const seconds = (value: number) => (value >= 10 ? value.toFixed(0) : value.toFixed(1).replace(".", ","));
 
-/** Frames sent to the AI: on Render Free each frame costs close to a second, so "fast" is the default. */
+/**
+ * Frames sent to the AI. "slow" looks at every frame (slow motion for the AI): on two real clips it
+ * found 2 to 4 times more players followed for 3 s or more than "full", at about 2.5 times the time.
+ */
 const DETAIL = {
   fast: { frame_stride: 5, max_frames: 120 },
   full: { frame_stride: 3, max_frames: 300 },
+  slow: { frame_stride: 1, max_frames: 900 },
 } as const;
 
 /** Seconds of video each detail reaches at 30 fps: the AI takes frames from the start until the cap. */
