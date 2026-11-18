@@ -151,6 +151,7 @@
 
 .philosophy-title {
   grid-area: title;
+  align-self: center;
   margin: 0;
   font-family: var(--font-display);
   font-stretch: 62%;
