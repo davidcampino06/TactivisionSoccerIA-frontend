@@ -67,7 +67,7 @@ export const es = {
     notCommon: "No es una contraseña común",
   },
   landing: {
-    nav: { platform: "Plataforma", how: "Cómo funciona", philosophy: "Filosofía" },
+    nav: { platform: "Plataforma", philosophy: "Filosofía", team: "Equipo" },
     login: "Iniciar sesión",
     register: "Crear cuenta",
     start: "Empezar ahora",
@@ -106,11 +106,7 @@ export const es = {
       loading: "Cargando la detección…",
       pause: "Pausar video",
       play: "Reproducir video",
-      next: "Mira cómo funciona",
-    },
-    how: {
-      eyebrow: "Cómo funciona",
-      title: "Del clip al plan de partido, en cuatro pasos",
+      next: "Nuestra filosofía",
     },
   },
   slides: {
@@ -156,6 +152,16 @@ export const es = {
       "Por ello, nos especializamos en el análisis cualitativo y la evaluación detallada de video, identificando patrones, comportamientos tácticos y aspectos clave del desempeño que las estadísticas tradicionales no logran evidenciar. Nuestro objetivo es transformar cada detalle del juego en información valiosa para comprender, evaluar y potenciar el rendimiento deportivo.",
     ],
     rights: "TactiVision IA · Proyecto académico · Universidad Cooperativa de Colombia",
+    team: {
+      title: "Equipo de trabajo",
+      role: "Estudiante",
+      country: "Colombia",
+      members: [
+        { name: "David Esteban Campiño", photo: "/equipo/david-campino.jpg" },
+        { name: "Juan Manuel Gallardo", photo: "/equipo/juan-gallardo.jpg" },
+        { name: "Jaider Julián Chindoy", photo: "/equipo/jaider-chindoy.jpg" },
+      ],
+    },
   },
   pitch: {
     width: "Ancho del equipo",
