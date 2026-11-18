@@ -1,17 +1,22 @@
 import { formatIndicatorValue, indicatorLabel } from "../../i18n/labels";
 
-export type TeamGroup = "team_a" | "team_b" | "match";
-export const TEAM_GROUPS: TeamGroup[] = ["team_a", "team_b", "match"];
+/**
+ * In comparisons and evolution the backend names the indicators from the user's team ("own.", "rival.")
+ * when it knows which AI team was ours in each clip; otherwise they keep "team_a." / "team_b.".
+ */
+export type TeamGroup = "own" | "rival" | "team_a" | "team_b" | "match";
+export const TEAM_GROUPS: TeamGroup[] = ["own", "rival", "team_a", "team_b", "match"];
+const TEAM_PREFIXES = new Set<string>(["own", "rival", "team_a", "team_b"]);
 
-/** "team_a.team_width" -> "team_a"; indicators without a team prefix belong to the whole match. */
+/** "team_a.team_width" -> "team_a", "own.team_width" -> "own"; without a team prefix: the whole match. */
 export function groupOf(indicator: string): TeamGroup {
   const prefix = indicator.split(".")[0];
-  return prefix === "team_a" || prefix === "team_b" ? prefix : "match";
+  return TEAM_PREFIXES.has(prefix) ? (prefix as TeamGroup) : "match";
 }
 
 /** How many indicators each group has. */
 export function countByGroup(indicators: string[]): Record<TeamGroup, number> {
-  const counts: Record<TeamGroup, number> = { team_a: 0, team_b: 0, match: 0 };
+  const counts: Record<TeamGroup, number> = { own: 0, rival: 0, team_a: 0, team_b: 0, match: 0 };
   indicators.forEach((indicator) => { counts[groupOf(indicator)] += 1; });
   return counts;
 }
