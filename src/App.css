@@ -7021,6 +7021,7 @@ html {
 }
 
 .hint-item.is-dismissed { opacity: 0.6; }
+.hint-item.is-decided { box-shadow: inset 3px 0 0 var(--accent); }
 
 .hint-photos {
   display: flex;
