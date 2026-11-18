@@ -26,7 +26,7 @@ const CATALOG: Catalog[] = [
   { key: "hash", layer: "backend" },
   { key: "trie", layer: "frontend", to: "/jugadores" },
   { key: "heap", layer: "backend", to: "#monticulo" },
-  { key: "bst", layer: "frontend", to: "/jugadores/ranking" },
+  { key: "bst", layer: "frontend", to: "/estadisticas" },
   { key: "graph", layer: "ai", to: "/partidos" },
 ];
 
