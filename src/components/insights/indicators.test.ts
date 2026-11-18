@@ -25,6 +25,14 @@ describe("tactical indicators in the app", () => {
   it("groups indicators by team", () => {
     expect(groupOf("team_b.isolated_players")).toBe("team_b");
     expect(groupOf("max_zone_numerical_difference")).toBe("match");
-    expect(countByGroup(["team_a.x", "team_a.y", "team_b.x", "match.ball_detection_rate"])).toEqual({ team_a: 2, team_b: 1, match: 1 });
+    expect(countByGroup(["team_a.x", "team_a.y", "team_b.x", "match.ball_detection_rate"]))
+      .toEqual({ own: 0, rival: 0, team_a: 2, team_b: 1, match: 1 });
+  });
+
+  it("groups the indicators of our team and the rival, as comparisons name them", () => {
+    expect(groupOf("own.team_width")).toBe("own");
+    expect(groupOf("rival.team_width")).toBe("rival");
+    expect(indicatorName("own.team_width")).toBe(indicatorName("team_a.team_width"));
+    expect(countByGroup(["own.x", "own.y", "rival.x", "team_a.x"])).toEqual({ own: 2, rival: 1, team_a: 1, team_b: 0, match: 0 });
   });
 });
