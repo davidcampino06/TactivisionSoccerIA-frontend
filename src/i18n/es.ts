@@ -187,6 +187,7 @@ export const es = {
       sectionInsights: "Rendimiento",
       sectionProject: "Proyecto",
       structures: "Estructuras de datos",
+      statistics: "Estadísticas",
       review: "Revisión",
       library: "Videos analizados",
     },
@@ -765,7 +766,16 @@ export const es = {
       },
       shirtShort: "Dorsal",
       noShirt: "S/N",
-      ranking: "Ranking",
+      ranking: "Estadísticas",
+      participation: {
+        title: "Estadísticas de participación",
+        open: "Ver estadísticas y ranking",
+        withData: (withData: number, total: number, seconds: string) =>
+          `${withData} de ${total} jugadores con datos · ${seconds} s identificados en video`,
+        top: "Más tiempo en video",
+        empty: "Todavía no hay datos. Se llenan cuando, en un análisis, asignas las trayectorias de la IA a tus jugadores.",
+        seconds: (value: string) => `${value} s`,
+      },
     },
     structures: {
       eyebrow: "Proyecto académico",
@@ -847,13 +857,16 @@ export const es = {
     },
     ranking: {
       eyebrow: "Plantilla",
-      title: "Ranking de participación",
-      description: "Quién aparece más en los videos analizados. El orden sale de un árbol binario de búsqueda.",
+      title: "Estadísticas de jugadores",
+      description: "Cuánto aparece cada jugador en los videos analizados, contando solo las trayectorias que una persona le asignó. El orden sale de un árbol binario de búsqueda.",
+      summary: (withData: number, total: number) =>
+        `${withData} de ${total} jugadores ya tienen datos. El resto aparecerá cuando lo identifiques en un análisis.`,
       back: "Volver a la plantilla",
       metric: "Ordenar por",
-      metrics: { seconds: "Tiempo en video", detections: "Detecciones", matches: "Partidos analizados" },
+      metrics: { seconds: "Tiempo en video", perMatch: "Promedio por partido", detections: "Detecciones", matches: "Partidos analizados" },
       unit: {
         seconds: (value: string) => `${value} s`,
+        perMatch: (value: string) => `${value} s`,
         detections: (value: string) => value,
         matches: (value: string) => value,
       },
