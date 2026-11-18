@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { api, json } from "../../api/client";
+import DeleteTeamPanel from "../../components/admin/DeleteTeamPanel";
 import Donut from "../../components/dashboard/Donut";
 import { ConfirmButton, EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section, type Tone } from "../../components/ui";
 import { useElementWidth } from "../../hooks/useElementWidth";
@@ -202,6 +203,18 @@ function Users() {
     }
   };
 
+  const remove = async (user: AdminUser) => {
+    setError(null);
+    setNotice("");
+    try {
+      await api(`/api/admin/users/${user.id}`, { method: "DELETE" });
+      users.setData((users.data ?? []).filter((item) => item.id !== user.id));
+      setNotice(t.userDeleted(user.email));
+    } catch (caught) {
+      setError(caught);
+    }
+  };
+
   return (
     <Section>
       <div className="squad-toolbar">
@@ -226,6 +239,8 @@ function Users() {
               {(users.data ?? []).map((user) => {
                 const isAdmin = user.role === "ADMINISTRATOR";
                 const locked = Boolean(user.team_name);
+                // A coach with a team is deleted together with the team (section Equipos).
+                const ownsTeam = user.role === "COACH" && locked;
                 return (
                   <tr key={user.id} className={user.is_active === false ? "row-muted" : undefined}>
                     <td>
@@ -251,6 +266,9 @@ function Users() {
                       {!isAdmin && (user.is_active === false
                         ? <button type="button" className="btn btn-ghost btn-sm" onClick={() => void update(user, { is_active: true })}>{t.activate}</button>
                         : <ConfirmButton label={t.deactivate} confirmLabel={t.deactivateConfirm} onConfirm={() => void update(user, { is_active: false })} />)}
+                      {!isAdmin && (ownsTeam
+                        ? <button type="button" className="btn btn-ghost btn-sm" disabled title={t.deleteUserLocked}>{t.deleteUser}</button>
+                        : <ConfirmButton label={t.deleteUser} confirmLabel={t.deleteUserConfirm} onConfirm={() => void remove(user)} />)}
                     </td>
                   </tr>
                 );
@@ -265,19 +283,25 @@ function Users() {
 
 function Teams() {
   const teams = useLoad(() => api<AdminTeam[]>("/api/admin/teams"), "admin-teams");
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
+  const [error, setError] = useState<unknown>(null);
   return (
     <Section>
-      <ErrorBanner error={teams.error} onRetry={teams.reload} />
+      {notice && <p className="notice" role="status">{notice}</p>}
+      <ErrorBanner error={error ?? teams.error} onRetry={error ? undefined : teams.reload} />
       {teams.loading && !teams.data ? <Loading /> : (teams.data ?? []).length === 0 ? <EmptyState title={t.noTeams} /> : (
         <div className="table-wrap">
           <table className="table">
             <thead>
               <tr><th>{t.team}</th><th>{t.coach}</th><th className="num">{t.analysts}</th><th className="num">{t.players}</th>
-                <th className="num">{t.matches}</th><th className="num">{t.analyses}</th><th>{t.created}</th></tr>
+                <th className="num">{t.matches}</th><th className="num">{t.analyses}</th><th>{t.created}</th>
+                <th aria-label={t.actions} /></tr>
             </thead>
             <tbody>
               {(teams.data ?? []).map((team) => (
-                <tr key={team.id}>
+                <Fragment key={team.id}>
+                <tr>
                   <td>
                     <span className="user-cell">
                       <span className="team-badge" aria-hidden="true">{team.name.split(/\s+/).map((word) => word[0]).slice(0, 2).join("")}</span>
@@ -290,7 +314,27 @@ function Teams() {
                   <td className="num">{team.matches}</td>
                   <td className="num">{team.analyses}</td>
                   <td className="nowrap">{formatServerDate(team.created_at)}</td>
+                  <td className="cell-actions">
+                    {deleting !== team.id && (
+                      <button type="button" className="btn btn-danger btn-sm" onClick={() => { setNotice(""); setDeleting(team.id); }}>
+                        {t.deleteTeam}
+                      </button>
+                    )}
+                  </td>
                 </tr>
+                {deleting === team.id && (
+                  <tr className="row-panel">
+                    <td colSpan={8}>
+                      <DeleteTeamPanel team={team} onCancel={() => setDeleting(null)} onError={setError}
+                        onDeleted={(result) => {
+                          setDeleting(null);
+                          teams.setData((teams.data ?? []).filter((item) => item.id !== team.id));
+                          setNotice(t.teamDeleted(result.team, result.users));
+                        }} />
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>
