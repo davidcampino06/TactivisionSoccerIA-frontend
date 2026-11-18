@@ -5283,6 +5283,24 @@ html {
   opacity: 0.38;
 }
 
+/* Squad page: the statistics card above the roster. */
+.participation-card {
+  margin-bottom: 18px;
+}
+
+.participation-card .ranking-list {
+  margin-top: 6px;
+}
+
+.participation-top-title {
+  margin: 12px 0 0;
+  color: var(--chalk-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .ranking-pos {
   color: var(--chalk-muted);
   font: 800 0.86rem var(--font-mono);
