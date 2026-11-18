@@ -180,6 +180,110 @@
   color: var(--chalk-muted);
 }
 
+/* Team: three small cards under the philosophy text. */
+.team {
+  max-width: 1320px;
+  margin: clamp(48px, 7vw, 88px) auto 0;
+}
+
+.team-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 0 0 22px;
+  font: 500 0.78rem var(--font-mono);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 85%, white);
+}
+
+.team-title::before,
+.team-title::after {
+  content: "";
+  width: 32px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.team-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 248px));
+  justify-content: center;
+  gap: clamp(14px, 3vw, 32px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.team-card {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.team-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center 20%;
+  filter: saturate(0.9);
+}
+
+.team-card-text {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 12px 10px 16px;
+  text-align: center;
+}
+
+.team-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+/* Colombia: yellow (half), blue, red. */
+.team-flag {
+  flex: none;
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  background: linear-gradient(#fcd116 0 50%, #003893 50% 75%, #ce1126 75% 100%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.team-role {
+  margin: 0;
+  font: 500 0.7rem var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--chalk-muted);
+}
+
+.team-rule {
+  width: 28px;
+  height: 2px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .team-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .team-name { flex-direction: column; gap: 4px; font-size: 0.8rem; }
+}
+
 .philosophy-bar {
   display: flex;
   flex-wrap: wrap;
