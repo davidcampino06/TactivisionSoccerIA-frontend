@@ -7112,3 +7112,46 @@ html {
   .hint-item { grid-template-columns: 1fr; }
   .hint-actions { justify-content: flex-start; }
 }
+
+/* Administration: delete buttons side by side, and the panel that confirms deleting a team. */
+.cell-actions > * + * {
+  margin-left: 6px;
+}
+
+.row-panel td {
+  padding-top: 0;
+}
+
+.delete-team {
+  display: grid;
+  gap: 10px;
+  max-width: 640px;
+  margin: 4px 0 8px auto;
+  padding: 16px 18px;
+  border: 1px solid rgba(220, 38, 38, 0.45);
+  border-radius: 14px;
+  background: rgba(220, 38, 38, 0.06);
+  text-align: left;
+}
+
+.delete-team p,
+.delete-team ul {
+  margin: 0;
+}
+
+.delete-team ul {
+  padding-left: 20px;
+  color: var(--chalk-muted);
+}
+
+.delete-team label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.86rem;
+}
+
+.delete-team-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
