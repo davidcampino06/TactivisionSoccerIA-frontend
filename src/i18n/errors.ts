@@ -47,6 +47,8 @@ const SIMPLE_CODES: Record<string, string> = {
   CREST_EMPTY: es.pages.team.identity.badFormat,
   INVITATION_CODE_FAILED: es.errors.invitationCodeFailed,
   ADMIN_MANAGED_BY_CONFIG: es.errors.adminManagedByConfig,
+  COACH_OWNS_TEAM: es.errors.coachOwnsTeam,
+  TEAM_ANALYSIS_RUNNING: es.errors.teamAnalysisRunning,
   ROLE_CHANGE_TEAM_LINKED: es.errors.roleChangeTeamLinked,
   INVALID_ANALYSIS_STATE: es.errors.invalidAnalysisState,
   INVALID_RECOMMENDATION_STATE: es.errors.invalidRecommendationState,
