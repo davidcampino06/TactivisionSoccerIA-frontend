@@ -3,6 +3,7 @@ import { api, json } from "../../api/client";
 import { es } from "../../i18n/es";
 import { formatPercent } from "../../i18n/labels";
 import type { IdentificationHints as Hints, KitHint, Track, TrackLinkHint } from "../../types";
+import { kitDecision } from "./kitDecision";
 import TrackPhoto from "./TrackPhoto";
 
 const t = es.pages.analysis.hints;
@@ -21,6 +22,7 @@ const LINKS_PREVIEW = 5;
 
 const decimal = (value: number) => value.toLocaleString("es-CO", { maximumFractionDigits: 1 });
 
+
 /**
  * What the AI suggests to tell who is who, and nothing more: two tracks that look like the same
  * player hidden for a moment, and the people whose shirt is of no team. A person says yes or no;
@@ -31,6 +33,13 @@ export default function IdentificationHints({ analysisId, hints, tracks, onChang
   const [keeper, setKeeper] = useState<Record<number, string>>({});
   const [done, setDone] = useState("");
   const [allLinks, setAllLinks] = useState(false);
+  // Kits whose decision the person reopened with "Cambiar".
+  const [editing, setEditing] = useState<Set<number>>(new Set());
+  const editKit = (group: number, open: boolean) => setEditing((current) => {
+    const next = new Set(current);
+    if (open) next.add(group); else next.delete(group);
+    return next;
+  });
   const byId = new Map(tracks.map((track) => [track.track_id, track]));
   const pending = hints.links.filter((link) => link.status === "SUGGESTED");
   const decided = hints.links.filter((link) => link.status !== "SUGGESTED");
@@ -62,7 +71,11 @@ export default function IdentificationHints({ analysisId, hints, tracks, onChang
   const markKit = (kit: KitHint, body: { role: string; shirt_number?: number | null }) =>
     run(`kit-${kit.kit_group}`, () => api<{ tracks: number[] }>(
       `/api/analyses/${analysisId}/kits/${kit.kit_group}/identity`, { method: "PUT", body: json(body) }))
-      .then((result) => { if (result) setDone(t.kitDone(result.tracks?.length ?? kit.tracks.length)); });
+      .then((result) => {
+        if (!result) return;
+        setDone(t.kitDone(result.tracks?.length ?? kit.tracks.length));
+        editKit(kit.kit_group, false);
+      });
 
   const dismissKit = (kit: KitHint, dismissed: boolean) => run(`kit-${kit.kit_group}`, () =>
     api(`/api/analyses/${analysisId}/kits/${kit.kit_group}`, { method: "PUT", body: json({ dismissed }) }));
@@ -128,8 +141,11 @@ export default function IdentificationHints({ analysisId, hints, tracks, onChang
       {hints.kits.length > 0 && <h4 className="hint-subtitle">{t.kitsTitle}</h4>}
       {hints.kits.length > 0 && (
         <ul className="hint-list">
-          {hints.kits.map((kit) => (
-            <li key={kit.kit_group} className={`hint-item hint-kit${kit.dismissed ? " is-dismissed" : ""}`}>
+          {hints.kits.map((kit) => {
+            const decision = kitDecision(kit, byId);
+            const showDecision = decision !== null && !kit.dismissed && !editing.has(kit.kit_group);
+            return (
+            <li key={kit.kit_group} className={`hint-item hint-kit${kit.dismissed ? " is-dismissed" : ""}${showDecision ? " is-decided" : ""}`}>
               <div className="hint-photos">
                 <span className="kit-swatch" style={{ background: kit.kit_color }} aria-hidden="true" />
                 {kit.tracks.slice(0, 6).map((id) => <span key={id}>{photo(id)}</span>)}
@@ -138,7 +154,15 @@ export default function IdentificationHints({ analysisId, hints, tracks, onChang
                 <strong>{t.kitTitle(kit.suggestion)} · {t.kitTracks(kit.tracks.length)}</strong>
                 <span className="muted small">{kit.reason}</span>
               </div>
-              {kit.dismissed ? (
+              {showDecision ? (
+                <div className="hint-actions" role="status">
+                  <span className="chip chip-sm chip-good">
+                    {decision.kind === "referee" ? t.markedReferee(kit.tracks.length) : t.markedNumber(decision.number, kit.tracks.length)}
+                  </span>
+                  <button type="button" className="btn btn-ghost btn-sm" disabled={busy !== null}
+                    onClick={() => editKit(kit.kit_group, true)}>{t.changeKit}</button>
+                </div>
+              ) : kit.dismissed ? (
                 <div className="hint-actions">
                   <span className="chip chip-sm">{t.dismissed}</span>
                   <button type="button" className="btn btn-ghost btn-sm" disabled={busy !== null}
@@ -147,7 +171,9 @@ export default function IdentificationHints({ analysisId, hints, tracks, onChang
               ) : (
                 <div className="hint-actions">
                   <button type="button" className="btn btn-primary btn-sm" disabled={busy !== null}
-                    onClick={() => void markKit(kit, { role: "REFEREE" })}>{t.isReferee}</button>
+                    onClick={() => void markKit(kit, { role: "REFEREE" })}>
+                    {busy === `kit-${kit.kit_group}` ? t.saving : t.isReferee}
+                  </button>
                   <form className="hint-keeper" onSubmit={(event) => {
                     event.preventDefault();
                     const number = Number(keeper[kit.kit_group]);
@@ -165,10 +191,16 @@ export default function IdentificationHints({ analysisId, hints, tracks, onChang
                   </form>
                   <button type="button" className="btn btn-ghost btn-sm" disabled={busy !== null}
                     onClick={() => void dismissKit(kit, true)}>{t.dismissKit}</button>
+                  {decision !== null && (
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => editKit(kit.kit_group, false)}>
+                      {t.cancelChange}
+                    </button>
+                  )}
                 </div>
               )}
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </div>
