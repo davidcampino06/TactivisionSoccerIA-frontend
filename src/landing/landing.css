@@ -183,70 +183,6 @@
 
 .vhero-next:hover { color: #fff; }
 
-/* ---------- how it works ---------- */
-
-.how {
-  padding: clamp(64px, 9vw, 120px) clamp(16px, 5vw, 72px);
-  background: var(--ink);
-}
-
-.how-head { display: grid; gap: 12px; max-width: 1320px; margin: 0 auto 36px; }
-
-.how-title {
-  margin: 0;
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: clamp(1.8rem, 3.2vw, 2.7rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.how-steps {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0;
-  list-style: none;
-}
-
-.how-step {
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.how-step img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  filter: saturate(0.85);
-  transition: transform 0.6s ease;
-}
-
-.how-step:hover img { transform: scale(1.04); }
-
-.how-step-text { display: grid; gap: 8px; padding: 18px 18px 22px; }
-
-.how-step-eyebrow {
-  margin: 0;
-  font: 500 0.7rem var(--font-mono);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--accent) 85%, white);
-}
-
-.how-step h3 { margin: 0; font-size: 1.1rem; line-height: 1.3; }
-
-.how-step p:last-child { margin: 0; font-size: 0.92rem; line-height: 1.55; color: var(--chalk-muted); }
-
-@media (max-width: 1100px) {
-  .how-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
 @media (max-width: 760px) {
   .vhero { padding-top: calc(env(safe-area-inset-top, 0px) + 96px); }
   .vhero-shade {
@@ -254,13 +190,11 @@
       linear-gradient(0deg, rgba(6, 10, 9, 0.92) 0%, rgba(6, 10, 9, 0.55) 55%, rgba(6, 10, 9, 0.35) 100%);
   }
   .vhero-copy { align-self: end; }
-  .how-steps { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .vhero-media,
-  .vhero-copy,
-  .how-step img { animation: none; transition: none; }
+  .vhero-copy { animation: none; transition: none; }
 }
 
 /* Changing screen (landing <-> auth) fades the new one in. */
