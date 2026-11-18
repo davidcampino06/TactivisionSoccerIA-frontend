@@ -152,6 +152,8 @@
 .philosophy-title {
   grid-area: title;
   align-self: center;
+  justify-self: center;
+  text-align: center;
   margin: 0;
   font-family: var(--font-display);
   font-stretch: 62%;
@@ -831,6 +833,8 @@
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "eyebrow" "title" "lead" "body";
   }
+
+  .philosophy-title { justify-self: start; text-align: left; }
 
   .field-row,
   .rules {
