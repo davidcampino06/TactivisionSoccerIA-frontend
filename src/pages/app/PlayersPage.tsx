@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { api } from "../../api/client";
 import { PLAYER_STATUS_TONE } from "../../app/tones";
 import { useTeam } from "../../app/teamState";
+import ParticipationCard from "../../components/players/ParticipationCard";
 import PlayerForm from "../../components/players/PlayerForm";
 import { isUnavailable, returnText } from "../../components/players/availability";
 import { EmptyState, ErrorBanner, Loading, PageHeader, Pill, Section } from "../../components/ui";
@@ -10,7 +11,7 @@ import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { label } from "../../i18n/labels";
 import { Trie, searchAll } from "../../structures/Trie";
-import type { Player } from "../../types";
+import type { Player, PlayerStats } from "../../types";
 
 const t = es.pages.players;
 type Filter = "active" | "INJURED" | "SUSPENDED" | "UNAVAILABLE" | "INACTIVE";
@@ -45,6 +46,8 @@ export default function PlayersPage() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("active");
   const players = useLoad(() => api<Player[]>(`/api/teams/${team!.id}/players?include_inactive=true`), team!.id);
+  // Statistics are optional on this page: if they fail, the squad still works and the card is simply not shown.
+  const stats = useLoad(() => api<PlayerStats[]>(`/api/teams/${team!.id}/player-stats`), team!.id);
 
   const all = useMemo(() => players.data ?? [], [players.data]);
   const trie = useMemo(() => buildIndex(all), [all]);
@@ -65,7 +68,7 @@ export default function PlayersPage() {
       <PageHeader eyebrow={t.eyebrow} title={t.title} description={players.data ? t.description(squadSize) : undefined}
         actions={!showForm && (
           <div className="header-actions">
-            <Link to="/jugadores/ranking" className="btn btn-ghost">{t.ranking}</Link>
+            <Link to="/estadisticas" className="btn btn-ghost">{t.ranking}</Link>
             {isCoach && <button type="button" className="btn btn-primary" onClick={() => setParams({ nuevo: "1" })}>{t.create}</button>}
           </div>
         )} />
@@ -102,7 +105,8 @@ export default function PlayersPage() {
             </div>
           </div>
 
-          {search && <TriePanel trie={trie} search={search} query={query} />}
+          {search ? <TriePanel trie={trie} search={search} query={query} />
+            : !showForm && stats.data && stats.data.length > 0 && <ParticipationCard stats={stats.data} />}
 
           {groups.length === 0 ? (
             <Section><EmptyState title={search ? t.noResults(query.trim()) : t.noneInFilter} /></Section>
