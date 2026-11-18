@@ -69,7 +69,8 @@ export default function AppRoutes({ user, onUserChange, onLogout }: Props) {
             <Route path="revision" element={<TeamOnly><ReviewInboxPage /></TeamOnly>} />
             <Route path="biblioteca" element={<TeamOnly><ClipLibraryPage /></TeamOnly>} />
             <Route path="jugadores" element={<TeamOnly><PlayersPage /></TeamOnly>} />
-            <Route path="jugadores/ranking" element={<TeamOnly><PlayerRankingPage /></TeamOnly>} />
+            <Route path="estadisticas" element={<TeamOnly><PlayerRankingPage /></TeamOnly>} />
+            <Route path="jugadores/ranking" element={<Navigate to="/estadisticas" replace />} />
             <Route path="jugadores/:playerId" element={<TeamOnly><PlayerDetailPage /></TeamOnly>} />
             <Route path="diseno-tactico" element={<TeamOnly><TacticsPage /></TeamOnly>} />
             <Route path="diseno-tactico/:playId" element={<TeamOnly><TacticalEditorPage /></TeamOnly>} />
