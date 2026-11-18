@@ -6,7 +6,6 @@ import { es } from "../i18n/es";
 import "../landing/landing.css";
 import "../landing/slideshow.css";
 import HeroSlideshow from "../landing/HeroSlideshow";
-import HowItWorks from "../landing/HowItWorks";
 import PhilosophyFooter from "../landing/PhilosophyFooter";
 import VideoHero from "../landing/VideoHero";
 import type { User } from "../types";
@@ -76,8 +75,8 @@ export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props)
         {screen === "landing" ? (
           <>
             <nav className="topnav" aria-label={es.brand.name}>
-              <a href="#como-funciona">{es.landing.nav.how}</a>
               <a href="#filosofia">{es.landing.nav.philosophy}</a>
+              <a href="#equipo">{es.landing.nav.team}</a>
             </nav>
             <div className="topbar-actions">
               <button type="button" className="cta-ghost small" onClick={() => openDrawer("login")}>{es.landing.login}</button>
@@ -97,7 +96,6 @@ export default function AuthPage({ onAuthenticated, sessionNotice = "" }: Props)
       {screen === "landing" ? (
         <div className="screen-fade" key="landing">
           <VideoHero paused={drawer.open} onStart={() => openDrawer("register")} onLogin={() => openDrawer("login")} />
-          <HowItWorks />
           <PhilosophyFooter />
         </div>
       ) : (
