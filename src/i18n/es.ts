@@ -704,6 +704,11 @@ export const es = {
         dismissed: "Descartada",
         restoreKit: "Volver a mostrar",
         kitDone: (n: number) => `Listo: se marcaron ${n === 1 ? "1 trayectoria" : `${n} trayectorias`}.`,
+        markedReferee: (n: number) => (n === 1 ? "Marcada como árbitro" : `Marcadas como árbitro (${n})`),
+        markedNumber: (number: number, n: number) => (n === 1 ? `Dorsal ${number}` : `Dorsal ${number} en las ${n}`),
+        changeKit: "Cambiar",
+        cancelChange: "Cancelar",
+        saving: "Guardando…",
       },
       frames: "Cuadros",
       video: {
