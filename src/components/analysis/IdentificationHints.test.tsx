@@ -67,6 +67,30 @@ describe("IdentificationHints", () => {
       { method: "PUT", body: JSON.stringify({ role: "PLAYER", shirt_number: 1 }) }));
   });
 
+  it("once the kit is marked as the referee the card says so, and it can be changed", () => {
+    const marked = tracks.map((item) => ([7, 8].includes(item.track_id) ? { ...item, role: "REFEREE" as const } : item));
+    render(<IdentificationHints analysisId="a1" hints={hints()} tracks={marked} onChanged={() => {}} onError={() => {}} />);
+    expect(screen.getByText("Marcadas como árbitro (2)")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Es el árbitro" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Cambiar" }));
+    expect(screen.getByRole("button", { name: "Es el árbitro" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(screen.getByText("Marcadas como árbitro (2)")).toBeTruthy();
+  });
+
+  it("a goalkeeper's number saved for the kit is shown on the card", () => {
+    const marked = tracks.map((item) => ([7, 8].includes(item.track_id) ? { ...item, role: "PLAYER" as const, player_number: 13 } : item));
+    render(<IdentificationHints analysisId="a1" hints={hints()} tracks={marked} onChanged={() => {}} onError={() => {}} />);
+    expect(screen.getByText("Dorsal 13 en las 2")).toBeTruthy();
+  });
+
+  it("a kit with only some tracks marked still asks", () => {
+    const partly = tracks.map((item) => (item.track_id === 7 ? { ...item, role: "REFEREE" as const } : item));
+    render(<IdentificationHints analysisId="a1" hints={hints()} tracks={partly} onChanged={() => {}} onError={() => {}} />);
+    expect(screen.getByRole("button", { name: "Es el árbitro" })).toBeTruthy();
+  });
+
   it("a conflict is passed to the page, which shows it", async () => {
     const conflict = new Error("conflict");
     apiMock.mockRejectedValueOnce(conflict);
