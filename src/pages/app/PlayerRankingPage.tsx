@@ -9,20 +9,20 @@ import { es } from "../../i18n/es";
 import { formatNumber, label } from "../../i18n/labels";
 import { BinarySearchTree, minimumHeight } from "../../structures/BinarySearchTree";
 import type { PlayerStats } from "../../types";
+import { METRICS, metricValue, type Metric } from "../../components/players/participation";
 
 const t = es.pages.ranking;
-type Metric = "seconds" | "detections" | "matches";
-const METRICS: Metric[] = ["seconds", "detections", "matches"];
+
 
 /** Tree key: the metric, and the surname to break ties (so every key is unique). */
 interface RankKey { value: number; name: string }
 // Bigger value = bigger key; with the same value the alphabetically FIRST surname is the bigger key,
 // so the descending ranking lists ties in alphabetical order.
 const compareKeys = (a: RankKey, b: RankKey) => a.value - b.value || b.name.localeCompare(a.name, "es");
-const keyOf = (player: PlayerStats, metric: Metric): RankKey => ({ value: player[metric], name: `${player.last_name} ${player.first_name}` });
+const keyOf = (player: PlayerStats, metric: Metric): RankKey => ({ value: metricValue(player, metric), name: `${player.last_name} ${player.first_name}` });
 
 const formatValue = (value: number, metric: Metric) =>
-  t.unit[metric](metric === "seconds" ? formatNumber(value, 1) : String(value));
+  t.unit[metric](metric === "seconds" || metric === "perMatch" ? formatNumber(value, 1) : String(value));
 
 export default function PlayerRankingPage() {
   const { team } = useTeam();
@@ -46,7 +46,8 @@ export default function PlayerRankingPage() {
   const tree = balanced ? trees.avl : trees.plain;
 
   const ranking = useMemo(() => tree.descending(), [tree]);
-  const max = Math.max(0, ...players.map((player) => player[metric]));
+  const max = Math.max(0, ...players.map((player) => metricValue(player, metric)));
+  const withData = players.filter((player) => player.detections > 0).length;
   const threshold = Math.min(minimum, max);
   const range = useMemo(
     // Lower bound just under the threshold: every key with value >= threshold is inside, whatever its name.
@@ -82,20 +83,21 @@ export default function PlayerRankingPage() {
             {hasData && (
               <label className="ranking-range">
                 <span>{t.minimum}</span>
-                <input type="range" min={0} max={max} step={metric === "seconds" ? 0.5 : 1} value={threshold}
+                <input type="range" min={0} max={max} step={metric === "seconds" || metric === "perMatch" ? 0.5 : 1} value={threshold}
                   onChange={(event) => setMinimum(Number(event.target.value))} />
                 <strong>{t.minimumValue(formatValue(threshold, metric))}</strong>
                 <small>{t.inRange(range.values.length, players.length)}</small>
               </label>
             )}
           </div>
-          {!hasData && <p className="notice notice-info">{t.noData}</p>}
+          {hasData ? (withData < players.length && <p className="muted">{t.summary(withData, players.length)}</p>)
+            : <p className="notice notice-info">{t.noData}</p>}
 
           <div className="ranking-layout">
             <Section title={t.listTitle} className="ranking-list-panel">
               <ol className="ranking-list">
                 {ranking.map((player, index) => {
-                  const value = player[metric];
+                  const value = metricValue(player, metric);
                   return (
                     <li key={player.player_id}>
                       <Link to={`/jugadores/${player.player_id}`}
@@ -194,10 +196,10 @@ function TreeDiagram({ tree, metric, path, visited, inRange, hovered }: DiagramP
             onPath.has(player) ? "is-path" : "", hovered === player ? "is-target" : ""].join(" ");
           return (
             <g key={player.player_id} className={classes} transform={`translate(${cx},${cy})`}>
-              <title>{`${player.first_name} ${player.last_name}: ${formatValue(player[metric], metric)}`}</title>
+              <title>{`${player.first_name} ${player.last_name}: ${formatValue(metricValue(player, metric), metric)}`}</title>
               <circle r={15} />
               <text className="bst-label" dy="0.35em">{player.shirt_number ?? "–"}</text>
-              <text className="bst-value" dy="2.35em">{formatValue(player[metric], metric)}</text>
+              <text className="bst-value" dy="2.35em">{formatValue(metricValue(player, metric), metric)}</text>
             </g>
           );
         })}
