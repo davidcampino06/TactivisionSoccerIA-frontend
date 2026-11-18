@@ -936,7 +936,7 @@ export const es = {
     },
     insights: {
       team: "Equipo",
-      teams: { team_a: "Equipo A", team_b: "Equipo B", match: "Partido" } as Record<string, string>,
+      teams: { own: "Nuestro equipo", rival: "Rival", team_a: "Equipo A", team_b: "Equipo B", match: "Partido" } as Record<string, string>,
       threshold: "Umbral",
       riskAbove: "Riesgo si sube del umbral",
       riskBelow: "Riesgo si baja del umbral",
@@ -1321,7 +1321,7 @@ export const es = {
       left_to_right: "Mi equipo ataca de izquierda a derecha",
       right_to_left: "Mi equipo ataca de derecha a izquierda",
     },
-    team: { team_a: "Equipo A", team_b: "Equipo B", match: "Partido", TEAM_A: "Equipo A", TEAM_B: "Equipo B", MATCH: "Partido" },
+    team: { own: "Nuestro equipo", rival: "Rival", team_a: "Equipo A", team_b: "Equipo B", match: "Partido", TEAM_A: "Equipo A", TEAM_B: "Equipo B", MATCH: "Partido" },
     indicator: {
       team_width: "Ancho del equipo",
       team_length: "Largo del equipo",
