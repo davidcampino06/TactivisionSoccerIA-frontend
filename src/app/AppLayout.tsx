@@ -22,6 +22,8 @@ const ICONS = {
   team: icon("M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19M10 10.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6M20 19v-1.5a3.5 3.5 0 0 0-2.5-3.35M15.5 4.6a3 3 0 0 1 0 5.8"),
   matches: icon("M4 5h16v14H4zM4 12h16M12 5v14M8.5 12a3.5 3.5 0 1 0 7 0 3.5 3.5 0 1 0-7 0"),
   players: icon("M9 3l3 2 3-2 4 3-2 4h-2v11H9V10H7L5 6z"),
+  // A podium: who appears most in the analysed videos.
+  statistics: icon("M3 20h18M4 20v-6h5v6M9.5 20V9h5v11M15 20v-8h5v8"),
   tactics: icon("M5 5l4 4M9 5 5 9M15 15l4 4M19 15l-4 4M7 17c3 0 4-3 6-6s3-4 6-4"),
   comparison: icon("M6 20V10M12 20V4M18 20v-7"),
   evolution: icon("M3 17l6-6 4 4 8-8M15 7h6v6"),
@@ -102,6 +104,7 @@ export default function AppLayout({ onLogout }: { onLogout: () => void }) {
       { title: es.app.nav.sectionTeam, items: [
         { to: "/equipo", text: es.app.nav.team, icon: ICONS.team },
         { to: "/jugadores", text: es.app.nav.players, icon: ICONS.players, needsTeam: true },
+        { to: "/estadisticas", text: es.app.nav.statistics, icon: ICONS.statistics, needsTeam: true },
       ] },
       { title: es.app.nav.sectionInsights, items: [
         { to: "/comparacion", text: es.app.nav.comparison, icon: ICONS.comparison, needsTeam: true },
