@@ -155,7 +155,7 @@ export default function VideoHero({ paused, onStart, onLogin }: { paused: boolea
             aria-pressed={userPaused} disabled={reducedMotion}>
             {userPaused || reducedMotion ? t.play : t.pause}
           </button>
-          <a href="#como-funciona" className="vhero-next">{t.next} <span aria-hidden="true">↓</span></a>
+          <a href="#filosofia" className="vhero-next">{t.next} <span aria-hidden="true">↓</span></a>
         </div>
       </div>
     </section>
