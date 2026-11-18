@@ -23,7 +23,19 @@ describe("AuthPage", () => {
     render(<AuthPage onAuthenticated={() => {}} />);
     expect(videoHero()).toBeTruthy();
     expect(slideshow()).toBeNull();
-    expect(document.getElementById("como-funciona")).toBeTruthy();
+    expect(document.getElementById("filosofia")).toBeTruthy();
+  });
+
+  it("shows the work team, as students, under the philosophy", () => {
+    render(<AuthPage onAuthenticated={() => {}} />);
+    expect(document.getElementById("como-funciona")).toBeNull();
+    const team = document.getElementById("equipo")!;
+    expect(team.closest("#filosofia")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Equipo de trabajo" })).toBeTruthy();
+    for (const name of ["David Esteban Campiño", "Juan Manuel Gallardo", "Jaider Julián Chindoy"]) {
+      expect(screen.getByRole("img", { name })).toBeTruthy();
+    }
+    expect(screen.getAllByText("Estudiante")).toHaveLength(3);
   });
 
   it.each([["Empezar ahora"], ["Iniciar sesión"], ["Crear cuenta"]])(
