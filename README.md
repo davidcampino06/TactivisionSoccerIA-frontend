@@ -4,8 +4,10 @@
 
 Aplicación web de **TactiVision IA**: el cuerpo técnico de un equipo sube los videos de sus partidos,
 la inteligencia artificial detecta y sigue a los jugadores, y la app muestra indicadores tácticos,
-posibles problemas con su evidencia y nivel de confianza, y recomendaciones. Además tiene pizarra
-táctica, plantilla, ranking, comparación, evolución y reportes.
+posibles problemas con su evidencia y nivel de confianza, recomendaciones y tres ejercicios de
+entrenamiento sugeridos por problema. El cuerpo técnico identifica a sus jugadores sobre el video
+(dorsales, árbitro, uniones de trayectorias) y con eso se llenan las estadísticas de cada jugador.
+Además tiene pizarra táctica, plantilla, comparación, evolución y reportes.
 
 React 19 + TypeScript + Vite. Se comunica **solo con el Backend** (`VITE_API_URL`); nunca llama al
 servicio de IA directamente.
@@ -19,6 +21,10 @@ pull request se ejecutan lint, pruebas (Vitest) y build.
 oscuro y de día en el claro, `public/backdrop`, licencia Unsplash) y cada panel y botón es de vidrio
 esmerilado (`src/glass.css`). Títulos en Anton (letra de camiseta, condensada) y texto en Inter.
 
+**Marca:** el logo TVIA (escudo con las letras dentro de un visor de cámara y el punto rojo de grabación)
+está trazado en vectores en `src/components/Logo.tsx`: las letras toman el color del texto, así se lee en
+modo claro y oscuro. `public/favicon.svg` es el mismo logo y cambia de color con el tema del navegador.
+
 ## Pantallas
 
 | | |
@@ -28,7 +34,7 @@ esmerilado (`src/glass.css`). Títulos en Anton (letra de camiseta, condensada) 
 | ![Posibles problemas](docs/capturas/problemas.png) | ![Red de cercanía](docs/capturas/red-cercania.png) |
 | **Resultado del análisis**: lo que cada equipo hizo bien y cada posible problema, con evidencia, confianza y explicación en lenguaje de fútbol; los problemas se revisan, confirman o descartan. | **Red de cercanía en 3D**: el grafo de apoyos entre compañeros y el recorrido BFS desde el jugador elegido (a cuántos pases cortos está cada uno). |
 | ![Ranking con árbol binario](docs/capturas/ranking.png) | ![Montículo de prioridades](docs/capturas/monticulo.png) |
-| **Ranking de participación**: el orden sale de un árbol binario de búsqueda; se compara el árbol AVL con el árbol sin balancear. | **Montículo**: la cola de revisión del backend (heap) dibujada como árbol y como arreglo. |
+| **Estadísticas de jugadores** (`/estadisticas`): tiempo en video, promedio por partido, detecciones y partidos de cada jugador identificado; el orden sale de un árbol binario de búsqueda y se compara el árbol AVL con el árbol sin balancear. | **Montículo**: la cola de revisión del backend (heap) dibujada como árbol y como arreglo. |
 | ![Evolución](docs/capturas/evolucion.png) | ![Panel de administración](docs/capturas/admin.png) |
 | **Evolución**: cada indicador partido a partido, con su umbral y si mejora o empeora. | **Administración** (modo oscuro): totales de la plataforma, usuarios, equipos y estado del sistema, sin acceso al contenido táctico de ningún equipo. |
 
@@ -41,25 +47,27 @@ La interfaz funciona en celular (menú lateral desplegable) y tiene modo claro y
 | Rol | Puede |
 |---|---|
 | **Entrenador** (`COACH`) | Crear su equipo y compartir el código de invitación; registrar partidos, jugadores y eventos; subir videos y lanzar análisis (con video real o en modo simulación); revisar posibles problemas; diseñar jugadas; generar reportes; comparar partidos; ver la evolución. |
-| **Analista** (`ANALYST`) | Unirse a un equipo con el código de invitación y trabajar en sus partidos, análisis, jugadas y reportes. |
-| **Administrador** (`ADMINISTRATOR`) | Ver totales de la plataforma, activar o desactivar cuentas, cambiar roles, ver equipos y el estado del sistema. **No** ve partidos, análisis ni jugadas (privacidad de cada equipo). |
+| **Analista** (`ANALYST`) | Unirse a un equipo con el código de invitación; registrar partidos, subir videos y lanzar análisis, revisar problemas, identificar jugadores, comparar y generar reportes. Ve las jugadas y la plantilla, pero no las edita ni borra. |
+| **Administrador** (`ADMINISTRATOR`) | Ver totales de la plataforma, activar, desactivar o eliminar cuentas, cambiar roles, ver y eliminar equipos (con todo su contenido y sus cuentas) y ver el estado del sistema. **No** ve partidos, análisis ni jugadas (privacidad de cada equipo). |
 
 ## Rutas
 
 | Ruta | Pantalla |
 |---|---|
-| `/` | Página de inicio (sin sesión) o redirección al panel |
+| `/` | Página de inicio (sin sesión): video con detecciones, filosofía y equipo de trabajo; o redirección al panel |
 | `/panel` | Centro de mando del equipo |
 | `/equipo` | Crear el equipo o unirse con código; miembros e invitación |
-| `/partidos`, `/partidos/:id` | Calendario, resultados, eventos, videos y análisis de cada partido |
-| `/analisis/:id` | Resultado del análisis: problemas, red de cercanía, indicadores |
-| `/jugadores`, `/jugadores/:id`, `/jugadores/ranking` | Plantilla con búsqueda instantánea, ficha y ranking. Cada jugador puede estar disponible, lesionado, suspendido o no disponible (motivo personal u otro), con el motivo y la fecha estimada de regreso; ese día la campana lo recuerda y el diseño táctico lo marca con una cruz roja |
+| `/partidos`, `/partidos/:id` | Calendario, resultados, eventos, videos y análisis de cada partido. La fecha y hora se eligen en un calendario propio con **Confirmar** y **Cancelar** (`DateTimePicker`): el selector del navegador no tiene botón de confirmar en computador |
+| `/analisis/:id` | Resultado del análisis: video con recuadros donde se ponen los dorsales, sugerencias de la IA para identificar (mismo jugador, árbitro o arquero; cada camiseta ya decidida muestra la decisión y **Cambiar**), problemas con sus ejercicios sugeridos, red de cercanía e indicadores |
+| `/jugadores`, `/jugadores/:id` | Plantilla con búsqueda instantánea, ficha y una tarjeta de estadísticas con los tres jugadores que más aparecen. Cada jugador puede estar disponible, lesionado, suspendido o no disponible (motivo personal u otro), con el motivo y la fecha estimada de regreso; ese día la campana lo recuerda y el diseño táctico lo marca con una cruz roja |
+| `/estadisticas` | Estadísticas y ranking de jugadores (árbol AVL). La dirección vieja `/jugadores/ranking` redirige aquí |
+| `/revision` | Bandeja de revisión: los posibles problemas del más urgente al menos urgente (montículo), con sus ejercicios sugeridos |
 | `/diseno-tactico`, `/diseno-tactico/:id` | Jugadas y pizarra táctica |
-| `/comparacion`, `/evolucion` | Comparar dos partidos; tendencia de cada indicador |
-| `/reportes`, `/reportes/:id` | Reportes con la foto de los datos del momento en que se generaron |
+| `/comparacion`, `/evolucion` | Comparar hasta 4 partidos (Nuestro equipo frente a Rival) y descargar el PDF; tendencia de cada indicador |
+| `/reportes`, `/reportes/:id` | Reportes con la foto de los datos del momento en que se generaron. El PDF (lo arma el Backend) lleva el logo TVIA y el escudo del equipo, o un escudo negro por defecto si el equipo no subió uno |
 | `/estructuras` | Las estructuras de datos del proyecto, explicadas y en uso |
 | `/perfil` | Datos personales y cambio de contraseña |
-| `/admin`, `/admin/usuarios`, `/admin/equipos`, `/admin/sistema` | Administración |
+| `/admin`, `/admin/usuarios`, `/admin/equipos`, `/admin/sistema` | Administración. Eliminar un equipo abre un panel que lista lo que se perderá y solo se confirma escribiendo el nombre del equipo (`components/admin/DeleteTeamPanel.tsx`) |
 
 Los enlaces de recuperación de contraseña llegan por correo y abren la app; por eso el sitio en
 Render tiene la regla de reescritura `/*` → `/index.html`.
@@ -119,7 +127,7 @@ src/
   api/          cliente HTTP (token, errores en español)
   app/          rutas, layout, contexto del equipo
   pages/        una página por ruta (pages/app/*)
-  components/   componentes por área: analysis, auth, charts, dashboard, insights, tactics, ...
+  components/   componentes por área: admin, analysis, auth, charts, dashboard, insights, players, tactics, ...
   structures/   Stack, UndoHistory, Trie, BinarySearchTree (con sus pruebas)
   security/     cifrado RSA, reglas de contraseña, sesión (con sus pruebas)
   i18n/         todos los textos en español y las etiquetas de los códigos del backend
@@ -130,7 +138,8 @@ src/
 ## Pruebas (Vitest)
 
 Las estructuras de datos propias (`src/structures/`), la seguridad del inicio de sesión
-(`src/security/`, formulario de login) y la lectura de indicadores tienen pruebas unitarias:
+(`src/security/`, formulario de login), la lectura de indicadores y los componentes principales tienen
+pruebas: 179 pruebas en 44 archivos.
 
 ```bash
 npm test
@@ -147,6 +156,12 @@ npm test
 | Sesión (JWT) | Cierre de sesión automático | Lee la expiración del token, detecta el vencimiento y avisa a la app |
 | Formulario de login | Pantalla de inicio de sesión | La contraseña nunca queda en el HTML, botón del ojito, solo viaja cifrada, al fallar se borra solo la contraseña y el error sale en español |
 | Indicadores | Panel, análisis y evolución | Del lado de riesgo de cada indicador (alto o bajo), etiquetas y unidades |
+| `DateTimePicker` | Registro de partidos | La fecha solo cambia al pulsar Confirmar; Cancelar y Escape la dejan igual; respeta minutos que no son múltiplo de 5 |
+| `IdentificationHints` | Identificación de jugadores | Uniones de trayectorias, camisetas de árbitro o arquero; una camiseta ya marcada muestra la decisión y se puede cambiar |
+| `TrainingDrills` | Posibles problemas | Ejercicio principal y alternativas, plegados, con la aclaración de que no los calcula la IA |
+| Estadísticas (`participation`, `ParticipationCard`) | Jugadores y Estadísticas | Promedio por partido, resumen de la plantilla y los tres que más aparecen |
+| `DeleteTeamPanel` | Administración | Un equipo solo se elimina después de escribir su nombre; un rechazo del servidor se muestra |
+| Página de inicio | Inicio | Sin la sección "Cómo funciona"; el equipo de trabajo, tres estudiantes, debajo de la filosofía |
 
 ## Despliegue (Render)
 
