@@ -7358,3 +7358,6 @@ html {
 @media (max-width: 640px) {
   .drill dl { grid-template-columns: 1fr; }
 }
+
+/* The situation picker and, under it, the name of a situation written by the staff ("Otra"). */
+.situation-choice { display: grid; gap: 8px; align-content: start; }
