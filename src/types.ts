@@ -53,6 +53,8 @@ export interface Video {
   /** Tactical situation the clip shows, chosen by a person; null: not classified. */
   situation?: string | null;
   situation_note?: string | null;
+  /** Name written by the staff when situation is OTHER (up to 30 characters). */
+  situation_custom?: string | null;
 }
 
 /** GET /api/teams/{id}/clip-library */
@@ -62,6 +64,7 @@ export interface ClipLibrary {
     file_name: string;
     situation: string | null;
     situation_note: string | null;
+    situation_custom?: string | null;
     match: { id: string; opponent: string; match_date: string };
     analysis: { id: string; mode: string; completed_at: string | null; own_team_known: boolean };
     /** team: TEAM_A, TEAM_B or MATCH; shown when the analysis does not know which team is ours. */
