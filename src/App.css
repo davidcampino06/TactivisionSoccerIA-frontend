@@ -7299,3 +7299,53 @@ html {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* Suggested training exercise under a possible issue. */
+.drill {
+  margin-top: 10px;
+  border: 1px solid rgba(var(--fg), 0.12);
+  border-left: 3px solid #5e9c3a;
+  border-radius: 10px;
+  background: rgba(var(--fg), 0.03);
+}
+
+.drill summary {
+  padding: 10px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.drill dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0 12px 4px;
+}
+
+.drill dt {
+  font: 600 0.72rem var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--chalk-muted);
+  padding-top: 2px;
+}
+
+.drill dd {
+  margin: 0;
+}
+
+.drill dd ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.drill-note {
+  margin: 6px 12px 12px;
+  font-size: 0.8rem;
+  color: var(--chalk-muted);
+}
+
+@media (max-width: 640px) {
+  .drill dl { grid-template-columns: 1fr; }
+}
