@@ -48,6 +48,17 @@ describe("ClipLibraryPage", () => {
     expect(screen.getByRole("link", { name: "Clasificar en el partido" }).getAttribute("href")).toBe("/partidos/m-v3");
   });
 
+  it("shows a situation written by the staff on the clip and as its own filter", async () => {
+    apiMock.mockResolvedValue({
+      clips: [{ ...clip("v9", "Roma", "OTHER", []), situation_custom: "Pelotazo al 9" }],
+      facets: { situations: [{ key: "OTHER:Pelotazo al 9", count: 1, clips: ["v9"] }], problems: [], strengths: [] },
+    });
+    render(<MemoryRouter><ClipLibraryPage /></MemoryRouter>);
+    expect(await screen.findByText("vs Roma")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Pelotazo al 9 (1)" })).toBeTruthy();
+    expect(screen.getAllByText("Pelotazo al 9").length).toBeGreaterThan(0);
+  });
+
   it("combines filters by intersecting the clip lists of the index", async () => {
     renderLibrary();
     await screen.findByText("vs Rionegro");
