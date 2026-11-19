@@ -510,7 +510,7 @@ html {
   gap: 6px;
 }
 
-:is(.btn, .nav-link, .user-card, .back-link, .table-link, .row-link, .menu-toggle):focus-visible {
+:is(.btn, .nav-link, .user-card, .back-link, .table-link, .menu-toggle):focus-visible {
   outline: 2px solid var(--chalk);
   outline-offset: 2px;
 }
@@ -605,22 +605,6 @@ html {
 
 .table tr.is-clickable:hover td {
   background: color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-.row-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--surface-2);
-  color: var(--chalk);
-  text-decoration: none;
-}
-
-.row-link:hover {
-  background: #1a221f;
 }
 
 .row-main {
