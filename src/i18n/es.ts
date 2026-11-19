@@ -1,5 +1,15 @@
 // User-facing copy. Code stays in English; everything the user reads is Spanish.
 export const es = {
+  dateTimePicker: {
+    dialog: "Elegir fecha y hora",
+    previousMonth: "Mes anterior",
+    nextMonth: "Mes siguiente",
+    weekdays: ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"],
+    hour: "Hora",
+    minute: "Minutos",
+    cancel: "Cancelar",
+    confirm: "Confirmar",
+  },
   brand: {
     name: "TactiVision IA",
     tagline: "Análisis táctico con visión artificial",
