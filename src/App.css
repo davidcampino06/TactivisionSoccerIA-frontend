@@ -7155,3 +7155,147 @@ html {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* TactiVision IA mark: the letters follow the text colour; the viewfinder frame is the brand green,
+   brighter on the dark theme so it keeps its contrast. */
+.logo-mark {
+  flex: none;
+  display: block;
+}
+
+.logo-frame {
+  fill: #5e9c3a;
+}
+
+:root[data-theme="light"] .app-shell .logo-frame,
+:root[data-theme="light"] .session-check .logo-frame {
+  fill: #2e5a1c;
+}
+
+/* Date and time picker of a match: a field-looking button that opens a panel with Confirmar. */
+.dtp {
+  position: relative;
+}
+
+.dtp-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid rgba(var(--fg), 0.14);
+  border-radius: 10px;
+  background: rgba(var(--fg), 0.04);
+  color: var(--chalk);
+  font: 400 0.95rem var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dtp-trigger span::first-letter {
+  text-transform: uppercase;
+}
+
+.dtp-trigger:focus-visible,
+.dtp-trigger[aria-expanded="true"] {
+  outline: none;
+  border-color: var(--chalk);
+  box-shadow: 0 0 0 3px rgba(243, 244, 240, 0.12);
+}
+
+/* In the flow of the form (not floating): the glass panels around it create their own stacking
+   contexts, and a floating calendar would be drawn under the next card. */
+.dtp-panel {
+  display: grid;
+  margin-top: 8px;
+  gap: 12px;
+  width: min(320px, 100%);
+  padding: 14px;
+  border: 1px solid rgba(var(--fg), 0.14);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.dtp-month {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dtp-month strong::first-letter {
+  text-transform: uppercase;
+}
+
+.dtp-month strong {
+  display: inline-block;
+}
+
+.dtp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  text-align: center;
+}
+
+.dtp-weekday {
+  font: 500 0.7rem var(--font-mono);
+  color: var(--chalk-muted);
+  padding-bottom: 2px;
+}
+
+.dtp-day {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--chalk);
+  font: 500 0.88rem var(--font-body);
+  cursor: pointer;
+}
+
+.dtp-day:hover {
+  background: rgba(var(--fg), 0.08);
+}
+
+.dtp-day[aria-pressed="true"] {
+  background: var(--accent);
+  color: #111;
+  font-weight: 700;
+}
+
+.dtp-time {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+
+.dtp-time label {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--chalk-muted);
+}
+
+.dtp-time > span {
+  padding-bottom: 11px;
+  font-weight: 700;
+}
+
+.dtp-summary {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--chalk-muted);
+}
+
+.dtp-summary::first-letter {
+  text-transform: uppercase;
+}
+
+.dtp-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
