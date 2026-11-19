@@ -1,5 +1,13 @@
 // User-facing copy. Code stays in English; everything the user reads is Spanish.
 export const es = {
+  trainingDrill: {
+    title: (name: string) => `Ejercicio sugerido: ${name}`,
+    objective: "Objetivo",
+    organization: "Organización",
+    development: "Desarrollo",
+    keys: "Claves",
+    variant: "Variante",
+  },
   dateTimePicker: {
     dialog: "Elegir fecha y hora",
     previousMonth: "Mes anterior",
