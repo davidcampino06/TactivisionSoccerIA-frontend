@@ -122,6 +122,8 @@ export interface Recommendation {
   notes?: ReviewNote[];
   /** The issue in football words and a real frame that shows it; null in older analyses. */
   explanation?: IssueExplanation | null;
+  /** A training exercise to work on this kind of issue (fixed catalogue in the backend, not computed by the AI). */
+  drill?: TrainingDrill | null;
 }
 
 export interface ExamplePlayer {
@@ -615,4 +617,15 @@ export interface PlayerStats {
   matches: number;
   detections: number;
   seconds: number;
+}
+
+export interface TrainingDrill {
+  code: string;
+  name: string;
+  objective: string;
+  organization: string;
+  development: string;
+  keys: string[];
+  variant: string;
+  note: string;
 }
