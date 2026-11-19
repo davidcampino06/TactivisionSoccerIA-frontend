@@ -9,6 +9,7 @@ import { formatDateTime, label } from "../../i18n/labels";
 import type { Match } from "../../types";
 import { RESULT_TONE } from "../../app/tones";
 import { CountedLabel } from "../../components/CharCount";
+import DateTimePicker from "../../components/DateTimePicker";
 
 const t = es.pages.matches;
 
@@ -97,10 +98,10 @@ function MatchForm({ teamId, onClose }: { teamId: string; onClose: () => void })
           <CountedLabel text={t.opponent} value={form.opponent} max={120} />
           <input value={form.opponent} onChange={(e) => setForm({ ...form, opponent: e.target.value })} maxLength={120} required autoFocus />
         </label>
-        <label className="field">
-          <span>{t.date}</span>
-          <input type="datetime-local" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
-        </label>
+        <div className="field">
+          <span id="match-date">{t.date}</span>
+          <DateTimePicker labelId="match-date" value={form.date} onChange={(date) => setForm({ ...form, date })} />
+        </div>
         <fieldset className="field segmented">
           <legend>{t.venue}</legend>
           <label className={form.isHome ? "selected" : undefined}>
