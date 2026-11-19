@@ -4,7 +4,7 @@ import { api, json } from "../../api/client";
 import { SEVERITY_TONE } from "../../app/tones";
 import { useTeam } from "../../app/teamState";
 import IssueExplanation from "../../components/analysis/IssueExplanation";
-import TrainingDrill from "../../components/analysis/TrainingDrill";
+import TrainingDrills from "../../components/analysis/TrainingDrills";
 import ReviewNotes from "../../components/analysis/ReviewNotes";
 import { TeamTag } from "../../components/analysis/TeamColors";
 import type { TeamColors, TeamKey } from "../../components/analysis/shirtColor";
@@ -166,7 +166,7 @@ function ProblemCard({ item, rank, busy, onNotes, onAction }: {
       <p><span className="issue-label">{ta.evidence}:</span> {item.evidence}</p>
       <p><span className="issue-label">{ta.recommendation}:</span> {item.description}</p>
       {item.explanation && <IssueExplanation explanation={item.explanation} colors={colorsOf(item.context)} />}
-      {item.drill && <TrainingDrill drill={item.drill} />}
+      {item.drills && <TrainingDrills drills={item.drills} />}
       <ReviewNotes recommendationId={item.id} notes={item.notes ?? []} onChange={onNotes} />
       <div className="issue-actions">
         <button type="button" className="btn btn-primary btn-sm" disabled={busy} onClick={() => onAction("confirm")}>{ta.confirm}</button>
