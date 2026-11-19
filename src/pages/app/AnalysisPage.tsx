@@ -10,6 +10,7 @@ import { formatIndicatorValue, formatPercent, formatTimestamp, indicatorLabel, l
 import ProximityNetwork from "../../components/analysis/ProximityNetwork";
 import { TeamLegend, TeamTag } from "../../components/analysis/TeamColors";
 import IssueExplanation from "../../components/analysis/IssueExplanation";
+import TrainingDrill from "../../components/analysis/TrainingDrill";
 import AnalysisVideo, { type IdentityChange } from "../../components/analysis/AnalysisVideo";
 import { isIdentified } from "../../components/analysis/trackLabel";
 import TrackPhoto from "../../components/analysis/TrackPhoto";
@@ -225,6 +226,7 @@ function IssueCard({ item, rank, colors, ownTeam, onUpdated, onError }:
       <p><span className="issue-label">{t.evidence}:</span> {item.evidence}</p>
       <p><span className="issue-label">{t.recommendation}:</span> {item.description}</p>
       {item.explanation && <IssueExplanation explanation={item.explanation} colors={colors} />}
+      {item.drill && <TrainingDrill drill={item.drill} />}
       <ReviewNotes recommendationId={item.id} notes={item.notes ?? []} onChange={(notes) => onUpdated({ ...item, notes })} />
       {open && (
         <div className="issue-actions">
