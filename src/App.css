@@ -7300,9 +7300,34 @@ html {
   gap: 8px;
 }
 
-/* Suggested training exercise under a possible issue. */
+/* Suggested training exercises under a possible issue. */
+.drills {
+  margin-top: 12px;
+}
+
+.drills-title {
+  margin: 0 0 6px;
+  font: 600 0.72rem var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--chalk-muted);
+}
+
+.drill-tag {
+  margin-right: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(94, 156, 58, 0.18);
+  font: 600 0.68rem var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.drill + .drill {
+  margin-top: 6px;
+}
+
 .drill {
-  margin-top: 10px;
   border: 1px solid rgba(var(--fg), 0.12);
   border-left: 3px solid #5e9c3a;
   border-radius: 10px;
