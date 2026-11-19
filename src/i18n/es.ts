@@ -1,7 +1,9 @@
 // User-facing copy. Code stays in English; everything the user reads is Spanish.
 export const es = {
   trainingDrill: {
-    title: (name: string) => `Ejercicio sugerido: ${name}`,
+    heading: (count: number) => (count === 1 ? "Ejercicio sugerido" : `Ejercicios sugeridos (${count})`),
+    main: "Principal",
+    alternative: "Alternativa",
     objective: "Objetivo",
     organization: "Organización",
     development: "Desarrollo",
