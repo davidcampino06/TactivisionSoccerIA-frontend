@@ -8,6 +8,7 @@ import { EmptyState, ErrorBanner, Loading, PageHeader, Pill } from "../../compon
 import { useLoad } from "../../hooks/useLoad";
 import { es } from "../../i18n/es";
 import { label } from "../../i18n/labels";
+import { situationLabel } from "../../components/videos/situation";
 import type { ClipLibrary } from "../../types";
 import { useTrackPhoto } from "../../components/analysis/trackPhotoCache";
 
@@ -58,7 +59,7 @@ export default function ClipLibraryPage() {
               {data.facets.situations.map((facet) => (
                 <button key={facet.key} type="button" className={`review-tab${situation === facet.key ? " is-active" : ""}`}
                   aria-pressed={situation === facet.key} onClick={() => setSituation(facet.key)}>
-                  {label("situation", facet.key)} ({facet.count})
+                  {situationLabel(facet.key)} ({facet.count})
                 </button>
               ))}
             </div>
@@ -81,7 +82,7 @@ export default function ClipLibraryPage() {
               {shown.map((clip) => (
                 <article key={clip.video_id} className="glass library-card">
                   <header className="library-card-head">
-                    <Pill tone={clip.situation ? "info" : "neutral"}>{label("situation", clip.situation ?? "NONE")}</Pill>
+                    <Pill tone={clip.situation ? "info" : "neutral"}>{situationLabel(clip.situation, clip.situation_custom)}</Pill>
                     {clip.analysis.mode === "SIMULATION_MODE" && <Pill tone="warning">{t.simulated}</Pill>}
                   </header>
                   {clip.photos && clip.photos.length > 0 && (
